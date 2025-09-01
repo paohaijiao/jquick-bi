@@ -1,0 +1,93 @@
+报表主表 (reports)
+CREATE TABLE reports (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '报表ID',
+    name VARCHAR(255) NOT NULL COMMENT '报表名称',
+    description TEXT COMMENT '报表描述',
+    creator_id BIGINT NOT NULL COMMENT '创建人ID',
+    folder_id BIGINT COMMENT '所属文件夹ID',
+    status TINYINT NOT NULL DEFAULT 0 COMMENT '状态：0-草稿，1-已发布，2-已归档',
+    width INT NOT NULL DEFAULT 1920 COMMENT '报表宽度',
+    height INT NOT NULL DEFAULT 1080 COMMENT '报表高度',
+    background_color VARCHAR(20) DEFAULT '#FFFFFF' COMMENT '背景颜色',
+    theme VARCHAR(50) DEFAULT 'default' COMMENT '主题样式',
+    created_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    published_time DATETIME COMMENT '发布时间',
+    version INT NOT NULL DEFAULT 1 COMMENT '版本号',
+    is_deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0-否，1-是',
+    INDEX idx_creator (creator_id),
+    INDEX idx_folder (folder_id),
+    INDEX idx_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='报表主表';
+报表组件表 (report_components)
+CREATE TABLE report_components (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '组件ID',
+    report_id BIGINT NOT NULL COMMENT '报表ID',
+    parent_id BIGINT COMMENT '父组件ID，用于嵌套组件',
+    type VARCHAR(50) NOT NULL COMMENT '组件类型：table,chart,card等',
+    name VARCHAR(255) COMMENT '组件名称',
+    x INT NOT NULL COMMENT 'X坐标',
+    y INT NOT NULL COMMENT 'Y坐标',
+    width INT NOT NULL COMMENT '宽度',
+    height INT NOT NULL COMMENT '高度',
+    z_index INT NOT NULL DEFAULT 0 COMMENT '层级',
+    is_visible TINYINT NOT NULL DEFAULT 1 COMMENT '是否可见：0-否，1-是',
+    created_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    FOREIGN KEY (report_id) REFERENCES reports(id) ON DELETE CASCADE,
+    FOREIGN KEY (parent_id) REFERENCES report_components(id) ON DELETE CASCADE,
+    INDEX idx_report (report_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='报表组件表';
+组件属性表 (component_properties)
+
+CREATE TABLE component_properties (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '属性ID',
+    component_id BIGINT NOT NULL COMMENT '组件ID',
+    prop_group VARCHAR(50) NOT NULL COMMENT '属性分组：style,data,layout等',
+    prop_name VARCHAR(100) NOT NULL COMMENT '属性名称',
+    prop_value TEXT COMMENT '属性值',
+    created_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    FOREIGN KEY (component_id) REFERENCES report_components(id) ON DELETE CASCADE,
+    UNIQUE KEY uk_component_prop (component_id, prop_group, prop_name),
+    INDEX idx_component (component_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='组件属性表';
+
+REATE TABLE component_data_sources (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '数据源ID',
+    component_id BIGINT NOT NULL COMMENT '组件ID',
+    data_source_type VARCHAR(50) NOT NULL COMMENT '数据源类型：database,file,api等',
+    data_source_id BIGINT NOT NULL COMMENT '数据源ID，关联具体数据源表',
+    sql_text TEXT COMMENT '查询SQL',
+    parameters TEXT COMMENT '查询参数，JSON格式',
+    refresh_interval INT DEFAULT 0 COMMENT '刷新间隔(秒)，0表示不自动刷新',
+    created_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    FOREIGN KEY (component_id) REFERENCES report_components(id) ON DELETE CASCADE,
+    INDEX idx_component (component_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='组件数据源表';
+
+CREATE TABLE report_versions (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '版本记录ID',
+    report_id BIGINT NOT NULL COMMENT '报表ID',
+    version INT NOT NULL COMMENT '版本号',
+    content LONGTEXT COMMENT '报表完整配置快照，JSON格式',
+    creator_id BIGINT NOT NULL COMMENT '操作用户ID',
+    change_log TEXT COMMENT '变更日志',
+    created_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    FOREIGN KEY (report_id) REFERENCES reports(id) ON DELETE CASCADE,
+    UNIQUE KEY uk_report_version (report_id, version),
+    INDEX idx_report (report_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='报表版本表';
+
+CREATE TABLE report_folders (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '文件夹ID',
+    name VARCHAR(255) NOT NULL COMMENT '文件夹名称',
+    parent_id BIGINT COMMENT '父文件夹ID',
+    creator_id BIGINT NOT NULL COMMENT '创建人ID',
+    created_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    is_deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0-否，1-是',
+    FOREIGN KEY (parent_id) REFERENCES report_folders(id) ON DELETE CASCADE,
+    INDEX idx_parent (parent_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='报表文件夹表';

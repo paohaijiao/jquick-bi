@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JQuick BI - 用户注册</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            display: flex;
+            min-height: 100vh;
+            background: linear-gradient(120deg, #ff9d42, #ff8326, #ff6a00);
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* 装饰元素 */
+        .decoration {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        
+        .circle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .circle-1 {
+            width: 300px;
+            height: 300px;
+            top: -100px;
+            left: 5%;
+        }
+        
+        .circle-2 {
+            width: 200px;
+            height: 200px;
+            bottom: 50px;
+            left: 10%;
+        }
+        
+        .circle-3 {
+            width: 150px;
+            height: 150px;
+            top: 30%;
+            right: 25%;
+        }
+        
+        .graphic {
+            position: absolute;
+            opacity: 0.05;
+            color: white;
+        }
+        
+        .graphic-1 {
+            top: 15%;
+            left: 20%;
+            font-size: 120px;
+            transform: rotate(-15deg);
+        }
+        
+        .graphic-2 {
+            bottom: 20%;
+            right: 20%;
+            font-size: 100px;
+            transform: rotate(10deg);
+        }
+        
+        .main-container {
+            display: flex;
+            width: 100%;
+            max-width: 1300px;
+            margin-left: auto;
+            z-index: 2;
+        }
+        
+        .left-content {
+            flex: 1;
+            padding: 40px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .right-content {
+            width: 450px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-right: 40px;
+        }
+        
+        .register-card {
+            background-color: rgba(255, 255, 255, 0.97);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+            transition: transform 0.3s ease;
+            width: 100%;
+            max-width: 420px;
+        }
+        
+        .register-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .header {
+            text-align: center;
+            padding: 35px 20px 15px;
+            background: linear-gradient(to right, #ff8326, #ff6a00);
+            color: white;
+        }
+        
+        .logo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .logo-icon {
+            font-size: 36px;
+            color: white;
+            margin-right: 12px;
+        }
+        
+        .logo-text {
+            font-size: 32px;
+            font-weight: 800;
+            color: white;
+        }
+        
+        .tagline {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            margin-top: 5px;
+        }
+        
+        .form-container {
+            padding: 25px 35px 35px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .input-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #ff8326;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 15px 20px 15px 50px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .input-group input:focus {
+            border-color: #ff8326;
+            box-shadow: 0 0 0 3px rgba(255, 131, 38, 0.2);
+            outline: none;
+        }
+        
+        .password-strength {
+            height: 6px;
+            background-color: #eee;
+            border-radius: 3px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+        
+        .strength-meter {
+            height: 100%;
+            width: 0;
+            border-radius: 3px;
+            transition: width 0.3s, background-color 0.3s;
+        }
+        
+        .strength-text {
+            font-size: 13px;
+            margin-top: 5px;
+            text-align: right;
+            color: #777;
+        }
+        
+        .terms {
+            display: flex;
+            align-items: flex-start;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+        
+        .terms input {
+            margin-right: 10px;
+            margin-top: 3px;
+            accent-color: #ff8326;
+        }
+        
+        .terms a {
+            color: #ff8326;
+            text-decoration: none;
+        }
+        
+        .terms a:hover {
+            text-decoration: underline;
+        }
+        
+        .btn-register {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(to right, #ff8326, #ff6a00);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(255, 131, 38, 0.3);
+        }
+        
+        .btn-register:hover {
+            background: linear-gradient(to right, #ff6a00, #ff8326);
+            box-shadow: 0 6px 15px rgba(255, 131, 38, 0.4);
+        }
+        
+        .divider {
+            margin: 25px 0;
+            height: 1px;
+            background: linear-gradient(to right, rgba(255, 131, 38, 0.1), rgba(255, 131, 38, 0.4), rgba(255, 131, 38, 0.1));
+            position: relative;
+            text-align: center;
+        }
+        
+        .divider span {
+            position: relative;
+            top: -12px;
+            background-color: white;
+            padding: 0 18px;
+            color: #ff8326;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 15px;
+            color: #666;
+        }
+        
+        .login-link a {
+            color: #ff8326;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+        
+        .external-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .github-link, .email-link {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: #ff8326;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s;
+            padding: 8px 15px;
+            border-radius: 6px;
+        }
+        
+        .github-link:hover, .email-link:hover {
+            color: #e65c00;
+            background-color: rgba(255, 131, 38, 0.1);
+        }
+        
+        .github-link i, .email-link i {
+            margin-right: 8px;
+            font-size: 18px;
+        }
+        
+        .app-info {
+            margin-top: 40px;
+        }
+        
+        .app-info h2 {
+            font-size: 42px;
+            margin-bottom: 25px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            font-weight: 800;
+        }
+        
+        .app-info p {
+            font-size: 18px;
+            line-height: 1.6;
+            max-width: 600px;
+        }
+        
+        .features {
+            list-style: none;
+            margin-top: 30px;
+        }
+        
+        .features li {
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .features i {
+            margin-right: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ff8326;
+            background-color: white;
+        }
+        
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 14px;
+            z-index: 2;
+        }
+        
+        @media (max-width: 1100px) {
+            .main-container {
+                max-width: 1000px;
+            }
+            
+            .left-content {
+                padding: 30px;
+            }
+            
+            .right-content {
+                padding-right: 20px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .main-container {
+                flex-direction: column;
+                margin: 0 auto;
+            }
+            
+            .left-content {
+                padding: 30px;
+                text-align: center;
+            }
+            
+            .right-content {
+                width: 100%;
+                padding: 20px;
+                justify-content: center;
+            }
+            
+            .app-info h2 {
+                font-size: 32px;
+            }
+            
+            .features li {
+                justify-content: center;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .form-container {
+                padding: 20px 25px 30px;
+            }
+            
+            .features li {
+                font-size: 16px;
+            }
+            
+            .external-links {
+                flex-direction: column;
+                gap: 12px;
+                align-items: center;
+            }
+            
+            .app-info h2 {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="decoration">
+        <div class="circle circle-1"></div>
+        <div class="circle circle-2"></div>
+        <div class="circle circle-3"></div>
+        <i class="fas fa-chart-pie graphic graphic-1"></i>
+        <i class="fas fa-chart-bar graphic graphic-2"></i>
+    </div>
+    
+    <div class="main-container">
+        <div class="left-content">
+            <div class="app-info">
+                <h2>加入 JQuick BI 社区</h2>
+                <p>注册账号，开启您的数据智能分析之旅。我们的平台提供强大的数据可视化工具和实时分析功能。</p>
+                
+                <ul class="features">
+                    <li><i class="fas fa-rocket"></i> 快速上手，轻松入门</li>
+                    <li><i class="fas fa-database"></i> 处理海量数据无压力</li>
+                    <li><i class="fas fa-lock"></i> 高级安全保护，数据隐私无忧</li>
+                    <li><i class="fas fa-users"></i> 加入活跃的数据分析社区</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="right-content">
+            <div class="register-card">
+                <div class="header">
+                    <div class="logo">
+                        <i class="fas fa-chart-line logo-icon"></i>
+                        <div class="logo-text">JQuick BI</div>
+                    </div>
+                    <p class="tagline">创建您的账户 · 开启数据分析之旅</p>
+                </div>
+                
+                <div class="form-container">
+                    <div class="input-group">
+                        <i class="fas fa-user"></i>
+                        <input type="text" placeholder="用户名" required>
+                    </div>
+                    
+                    <div class="input-group">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" placeholder="电子邮箱" required>
+                    </div>
+                    
+                    <div class="input-group">
+                        <i class="fas fa-building"></i>
+                        <input type="text" placeholder="公司名称 (可选)">
+                    </div>
+                    
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" placeholder="密码" required onkeyup="checkPasswordStrength()">
+                        <div class="password-strength">
+                            <div class="strength-meter" id="strength-meter"></div>
+                        </div>
+                        <div class="strength-text" id="strength-text">密码强度</div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" placeholder="确认密码" required>
+                    </div>
+                    
+                    <div class="terms">
+                        <input type="checkbox" id="agree-terms" required>
+                        <label for="agree-terms">我已阅读并同意 <a href="#">服务条款</a> 和 <a href="#">隐私政策</a></label>
+                    </div>
+                    
+                    <button class="btn-register">注册账号</button>
+                    
+                    <div class="divider">
+                        <span>已经拥有账户?</span>
+                    </div>
+                    
+                    <div class="login-link">
+                        已有账号? <a href="#">立即登录</a>
+                    </div>
+                    
+                    <div class="external-links">
+                        <a href="https://github.com/paohaijiao/jquickbi.git" class="github-link" target="_blank">
+                            <i class="fab fa-github"></i> GitHub项目
+                        </a>
+                        <a href="mailto:goudingcheng@gmail.com" class="email-link">
+                            <i class="fas fa-envelope"></i> 联系我们
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>© 2023 JQuick BI · 数据智能分析平台 · 隐私政策 · 服务条款</p>
+    </div>
+
+    <script>
+        function checkPasswordStrength() {
+            const password = document.getElementById('password').value;
+            const meter = document.getElementById('strength-meter');
+            const text = document.getElementById('strength-text');
+            
+            let strength = 0;
+            
+            // 检查密码长度
+            if (password.length > 6) strength += 20;
+            if (password.length > 10) strength += 20;
+            
+            // 检查是否包含数字
+            if (password.match(/([0-9])/)) strength += 20;
+            
+            // 检查是否包含小写字母
+            if (password.match(/([a-z])/)) strength += 20;
+            
+            // 检查是否包含大写字母
+            if (password.match(/([A-Z])/)) strength += 20;
+            
+            // 检查是否包含特殊字符
+            if (password.match(/([!,@,#,$,%,^,&,*,?,_,~])/)) strength += 20;
+            
+            // 限制最大值为100
+            strength = Math.min(strength, 100);
+            
+            // 更新强度条
+            meter.style.width = strength + '%';
+            
+            // 更新文本和颜色
+            if (strength === 0) {
+                meter.style.backgroundColor = '#eee';
+                text.textContent = '密码强度';
+                text.style.color = '#777';
+            } else if (strength < 40) {
+                meter.style.backgroundColor = '#ff4d4d';
+                text.textContent = '弱';
+                text.style.color = '#ff4d4d';
+            } else if (strength < 70) {
+                meter.style.backgroundColor = '#ff8326';
+                text.textContent = '中';
+                text.style.color = '#ff8326';
+            } else {
+                meter.style.backgroundColor = '#22bb33';
+                text.textContent = '强';
+                text.style.color = '#22bb33';
+            }
+        }
+    </script>
+</body>
+</html>

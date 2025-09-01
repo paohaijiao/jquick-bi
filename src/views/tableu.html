@@ -1,0 +1,2687 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JQuick BI - 智能报表设计器</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #ff8326;
+            --secondary-color: #fff5eb;
+            --border-color: #ffd5b8;
+            --text-color: #2d3e50;
+            --light-bg: #f9f9f9;
+            --section-bg: #fff8f2;
+            --sidebar-width: 340px;
+            --header-height: 60px;
+            --danger-color: #ff4d4f;
+            --success-color: #52c41a;
+            --link-color: #1890ff;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            color: var(--text-color);
+            background: linear-gradient(120deg, #ff9d42, #ff8326, #ff6a00);
+            overflow: hidden;
+            height: 100vh;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        /* 顶部导航 */
+        .header {
+            height: var(--header-height);
+            background-color: rgba(255, 255, 255, 0.95);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            color: var(--primary-color);
+            font-size: 22px;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            font-size: 26px;
+        }
+        
+        .menu {
+            display: flex;
+        }
+        
+        .menu-item {
+            padding: 0 15px;
+            cursor: pointer;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            transition: background-color 0.2s;
+            color: #555;
+            position: relative;
+        }
+        
+        .menu-item:hover {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+        }
+        
+        .menu-item.has-submenu::after {
+            content: "\f0d7";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            margin-left: 5px;
+            font-size: 12px;
+        }
+        
+        .submenu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: white;
+            border: 1px solid var(--border-color);
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            min-width: 150px;
+            z-index: 100;
+            display: none;
+        }
+        
+        .menu-item:hover .submenu {
+            display: block;
+        }
+        
+        .submenu-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .submenu-item:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        /* 主内容区 */
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        /* 左侧边栏 */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: rgba(255, 255, 255, 0.95);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .sidebar-section {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .sidebar-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--primary-color);
+        }
+        
+        .filter-group {
+            margin-bottom: 15px;
+        }
+        
+        .filter-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .filter-label i {
+            margin-right: 8px;
+            color: var(--primary-color);
+        }
+        
+        select, input, textarea, button {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        button {
+            background: linear-gradient(to right, #ff8326, #ff6a00);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(255, 131, 38, 0.3);
+        }
+        
+        button:hover {
+            background: linear-gradient(to right, #ff6a00, #ff8326);
+            box-shadow: 0 4px 8px rgba(255, 131, 38, 0.4);
+        }
+        
+        button i {
+            margin-right: 8px;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            font-size: 13px;
+        }
+        
+        .checkbox-item input {
+            width: auto;
+            margin-right: 5px;
+        }
+        
+        /* 数据源模块 */
+        .data-source-panel {
+            padding: 15px;
+            background-color: var(--secondary-color);
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .data-source-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .data-source-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 6px;
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .data-source-item:hover {
+            background-color: #ffe5d3;
+            transform: translateY(-2px);
+        }
+        
+        .data-source-item i {
+            margin-right: 8px;
+            color: var(--primary-color);
+        }
+        
+        /* 工作区 */
+        .workspace {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .workspace-controls {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 20px;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .workspace-tabs {
+            display: flex;
+        }
+        
+        .workspace-tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            color: #666;
+            position: relative;
+        }
+        
+        .workspace-tab .page-number {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 10px;
+            background-color: var(--primary-color);
+            color: white;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .workspace-tab.active {
+            border-bottom-color: var(--primary-color);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .canvas-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .canvas-controls button {
+            width: auto;
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+        
+        .canvas-container {
+            flex: 1;
+            padding: 20px;
+            overflow: auto;
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .canvas {
+            width: 90%;
+            min-width: 800px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            margin: 0 auto;
+            padding: 30px;
+        }
+        
+        .report-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .report-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--text-color);
+            margin-bottom: 10px;
+        }
+        
+        .report-subtitle {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .report-description {
+            font-size: 14px;
+            color: #666;
+            max-width: 80%;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+        
+        .drop-zone {
+            position: relative;
+            border: 2px dashed #ffc6a5;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #ff8326;
+            font-size: 14px;
+            background-color: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s;
+            margin-bottom: 20px;
+            min-height: 100px;
+        }
+        
+        .drop-zone:hover {
+            background-color: rgba(255, 246, 229, 0.9);
+            border-color: var(--primary-color);
+        }
+        
+        .section {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            background-color: var(--light-bg);
+            position: relative;
+        }
+        
+        .section-header {
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .section-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .section-action-btn {
+            background: none;
+            border: none;
+            color: #666;
+            padding: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            box-shadow: none;
+        }
+        
+        .section-action-btn:hover {
+            background: none;
+            color: var(--primary-color);
+            box-shadow: none;
+        }
+        
+        .page-break {
+            height: 20px;
+            border-top: 2px dashed #ccc;
+            margin: 30px 0;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .page-break::after {
+            content: "分页符";
+            background-color: white;
+            padding: 0 10px;
+            font-size: 12px;
+            color: #999;
+        }
+        
+        .navigation-panel {
+            background-color: var(--section-bg);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .navigation-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+        
+        .navigation-list {
+            list-style: none;
+        }
+        
+        .navigation-item {
+            padding: 5px 0;
+        }
+        
+        .navigation-link {
+            color: var(--link-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        
+        .navigation-link i {
+            margin-right: 5px;
+            font-size: 12px;
+        }
+        
+        .navigation-link:hover {
+            text-decoration: underline;
+        }
+        
+        /* 文本元素样式 */
+        .text-element {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+        
+        .text-element:hover {
+            background-color: rgba(255, 245, 235, 0.5);
+        }
+        
+        .text-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .text-content {
+            line-height: 1.6;
+        }
+        
+        .text-content b {
+            color: var(--text-color);
+        }
+        
+        .text-content ul {
+            margin-left: 20px;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+        
+        /* 筛选器样式 */
+        .filter-panel {
+            background-color: var(--section-bg);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .filter-title {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+        
+        .filter-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-item {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .filter-item label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .filter-item select, .filter-item input {
+            width: 100%;
+        }
+        
+        .advanced-filter-btn {
+            background: none;
+            color: var(--link-color);
+            border: 1px dashed var(--link-color);
+            padding: 6px 12px;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+        
+        .advanced-filter-btn:hover {
+            background: none;
+            color: #096dd9;
+            border-color: #096dd9;
+            box-shadow: none;
+        }
+        
+        /* 数据容器组件 */
+        .components-panel {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .components-section {
+            margin-bottom: 15px;
+        }
+        
+        .components-section-title {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        
+        .components-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        
+        .component-item {
+            padding: 10px;
+            border-radius: 6px;
+            background-color: white;
+            border: 1px solid var(--border-color);
+            cursor: move;
+            display: flex;
+            align-items: center;
+            transition: all 0.2s;
+        }
+        
+        .component-item:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        
+        .component-item i {
+            margin-right: 8px;
+            color: var(--primary-color);
+        }
+        
+        /* 表格样式 */
+        .data-table-container {
+            overflow: auto;
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .data-table th, .data-table td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            min-width: 100px;
+        }
+        
+        .data-table th {
+            background-color: var(--secondary-color);
+            font-weight: 600;
+            color: var(--primary-color);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .data-table th::after {
+            content: "\f0dc";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            margin-left: 5px;
+            font-size: 12px;
+            opacity: 0.5;
+        }
+        
+        .data-table th.sorted-asc::after {
+            content: "\f0de";
+            opacity: 1;
+        }
+        
+        .data-table th.sorted-desc::after {
+            content: "\f0dd";
+            opacity: 1;
+        }
+        
+        .data-table th.frozen,
+        .data-table td.frozen {
+            position: sticky;
+            left: 0;
+            background-color: white;
+            z-index: 5;
+        }
+        
+        .data-table th.frozen {
+            z-index: 15;
+            background-color: var(--secondary-color);
+        }
+        
+        .data-table tr:hover {
+            background-color: #fff9f2;
+        }
+        
+        .drillable {
+            color: var(--link-color);
+            cursor: pointer;
+            text-decoration: underline;
+            text-decoration-style: dotted;
+        }
+        
+        .drillable:hover {
+            text-decoration-style: solid;
+        }
+        
+        .cell-highlight {
+            background-color: rgba(255, 77, 79, 0.1);
+            color: var(--danger-color);
+            font-weight: bold;
+        }
+        
+        .cell-positive {
+            color: var(--success-color);
+        }
+        
+        .cell-negative {
+            color: var(--danger-color);
+        }
+        
+        /* 矩阵样式 */
+        .matrix-container {
+            overflow: auto;
+            margin-bottom: 20px;
+        }
+        
+        .matrix {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .matrix th, .matrix td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+        
+        .matrix th {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+        }
+        
+        .matrix th.row-header {
+            position: sticky;
+            left: 0;
+            z-index: 5;
+            background-color: var(--secondary-color);
+        }
+        
+        .matrix th.col-header {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+        
+        /* 卡片/KPI样式 */
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .kpi-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .kpi-title {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .kpi-value {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .kpi-change {
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .kpi-change.positive {
+            color: var(--success-color);
+        }
+        
+        .kpi-change.negative {
+            color: var(--danger-color);
+        }
+        
+        /* 数据标签样式 */
+        .data-label {
+            position: absolute;
+            padding: 5px 10px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            font-size: 12px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .data-comment {
+            font-style: italic;
+            color: #666;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        
+        /* 数据查看器 */
+        .data-viewer {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            max-height: 70vh;
+            overflow: auto;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .data-viewer.active {
+            display: block;
+        }
+        
+        .viewer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .viewer-title {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .viewer-close {
+            background: none;
+            border: none;
+            color: #666;
+            font-size: 18px;
+            cursor: pointer;
+            width: auto;
+            padding: 0;
+            box-shadow: none;
+        }
+        
+        .viewer-close:hover {
+            background: none;
+            color: var(--danger-color);
+            box-shadow: none;
+        }
+        
+        /* 分页控件 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+            gap: 5px;
+        }
+        
+        .pagination button {
+            width: auto;
+            padding: 6px 12px;
+            background-color: white;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+        
+        .pagination button.active {
+            background: linear-gradient(to right, #ff8326, #ff6a00);
+            color: white;
+        }
+        
+        /* 树形控件 */
+        .tree-view {
+            margin-top: 10px;
+        }
+        
+        .tree-item {
+            padding: 8px 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: color 0.2s;
+        }
+        
+        .tree-item:hover {
+            color: var(--primary-color);
+        }
+        
+        .tree-item i {
+            margin-right: 8px;
+            color: #ff9d42;
+        }
+        
+        .tree-children {
+            margin-left: 24px;
+        }
+        
+        /* 右侧面板 */
+        .right-panel {
+            width: 340px;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-left: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .panel-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .panel-tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .panel-tab.active {
+            border-bottom: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .panel-content {
+            flex: 1;
+            overflow: auto;
+            padding: 15px;
+        }
+        
+        .formula-editor {
+            margin-bottom: 15px;
+        }
+        
+        .formula-editor textarea {
+            height: 100px;
+            font-family: monospace;
+            resize: none;
+        }
+        
+        .formula-help {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .formula-help strong {
+            color: var(--primary-color);
+        }
+        
+        .theme-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .theme-option {
+            border: 2px solid #eee;
+            border-radius: 8px;
+            height: 60px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+        
+        .theme-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .theme-option.active {
+            border-color: var(--primary-color);
+        }
+        
+        .theme-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-bottom: 5px;
+        }
+        
+        .setting-group {
+            margin-bottom: 20px;
+        }
+        
+        .setting-title {
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            color: var(--primary-color);
+        }
+        
+        .setting-title i {
+            margin-right: 8px;
+        }
+        
+        .setting-item {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .setting-label {
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .setting-label i {
+            margin-right: 8px;
+            color: #ff9d42;
+        }
+        
+        .setting-control {
+            width: 60%;
+        }
+        
+        /* 下拉菜单样式 */
+        .dropdown {
+            position: relative;
+            width: 100%;
+        }
+        
+        .dropdown-toggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 12px;
+            cursor: pointer;
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background-color: white;
+            border: 1px solid var(--border-color);
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            display: none;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .dropdown-menu.show {
+            display: block;
+        }
+        
+        .dropdown-item {
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .dropdown-item:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .color-preview {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .color-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+        }
+        
+        .color-box.selected {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(255, 131, 38, 0.3);
+        }
+        
+        /* 底部状态栏 */
+        .status-bar {
+            height: 35px;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            margin-left: 8px;
+            background: linear-gradient(to right, #ff8326, #ff6a00);
+            color: white;
+        }
+        
+        .page-info {
+            margin-left: auto;
+        }
+        
+        /* 高级筛选弹窗 */
+        .advanced-filter {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            width: 500px;
+            max-width: 90%;
+            z-index: 1001;
+            display: none;
+        }
+        
+        .advanced-filter.active {
+            display: block;
+        }
+        
+        .filter-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .filter-title {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .filter-close {
+            background: none;
+            border: none;
+            color: #666;
+            font-size: 16px;
+            cursor: pointer;
+            width: auto;
+            padding: 0;
+            box-shadow: none;
+        }
+        
+        .filter-close:hover {
+            background: none;
+            color: var(--danger-color);
+            box-shadow: none;
+        }
+        
+        .filter-body {
+            padding: 20px;
+        }
+        
+        .filter-rule {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        
+        .filter-rule select, .filter-rule input {
+            flex: 1;
+        }
+        
+        .filter-connector {
+            width: 60px;
+            text-align: center;
+        }
+        
+        .add-rule-btn {
+            background: none;
+            color: var(--link-color);
+            border: 1px dashed var(--link-color);
+            padding: 8px 15px;
+            margin-bottom: 20px;
+        }
+        
+        .add-rule-btn:hover {
+            background: none;
+            color: #096dd9;
+            border-color: #096dd9;
+            box-shadow: none;
+        }
+        
+        .filter-footer {
+            padding: 15px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .filter-footer button {
+            width: auto;
+            padding: 8px 16px;
+        }
+        
+        .cancel-btn {
+            background: white;
+            color: #666;
+            border: 1px solid var(--border-color);
+        }
+        
+        .cancel-btn:hover {
+            background: #f5f5f5;
+            box-shadow: none;
+        }
+        
+        /* 遮罩层 */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+        }
+        
+        .overlay.active {
+            display: block;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 1100px) {
+            .sidebar {
+                width: 280px;
+            }
+            
+            .right-panel {
+                width: 280px;
+            }
+        }
+        
+        @media (max-width: 900px) {
+            .sidebar {
+                width: 240px;
+            }
+            
+            .right-panel {
+                width: 240px;
+            }
+            
+            .menu-item {
+                padding: 0 10px;
+                font-size: 14px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar, .right-panel {
+                position: absolute;
+                top: var(--header-height);
+                bottom: 0;
+                z-index: 100;
+                transform: translateX(-100%);
+                transition: transform 0.3s;
+                width: 80%;
+                max-width: 300px;
+            }
+            
+            .sidebar.active, .right-panel.active {
+                transform: translateX(0);
+            }
+            
+            .right-panel {
+                right: 0;
+                left: auto;
+                transform: translateX(100%);
+            }
+            
+            .toggle-panel {
+                display: block !important;
+            }
+            
+            .canvas {
+                width: 95%;
+                min-width: auto;
+                padding: 15px;
+            }
+        }
+        
+        .toggle-panel {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            font-size: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部导航 -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-chart-line"></i>
+                <span>JQuick BI 设计器</span>
+            </div>
+            <div class="menu">
+                <div class="menu-item has-submenu">文件
+                    <div class="submenu">
+                        <div class="submenu-item"><i class="fas fa-file-new"></i> 新建报表</div>
+                        <div class="submenu-item"><i class="fas fa-file-open"></i> 打开报表</div>
+                        <div class="submenu-item"><i class="fas fa-save"></i> 保存</div>
+                        <div class="submenu-item"><i class="fas fa-download"></i> 导出</div>
+                        <div class="submenu-item"><i class="fas fa-print"></i> 打印</div>
+                    </div>
+                </div>
+                <div class="menu-item has-submenu">编辑
+                    <div class="submenu">
+                        <div class="submenu-item"><i class="fas fa-undo"></i> 撤销</div>
+                        <div class="submenu-item"><i class="fas fa-redo"></i> 重做</div>
+                        <div class="submenu-item"><i class="fas fa-cut"></i> 剪切</div>
+                        <div class="submenu-item"><i class="fas fa-copy"></i> 复制</div>
+                        <div class="submenu-item"><i class="fas fa-paste"></i> 粘贴</div>
+                    </div>
+                </div>
+                <div class="menu-item has-submenu">插入
+                    <div class="submenu">
+                        <div class="submenu-item"><i class="fas fa-heading"></i> 标题</div>
+                        <div class="submenu-item"><i class="fas fa-paragraph"></i> 描述文本</div>
+                        <div class="submenu-item"><i class="fas fa-border-all"></i> 分区</div>
+                        <div class="submenu-item"><i class="fas fa-file-page-break"></i> 分页符</div>
+                        <div class="submenu-item"><i class="fas fa-list"></i> 导航目录</div>
+                    </div>
+                </div>
+                <div class="menu-item has-submenu">视图
+                    <div class="submenu">
+                        <div class="submenu-item"><i class="fas fa-eye"></i> 预览模式</div>
+                        <div class="submenu-item"><i class="fas fa-edit"></i> 编辑模式</div>
+                        <div class="submenu-item"><i class="fas fa-columns"></i> 侧边栏</div>
+                        <div class="submenu-item"><i class="fas fa-zoom-in"></i> 放大</div>
+                        <div class="submenu-item"><i class="fas fa-zoom-out"></i> 缩小</div>
+                    </div>
+                </div>
+                <div class="menu-item">帮助</div>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button style="padding: 10px 16px;">
+                    <i class="fas fa-download"></i>导出报表
+                </button>
+                <button style="padding: 10px 16px;">
+                    <i class="fas fa-save"></i>保存报表
+                </button>
+            </div>
+        </header>
+        
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <!-- 左侧边栏 -->
+            <div class="sidebar">
+                <div class="sidebar-section">
+                    <div class="sidebar-title">
+                        <span>数据源</span>
+                        <i class="fas fa-database"></i>
+                    </div>
+                    
+                    <div class="data-source-panel">
+                        <div class="data-source-header">
+                            <span>已连接的数据源</span>
+                            <button style="padding: 6px 12px; font-size: 12px;">
+                                <i class="fas fa-plus"></i>添加
+                            </button>
+                        </div>
+                        
+                        <div class="data-source-item">
+                            <i class="fas fa-database"></i>
+                            <span>销售数据库</span>
+                        </div>
+                        
+                        <div class="data-source-item">
+                            <i class="fas fa-file-excel"></i>
+                            <span>客户数据.xlsx</span>
+                        </div>
+                        
+                        <div class="data-source-item">
+                            <i class="fas fa-cloud"></i>
+                            <span>云数据仓库</span>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-label">
+                            <i class="fas fa-filter"></i>数据筛选
+                        </label>
+                        <select>
+                            <option>全部数据</option>
+                            <option>销售数据</option>
+                            <option>客户数据</option>
+                            <option>产品数据</option>
+                        </select>
+                    </div>
+                    
+                    <button style="margin-top: 10px;">
+                        <i class="fas fa-sync-alt"></i>刷新数据
+                    </button>
+                </div>
+                
+                <div class="sidebar-section">
+                    <div class="sidebar-title">
+                        <span>数据字段</span>
+                        <i class="fas fa-list"></i>
+                    </div>
+                    
+                    <!-- 树形控件 -->
+                    <div class="tree-view">
+                        <div class="tree-item">
+                            <i class="fas fa-folder"></i>销售数据
+                        </div>
+                        <div class="tree-children">
+                            <div class="tree-item">
+                                <i class="fas fa-bars"></i>产品类别
+                            </div>
+                            <div class="tree-item">
+                                <i class="fas fa-bars"></i>地区
+                            </div>
+                            <div class="tree-item">
+                                <i class="fas fa-bars"></i>日期
+                            </div>
+                            <div class="tree-item">
+                                <i class="fas fa-bars"></i>销售额
+                            </div>
+                            <div class="tree-item">
+                                <i class="fas fa-bars"></i>利润
+                            </div>
+                        </div>
+                        
+                        <div class="tree-item">
+                            <i class="fas fa-folder"></i>客户数据
+                        </div>
+                        <div class="tree-children">
+                            <div class="tree-item">
+                                <i class="fas fa-bars"></i>客户细分
+                            </div>
+                            <div class="tree-item">
+                                <i class="fas fa-bars"></i>客户等级
+                            </div>
+                            <div class="tree-item">
+                                <i class="fas fa-bars"></i>订单数量
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="components-panel">
+                    <div class="sidebar-title">
+                        <span>报表元素</span>
+                        <i class="fas fa-cubes"></i>
+                    </div>
+                    
+                    <div class="components-section">
+                        <div class="components-section-title">文本元素</div>
+                        <div class="components-grid">
+                            <div class="component-item" draggable="true" data-type="title">
+                                <i class="fas fa-heading"></i>
+                                <span>标题</span>
+                            </div>
+                            <div class="component-item" draggable="true" data-type="subtitle">
+                                <i class="fas fa-heading fa-sm"></i>
+                                <span>子标题</span>
+                            </div>
+                            <div class="component-item" draggable="true" data-type="description">
+                                <i class="fas fa-paragraph"></i>
+                                <span>描述文本</span>
+                            </div>
+                            <div class="component-item" draggable="true" data-type="conclusion">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>结论</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="components-section">
+                        <div class="components-section-title">数据组件</div>
+                        <div class="components-grid">
+                            <div class="component-item" draggable="true" data-type="table">
+                                <i class="fas fa-table"></i>
+                                <span>表格</span>
+                            </div>
+                            <div class="component-item" draggable="true" data-type="matrix">
+                                <i class="fas fa-th"></i>
+                                <span>矩阵</span>
+                            </div>
+                            <div class="component-item" draggable="true" data-type="card">
+                                <i class="fas fa-id-card"></i>
+                                <span>卡片</span>
+                            </div>
+                            <div class="component-item" draggable="true" data-type="label">
+                                <i class="fas fa-tag"></i>
+                                <span>数据标签</span>
+                            </div>
+                            <div class="component-item" draggable="true" data-type="chart-bar">
+                                <i class="fas fa-chart-bar"></i>
+                                <span>柱状图</span>
+                            </div>
+                            <div class="component-item" draggable="true" data-type="chart-line">
+                                <i class="fas fa-chart-line"></i>
+                                <span>折线图</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="components-section">
+                        <div class="components-section-title">导航与分区</div>
+                        <div class="components-grid">
+                            <div class="component-item" draggable="true" data-type="navigation">
+                                <i class="fas fa-list"></i>
+                                <span>导航目录</span>
+                            </div>
+                            <div class="component-item" draggable="true" data-type="section">
+                                <i class="fas fa-border-all"></i>
+                                <span>分区</span>
+                            </div>
+                            <div class="component-item" draggable="true" data-type="pagebreak">
+                                <i class="fas fa-file-page-break"></i>
+                                <span>分页符</span>
+                            </div>
+                            <div class="component-item" draggable="true" data-type="filter">
+                                <i class="fas fa-filter"></i>
+                                <span>筛选器</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 工作区 -->
+            <div class="workspace">
+                <div class="workspace-controls">
+                    <div class="workspace-tabs">
+                        <div class="workspace-tab active">
+                            销售仪表板
+                            <span class="page-number">1</span>
+                        </div>
+                        <div class="workspace-tab">
+                            区域分析
+                            <span class="page-number">2</span>
+                        </div>
+                        <div class="workspace-tab">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                    </div>
+                    <div class="canvas-controls">
+                        <button id="toggle-data-viewer">
+                            <i class="fas fa-table"></i>数据预览
+                        </button>
+                        <button id="toggle-filter-panel">
+                            <i class="fas fa-filter"></i>筛选面板
+                        </button>
+                        <button>
+                            <i class="fas fa-eye"></i>预览报表
+                        </button>
+                    </div>
+                </div>
+                <div class="canvas-container">
+                    <div class="canvas">
+                        <!-- 报表标题区 -->
+                        <div class="report-header">
+                            <div class="text-element">
+                                <div class="text-title" style="font-size: 24px; text-align: center;">2024年Q2华东区域销售分析报表</div>
+                            </div>
+                            <div class="text-element">
+                                <div class="text-title" style="font-size: 16px; text-align: center;">1. 整体业绩概览 2. 分产品销售明细 3. 客户增长分析</div>
+                            </div>
+                            <div class="text-element">
+                                <div class="text-content" style="text-align: center;">
+                                    本报表展示了2024年第二季度华东区域的销售情况，包括整体业绩、产品销售明细及客户增长分析，
+                                    帮助管理层快速了解业务状况并做出决策。
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 导航目录 -->
+                        <div class="navigation-panel">
+                            <div class="navigation-title">
+                                <i class="fas fa-list"></i> 目录
+                            </div>
+                            <ul class="navigation-list">
+                                <li class="navigation-item">
+                                    <a href="#overview" class="navigation-link">
+                                        <i class="fas fa-angle-right"></i> 1. 整体业绩概览
+                                    </a>
+                                </li>
+                                <li class="navigation-item">
+                                    <a href="#product-detail" class="navigation-link">
+                                        <i class="fas fa-angle-right"></i> 2. 分产品销售明细
+                                    </a>
+                                </li>
+                                <li class="navigation-item">
+                                    <a href="#customer-growth" class="navigation-link">
+                                        <i class="fas fa-angle-right"></i> 3. 客户增长分析
+                                    </a>
+                                </li>
+                                <li class="navigation-item">
+                                    <a href="#conclusion" class="navigation-link">
+                                        <i class="fas fa-angle-right"></i> 4. 结论与建议
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <!-- 筛选器面板 -->
+                        <div class="filter-panel" id="filter-panel">
+                            <div class="filter-title">
+                                <i class="fas fa-filter"></i> 数据筛选
+                            </div>
+                            <div class="filter-row">
+                                <div class="filter-item">
+                                    <label>时间范围</label>
+                                    <select id="time-filter">
+                                        <option>2024年Q2</option>
+                                        <option>2024年Q1</option>
+                                        <option>2023年Q4</option>
+                                        <option>自定义...</option>
+                                    </select>
+                                </div>
+                                <div class="filter-item">
+                                    <label>区域</label>
+                                    <select id="region-filter">
+                                        <option>华东区域</option>
+                                        <option>华北区域</option>
+                                        <option>华南区域</option>
+                                        <option>西部区域</option>
+                                    </select>
+                                </div>
+                                <div class="filter-item">
+                                    <label>产品类型</label>
+                                    <select id="product-filter">
+                                        <option>全部产品</option>
+                                        <option>办公用品</option>
+                                        <option>技术产品</option>
+                                        <option>家具</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button class="advanced-filter-btn" id="advanced-filter-btn">
+                                <i class="fas fa-sliders-h"></i> 高级筛选
+                            </button>
+                        </div>
+                        
+                        <!-- 整体业绩概览区域 -->
+                        <div id="overview" class="section">
+                            <div class="section-header">
+                                <div class="section-title">1. 整体业绩概览</div>
+                                <div class="section-actions">
+                                    <button class="section-action-btn"><i class="fas fa-edit"></i></button>
+                                    <button class="section-action-btn"><i class="fas fa-copy"></i></button>
+                                    <button class="section-action-btn"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </div>
+                            
+                            <div class="card-container">
+                                <div class="kpi-card">
+                                    <div class="kpi-title">本季度总销售额</div>
+                                    <div class="kpi-value">¥1,200万</div>
+                                    <div class="kpi-change positive">
+                                        <i class="fas fa-arrow-up"></i> 同比增长 15%
+                                    </div>
+                                </div>
+                                <div class="kpi-card">
+                                    <div class="kpi-title">本季度利润</div>
+                                    <div class="kpi-value">¥320万</div>
+                                    <div class="kpi-change positive">
+                                        <i class="fas fa-arrow-up"></i> 同比增长 8%
+                                    </div>
+                                </div>
+                                <div class="kpi-card">
+                                    <div class="kpi-title">订单数量</div>
+                                    <div class="kpi-value">1,580</div>
+                                    <div class="kpi-change negative">
+                                        <i class="fas fa-arrow-down"></i> 同比下降 2%
+                                    </div>
+                                </div>
+                                <div class="kpi-card">
+                                    <div class="kpi-title">客户数量</div>
+                                    <div class="kpi-value">3,240</div>
+                                    <div class="kpi-change positive">
+                                        <i class="fas fa-arrow-up"></i> 同比增长 5%
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-element">
+                                <div class="text-content">
+                                    <b>业绩总览：</b>2024年Q2华东区域整体销售情况良好，总销售额达到1200万，
+                                    同比增长15%；利润320万，同比增长8%。客户数量稳步增长，但订单数量略有下降，
+                                    需要进一步分析原因。
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 分产品销售明细区域 -->
+                        <div id="product-detail" class="section">
+                            <div class="section-header">
+                                <div class="section-title">2. 分产品销售明细</div>
+                                <div class="section-actions">
+                                    <button class="section-action-btn"><i class="fas fa-edit"></i></button>
+                                    <button class="section-action-btn"><i class="fas fa-copy"></i></button>
+                                    <button class="section-action-btn"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </div>
+                            
+                            <div class="data-table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="frozen">产品类别</th>
+                                            <th>销售额</th>
+                                            <th>占比</th>
+                                            <th>同比增长</th>
+                                            <th>环比增长</th>
+                                            <th>利润</th>
+                                            <th>利润率</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="frozen drillable">办公用品</td>
+                                            <td>¥480万</td>
+                                            <td>40%</td>
+                                            <td class="cell-positive">+25%</td>
+                                            <td class="cell-positive">+5.2%</td>
+                                            <td>¥144万</td>
+                                            <td>30%</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="frozen drillable">技术产品</td>
+                                            <td>¥420万</td>
+                                            <td>35%</td>
+                                            <td class="cell-positive">+8%</td>
+                                            <td class="cell-positive">+3.1%</td>
+                                            <td>¥126万</td>
+                                            <td>30%</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="frozen drillable">家具</td>
+                                            <td class="cell-highlight">¥300万</td>
+                                            <td>25%</td>
+                                            <td class="cell-negative">-10%</td>
+                                            <td class="cell-negative">-2.3%</td>
+                                            <td>¥50万</td>
+                                            <td>16.7%</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="text-element">
+                                <div class="text-content">
+                                    <b>产品销售分析：</b>
+                                    <ul>
+                                        <li>A产品（办公用品）本月销售额占比40%，同比增长25%，为核心增长驱动力</li>
+                                        <li>B产品（技术产品）保持稳定增长，同比增长8%</li>
+                                        <li>C产品（家具）因竞品冲击，销售额下降10%，需优化营销策略</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="page-break"></div>
+                        
+                        <!-- 客户增长分析区域 -->
+                        <div id="customer-growth" class="section">
+                            <div class="section-header">
+                                <div class="section-title">3. 客户增长分析</div>
+                                <div class="section-actions">
+                                    <button class="section-action-btn"><i class="fas fa-edit"></i></button>
+                                    <button class="section-action-btn"><i class="fas fa-copy"></i></button>
+                                    <button class="section-action-btn"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </div>
+                            
+                            <div class="data-table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="frozen">客户类型</th>
+                                            <th>新增客户</th>
+                                            <th>流失客户</th>
+                                            <th>净增长</th>
+                                            <th>增长率</th>
+                                            <th>平均订单金额</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="frozen">大型企业</td>
+                                            <td>25</td>
+                                            <td>5</td>
+                                            <td>20</td>
+                                            <td class="cell-positive">8.3%</td>
+                                            <td>¥56,000</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="frozen">中型企业</td>
+                                            <td>86</td>
+                                            <td>32</td>
+                                            <td>54</td>
+                                            <td class="cell-positive">6.2%</td>
+                                            <td>¥18,500</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="frozen">小型企业</td>
+                                            <td>156</td>
+                                            <td>98</td>
+                                            <td>58</td>
+                                            <td class="cell-positive">3.5%</td>
+                                            <td>¥4,200</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="frozen">个人客户</td>
+                                            <td>320</td>
+                                            <td>280</td>
+                                            <td>40</td>
+                                            <td class="cell-positive">2.1%</td>
+                                            <td>¥1,500</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- 结论与建议区域 -->
+                        <div id="conclusion" class="section">
+                            <div class="section-header">
+                                <div class="section-title">4. 结论与建议</div>
+                                <div class="section-actions">
+                                    <button class="section-action-btn"><i class="fas fa-edit"></i></button>
+                                    <button class="section-action-btn"><i class="fas fa-copy"></i></button>
+                                    <button class="section-action-btn"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </div>
+                            
+                            <div class="text-element">
+                                <div class="text-content">
+                                    <b>主要结论：</b>
+                                    <ul>
+                                        <li>2024年Q2华东区域销售业绩整体向好，同比增长15%，超额完成季度目标</li>
+                                        <li>办公用品类产品增长显著，成为本季度主要增长点</li>
+                                        <li>家具类产品销售下滑明显，需引起重视</li>
+                                        <li>大型企业客户增长稳定，且贡献较高订单金额</li>
+                                    </ul>
+                                    <br>
+                                    <b>建议措施：</b>
+                                    <ul>
+                                        <li>针对办公用品类产品，可考虑扩大产品线，乘势提升市场份额</li>
+                                        <li>对家具类产品进行竞品分析，优化产品设计和营销策略</li>
+                                        <li>加强对大型企业客户的维护，同时制定小型企业客户留存计划</li>
+                                        <li>进一步分析订单数量下降原因，优化订单转化流程</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 拖放区域（设计模式下可见） -->
+                        <div class="drop-zone" style="margin-top: 30px;">
+                            <i class="fas fa-plus-circle" style="font-size: 24px; margin-bottom: 10px;"></i>
+                            <div>拖放组件到此处添加到报表</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 右侧面板 -->
+            <div class="right-panel">
+                <div class="panel-tabs">
+                    <div class="panel-tab active">属性</div>
+                    <div class="panel-tab">样式</div>
+                    <div class="panel-tab">数据</div>
+                    <div class="panel-tab">交互</div>
+                </div>
+                <div class="panel-content">
+                    <!-- 属性面板 -->
+                    <div class="setting-group">
+                        <div class="setting-title">
+                            <i class="fas fa-palette"></i>文本属性
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                <i class="fas fa-font"></i>字体
+                            </label>
+                            <div class="setting-control">
+                                <div class="dropdown">
+                                    <div class="dropdown-toggle">
+                                        <span>微软雅黑</span>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                    <div class="dropdown-menu">
+                                        <div class="dropdown-item">微软雅黑</div>
+                                        <div class="dropdown-item">宋体</div>
+                                        <div class="dropdown-item">黑体</div>
+                                        <div class="dropdown-item">Arial</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                <i class="fas fa-text-height"></i>字号
+                            </label>
+                            <div class="setting-control">
+                                <div class="dropdown">
+                                    <div class="dropdown-toggle">
+                                        <span>14px</span>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                    <div class="dropdown-menu">
+                                        <div class="dropdown-item">12px</div>
+                                        <div class="dropdown-item">14px</div>
+                                        <div class="dropdown-item">16px</div>
+                                        <div class="dropdown-item">18px</div>
+                                        <div class="dropdown-item">20px</div>
+                                        <div class="dropdown-item">24px</div>
+                                        <div class="dropdown-item">28px</div>
+                                        <div class="dropdown-item">32px</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                <i class="fas fa-paint-brush"></i>文本颜色
+                            </label>
+                            <div class="setting-control color-preview">
+                                <div class="color-box selected" style="background-color: #2d3e50;"></div>
+                                <div class="color-box" style="background-color: #ff8326;"></div>
+                                <div class="color-box" style="background-color: #ff4d4f;"></div>
+                                <div class="color-box" style="background-color: #52c41a;"></div>
+                                <div class="color-box" style="background-color: #1890ff;"></div>
+                                <div class="color-box" style="background-color: #666;"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                <i class="fas fa-bold"></i>文本样式
+                            </label>
+                            <div class="setting-control">
+                                <div class="dropdown">
+                                    <div class="dropdown-toggle">
+                                        <span>常规</span>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                    <div class="dropdown-menu">
+                                        <div class="dropdown-item">常规</div>
+                                        <div class="dropdown-item">粗体</div>
+                                        <div class="dropdown-item">斜体</div>
+                                        <div class="dropdown-item">下划线</div>
+                                        <div class="dropdown-item">粗体+斜体</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                <i class="fas fa-align-left"></i>对齐方式
+                            </label>
+                            <div class="setting-control">
+                                <div class="dropdown">
+                                    <div class="dropdown-toggle">
+                                        <span>左对齐</span>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                    <div class="dropdown-menu">
+                                        <div class="dropdown-item">左对齐</div>
+                                        <div class="dropdown-item">居中</div>
+                                        <div class="dropdown-item">右对齐</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 数据计算面板 -->
+                    <div class="setting-group">
+                        <div class="setting-title">
+                            <i class="fas fa-calculator"></i>自定义计算字段
+                        </div>
+                        
+                        <div class="formula-editor">
+                            <textarea placeholder="输入计算公式，例如：毛利率=(销售额-成本)/销售额&#10;支持函数：SUM(), AVG(), COUNT(), IF()等"></textarea>
+                            <div class="formula-help">
+                                示例: <strong>毛利率=(销售额-成本)/销售额</strong> | 
+                                <strong>IF(销售额>100000, "高", "低")</strong>
+                            </div>
+                        </div>
+                        
+                        <button style="margin-bottom: 10px;">
+                            <i class="fas fa-plus"></i>添加计算字段
+                        </button>
+                        
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                <i class="fas fa-balance-scale"></i>对比基准
+                            </label>
+                            <div class="setting-control">
+                                <div class="dropdown">
+                                    <div class="dropdown-toggle">
+                                        <span>无</span>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                    <div class="dropdown-menu">
+                                        <div class="dropdown-item">无</div>
+                                        <div class="dropdown-item">同比（去年同期）</div>
+                                        <div class="dropdown-item">环比（上一季度）</div>
+                                        <div class="dropdown-item">目标值</div>
+                                        <div class="dropdown-item">自定义</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 表格特定设置 -->
+                    <div class="setting-group">
+                        <div class="setting-title">
+                            <i class="fas fa-table"></i>表格设置
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                <i class="fas fa-snowflake"></i>冻结列
+                            </label>
+                            <div class="setting-control">
+                                <select>
+                                    <option>无</option>
+                                    <option>首列</option>
+                                    <option>前两列</option>
+                                    <option>自定义</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                <i class="fas fa-sort"></i>排序方式
+                            </label>
+                            <div class="setting-control">
+                                <select>
+                                    <option>无</option>
+                                    <option>销售额升序</option>
+                                    <option>销售额降序</option>
+                                    <option>利润升序</option>
+                                    <option>利润降序</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                <i class="fas fa-percentage"></i>数值格式
+                            </label>
+                            <div class="setting-control">
+                                <select>
+                                    <option>默认</option>
+                                    <option>保留1位小数</option>
+                                    <option>保留2位小数</option>
+                                    <option>百分比</option>
+                                    <option>货币</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                <i class="fas fa-fill"></i>条件格式
+                            </label>
+                            <div class="setting-control">
+                                <select>
+                                    <option>无</option>
+                                    <option>销售额<10万标红</option>
+                                    <option>利润>20%标绿</option>
+                                    <option>自定义规则</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 交互设置 -->
+                    <div class="setting-group">
+                        <div class="setting-title">
+                            <i class="fas fa-exchange-alt"></i>交互设置
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                <i class="fas fa-mouse-pointer"></i>启用钻取
+                            </label>
+                            <div class="setting-control">
+                                <select>
+                                    <option>启用</option>
+                                    <option>禁用</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                <i class="fas fa-link"></i>联动组件
+                            </label>
+                            <div class="setting-control">
+                                <select>
+                                    <option>无</option>
+                                    <option>销售额趋势图</option>
+                                    <option>产品分布饼图</option>
+                                    <option>地区销售热力图</option>
+                                    <option>全部组件</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label class="setting-label">
+                                <i class="fas fa-filter"></i>筛选范围
+                            </label>
+                            <div class="setting-control">
+                                <select>
+                                    <option>全局筛选</option>
+                                    <option>当前区域</option>
+                                    <option>自定义范围</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 数据预览器 -->
+        <div class="data-viewer" id="data-viewer">
+            <div class="viewer-header">
+                <div class="viewer-title">
+                    <i class="fas fa-table" style="margin-right: 10px; color: var(--primary-color);"></i>数据预览
+                </div>
+                <button class="viewer-close" id="close-data-viewer">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th class="frozen">产品类别</th>
+                        <th>地区</th>
+                        <th>销售额</th>
+                        <th>利润</th>
+                        <th>同比增长</th>
+                        <th>日期</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="frozen">办公用品</td>
+                        <td>华东</td>
+                        <td>¥12,456</td>
+                        <td>¥3,489</td>
+                        <td class="cell-positive">+5.2%</td>
+                        <td>2024-04-12</td>
+                    </tr>
+                    <tr>
+                        <td class="frozen">技术产品</td>
+                        <td>华南</td>
+                        <td>¥23,789</td>
+                        <td>¥7,245</td>
+                        <td class="cell-positive">+12.8%</td>
+                        <td>2024-04-11</td>
+                    </tr>
+                    <tr>
+                        <td class="frozen">家具</td>
+                        <td>华北</td>
+                        <td class="cell-highlight">¥8,673</td>
+                        <td>¥2,321</td>
+                        <td class="cell-negative">-3.5%</td>
+                        <td>2024-04-10</td>
+                    </tr>
+                    <tr>
+                        <td class="frozen">办公用品</td>
+                        <td>西部</td>
+                        <td>¥8,945</td>
+                        <td>¥2,567</td>
+                        <td class="cell-positive">+2.1%</td>
+                        <td>2024-04-09</td>
+                    </tr>
+                    <tr>
+                        <td class="frozen">技术产品</td>
+                        <td>华东</td>
+                        <td>¥19,832</td>
+                        <td>¥6,543</td>
+                        <td class="cell-positive">+8.7%</td>
+                        <td>2024-04-08</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <!-- 分页控件 -->
+            <div class="pagination">
+                <button><i class="fas fa-angle-double-left"></i></button>
+                <button class="active">1</button>
+                <button>2</button>
+                <button>3</button>
+                <button><i class="fas fa-angle-double-right"></i></button>
+            </div>
+        </div>
+        
+        <!-- 高级筛选弹窗 -->
+        <div class="advanced-filter" id="advanced-filter">
+            <div class="filter-header">
+                <div class="filter-title">高级筛选</div>
+                <button class="filter-close" id="close-advanced-filter">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="filter-body">
+                <div class="filter-rule">
+                    <select>
+                        <option>销售额</option>
+                        <option>利润</option>
+                        <option>订单数量</option>
+                        <option>客户数量</option>
+                    </select>
+                    <select>
+                        <option>> 大于</option>
+                        <option>< 小于</option>
+                        <option>= 等于</option>
+                        <option>>= 大于等于</option>
+                        <option><= 小于等于</option>
+                        <option>≠ 不等于</option>
+                    </select>
+                    <input type="text" placeholder="输入值">
+                </div>
+                
+                <div class="filter-connector">并且</div>
+                
+                <div class="filter-rule">
+                    <select>
+                        <option>客户类型</option>
+                        <option>产品类别</option>
+                        <option>地区</option>
+                        <option>月份</option>
+                    </select>
+                    <select>
+                        <option>= 等于</option>
+                        <option>≠ 不等于</option>
+                        <option>包含</option>
+                        <option>不包含</option>
+                    </select>
+                    <select>
+                        <option>新客户</option>
+                        <option>老客户</option>
+                        <option>大型企业</option>
+                        <option>中型企业</option>
+                        <option>小型企业</option>
+                    </select>
+                </div>
+                
+                <button class="add-rule-btn">
+                    <i class="fas fa-plus"></i> 添加条件
+                </button>
+            </div>
+            <div class="filter-footer">
+                <button class="cancel-btn">取消</button>
+                <button>应用筛选</button>
+            </div>
+        </div>
+        
+        <!-- 遮罩层 -->
+        <div class="overlay" id="overlay"></div>
+        
+        <!-- 底部状态栏 -->
+        <div class="status-bar">
+            <i class="fas fa-info-circle"></i>
+            <span style="margin-left: 8px;">就绪</span>
+            <span class="badge">已保存</span>
+            <div class="page-info">第 1 页，共 2 页</div>
+        </div>
+    </div>
+
+    <script>
+        // 数据预览器切换
+        document.getElementById('toggle-data-viewer').addEventListener('click', () => {
+            const viewer = document.getElementById('data-viewer');
+            const overlay = document.getElementById('overlay');
+            viewer.classList.toggle('active');
+            overlay.classList.toggle('active');
+        });
+        
+        // 关闭数据预览器
+        document.getElementById('close-data-viewer').addEventListener('click', () => {
+            document.getElementById('data-viewer').classList.remove('active');
+            document.getElementById('overlay').classList.remove('active');
+        });
+        
+        // 筛选面板切换
+        document.getElementById('toggle-filter-panel').addEventListener('click', () => {
+            const panel = document.getElementById('filter-panel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        });
+        
+        // 高级筛选弹窗
+        document.getElementById('advanced-filter-btn').addEventListener('click', () => {
+            const filter = document.getElementById('advanced-filter');
+            const overlay = document.getElementById('overlay');
+            filter.classList.add('active');
+            overlay.classList.add('active');
+        });
+        
+        // 关闭高级筛选
+        document.getElementById('close-advanced-filter').addEventListener('click', () => {
+            document.getElementById('advanced-filter').classList.remove('active');
+            document.getElementById('overlay').classList.remove('active');
+        });
+        
+        document.querySelector('.cancel-btn').addEventListener('click', () => {
+            document.getElementById('advanced-filter').classList.remove('active');
+            document.getElementById('overlay').classList.remove('active');
+        });
+        
+        // 关闭遮罩层时关闭所有弹窗
+        document.getElementById('overlay').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('overlay')) {
+                document.getElementById('data-viewer').classList.remove('active');
+                document.getElementById('advanced-filter').classList.remove('active');
+                document.getElementById('overlay').classList.remove('active');
+            }
+        });
+        
+        // 下拉菜单功能
+        document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
+            toggle.addEventListener('click', () => {
+                const menu = toggle.nextElementSibling;
+                menu.classList.toggle('show');
+                
+                // 关闭其他下拉菜单
+                document.querySelectorAll('.dropdown-menu').forEach(m => {
+                    if (m !== menu) {
+                        m.classList.remove('show');
+                    }
+                });
+            });
+        });
+        
+        // 点击下拉菜单项
+        document.querySelectorAll('.dropdown-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const menu = item.parentElement;
+                const toggle = menu.previousElementSibling;
+                toggle.querySelector('span').textContent = item.textContent;
+                menu.classList.remove('show');
+            });
+        });
+        
+        // 点击其他区域关闭下拉菜单
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.dropdown')) {
+                document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                    menu.classList.remove('show');
+                });
+            }
+        });
+        
+        // 颜色选择
+        document.querySelectorAll('.color-box').forEach(box => {
+            box.addEventListener('click', () => {
+                document.querySelectorAll('.color-box').forEach(b => {
+                    b.classList.remove('selected');
+                });
+                box.classList.add('selected');
+            });
+        });
+        
+        // 选项卡切换功能
+        document.querySelectorAll('.workspace-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.workspace-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // 更新页码信息
+                const pageNum = tab.querySelector('.page-number')?.textContent || '1';
+                document.querySelector('.page-info').textContent = `第 ${pageNum} 页，共 2 页`;
+            });
+        });
+
+        document.querySelectorAll('.panel-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.panel-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+            });
+        });
+
+        // 树形控件展开/折叠
+        document.querySelectorAll('.tree-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                if (e.target !== item) return;
+                
+                const children = item.nextElementSibling;
+                if (children && children.classList.contains('tree-children')) {
+                    children.style.display = children.style.display === 'none' ? 'block' : 'none';
+                    const icon = item.querySelector('i');
+                    if (icon.classList.contains('fa-folder')) {
+                        icon.className = children.style.display === 'none' ? 
+                            'fas fa-folder' : 'fas fa-folder-open';
+                    }
+                }
+            });
+        });
+
+        // 组件拖放功能
+        document.querySelectorAll('.component-item').forEach(item => {
+            item.addEventListener('dragstart', e => {
+                e.dataTransfer.setData('text/plain', item.getAttribute('data-type'));
+                item.classList.add('dragging');
+            });
+            
+            item.addEventListener('dragend', () => {
+                item.classList.remove('dragging');
+            });
+        });
+
+        document.querySelectorAll('.drop-zone').forEach(zone => {
+            zone.addEventListener('dragover', e => {
+                e.preventDefault();
+                zone.style.borderColor = '#ff8326';
+                zone.style.backgroundColor = '#fff5eb';
+            });
+            
+            zone.addEventListener('dragleave', e => {
+                zone.style.borderColor = '#ffc6a5';
+                zone.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+            });
+            
+            zone.addEventListener('drop', e => {
+                e.preventDefault();
+                const componentType = e.dataTransfer.getData('text/plain');
+                zone.style.borderColor = '#4caf50';
+                zone.style.backgroundColor = '#f1f8e9';
+                
+                // 根据拖放的组件类型生成不同内容
+                let content = '';
+                switch(componentType) {
+                    case 'table':
+                        content = `
+                            <i class="fas fa-table" style="margin-bottom: 5px;"></i>
+                            <div>表格已添加</div>
+                        `;
+                        break;
+                    case 'matrix':
+                        content = `
+                            <i class="fas fa-th" style="margin-bottom: 5px;"></i>
+                            <div>矩阵已添加</div>
+                        `;
+                        break;
+                    case 'card':
+                        content = `
+                            <i class="fas fa-id-card" style="margin-bottom: 5px;"></i>
+                            <div>指标卡已添加</div>
+                        `;
+                        break;
+                    case 'label':
+                        content = `
+                            <i class="fas fa-tag" style="margin-bottom: 5px;"></i>
+                            <div>数据标签已添加</div>
+                        `;
+                        break;
+                    case 'chart-bar':
+                        content = `
+                            <i class="fas fa-chart-bar" style="margin-bottom: 5px;"></i>
+                            <div>柱状图已添加</div>
+                        `;
+                        break;
+                    case 'chart-line':
+                        content = `
+                            <i class="fas fa-chart-line" style="margin-bottom: 5px;"></i>
+                            <div>折线图已添加</div>
+                        `;
+                        break;
+                    case 'title':
+                        content = `
+                            <i class="fas fa-heading" style="margin-bottom: 5px;"></i>
+                            <div>标题已添加</div>
+                        `;
+                        break;
+                    case 'subtitle':
+                        content = `
+                            <i class="fas fa-heading fa-sm" style="margin-bottom: 5px;"></i>
+                            <div>子标题已添加</div>
+                        `;
+                        break;
+                    case 'description':
+                        content = `
+                            <i class="fas fa-paragraph" style="margin-bottom: 5px;"></i>
+                            <div>描述文本已添加</div>
+                        `;
+                        break;
+                    case 'conclusion':
+                        content = `
+                            <i class="fas fa-lightbulb" style="margin-bottom: 5px;"></i>
+                            <div>结论已添加</div>
+                        `;
+                        break;
+                    case 'navigation':
+                        content = `
+                            <i class="fas fa-list" style="margin-bottom: 5px;"></i>
+                            <div>导航目录已添加</div>
+                        `;
+                        break;
+                    case 'section':
+                        content = `
+                            <i class="fas fa-border-all" style="margin-bottom: 5px;"></i>
+                            <div>分区已添加</div>
+                        `;
+                        break;
+                    case 'pagebreak':
+                        content = `
+                            <i class="fas fa-file-page-break" style="margin-bottom: 5px;"></i>
+                            <div>分页符已添加</div>
+                        `;
+                        break;
+                    case 'filter':
+                        content = `
+                            <i class="fas fa-filter" style="margin-bottom: 5px;"></i>
+                            <div>筛选器已添加</div>
+                        `;
+                        break;
+                }
+                
+                zone.innerHTML = content;
+                
+                // 更新状态栏
+                document.querySelector('.status-bar span').textContent = `已添加: ${getComponentName(componentType)}`;
+                
+                // 2秒后恢复提示状态
+                setTimeout(() => {
+                    zone.innerHTML = `
+                        <i class="fas fa-plus-circle" style="font-size: 24px; margin-bottom: 10px;"></i>
+                        <div>拖放组件到此处添加到报表</div>
+                    `;
+                    zone.style.borderColor = '#ffc6a5';
+                    zone.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+                    document.querySelector('.status-bar span').textContent = '就绪';
+                }, 2000);
+            });
+        });
+        
+        // 表格排序功能
+        document.querySelectorAll('.data-table th').forEach(header => {
+            header.addEventListener('click', () => {
+                // 移除其他列的排序状态
+                document.querySelectorAll('.data-table th').forEach(h => {
+                    if (h !== header) {
+                        h.classList.remove('sorted-asc', 'sorted-desc');
+                    }
+                });
+                
+                // 切换当前列的排序状态
+                if (header.classList.contains('sorted-asc')) {
+                    header.classList.remove('sorted-asc');
+                    header.classList.add('sorted-desc');
+                } else if (header.classList.contains('sorted-desc')) {
+                    header.classList.remove('sorted-desc');
+                } else {
+                    header.classList.add('sorted-asc');
+                }
+                
+                // 更新状态栏
+                const column = header.textContent.trim();
+                const order = header.classList.contains('sorted-asc') ? '升序' : 
+                              header.classList.contains('sorted-desc') ? '降序' : '取消排序';
+                document.querySelector('.status-bar span').textContent = `已${order}排序: ${column}`;
+            });
+        });
+        
+        // 数据钻取功能
+        document.querySelectorAll('.drillable').forEach(item => {
+            item.addEventListener('click', () => {
+                const value = item.textContent;
+                const viewer = document.getElementById('data-viewer');
+                const overlay = document.getElementById('overlay');
+                
+                // 更新数据预览器标题
+                document.querySelector('.viewer-title').innerHTML = `
+                    <i class="fas fa-table" style="margin-right: 10px; color: var(--primary-color);"></i>
+                    ${value} 明细数据
+                `;
+                
+                viewer.classList.add('active');
+                overlay.classList.add('active');
+                
+                // 更新状态栏
+                document.querySelector('.status-bar span').textContent = `已钻取: ${value} 明细数据`;
+            });
+        });
+        
+        // 添加筛选条件
+        document.querySelector('.add-rule-btn').addEventListener('click', () => {
+            const filterBody = document.querySelector('.filter-body');
+            const connector = document.createElement('div');
+            connector.className = 'filter-connector';
+            connector.textContent = '或者';
+            
+            const newRule = document.createElement('div');
+            newRule.className = 'filter-rule';
+            newRule.innerHTML = `
+                <select>
+                    <option>销售额</option>
+                    <option>利润</option>
+                    <option>订单数量</option>
+                    <option>客户数量</option>
+                </select>
+                <select>
+                    <option>> 大于</option>
+                    <option>< 小于</option>
+                    <option>= 等于</option>
+                    <option>>= 大于等于</option>
+                    <option><= 小于等于</option>
+                    <option>≠ 不等于</option>
+                </select>
+                <input type="text" placeholder="输入值">
+            `;
+            
+            filterBody.insertBefore(connector, document.querySelector('.add-rule-btn'));
+            filterBody.insertBefore(newRule, document.querySelector('.add-rule-btn'));
+        });
+        
+        // 导航链接跳转
+        document.querySelectorAll('.navigation-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                    
+                    // 高亮显示目标区域
+                    targetElement.style.borderColor = var(--primary-color);
+                    targetElement.style.boxShadow = '0 0 0 2px rgba(255, 131, 38, 0.3)';
+                    
+                    setTimeout(() => {
+                        targetElement.style.borderColor = '';
+                        targetElement.style.boxShadow = '';
+                    }, 2000);
+                }
+            });
+        });
+        
+        // 获取组件名称
+        function getComponentName(type) {
+            const names = {
+                'table': '表格',
+                'matrix': '矩阵',
+                'card': '指标卡',
+                'label': '数据标签',
+                'chart-bar': '柱状图',
+                'chart-line': '折线图',
+                'title': '标题',
+                'subtitle': '子标题',
+                'description': '描述文本',
+                'conclusion': '结论',
+                'navigation': '导航目录',
+                'section': '分区',
+                'pagebreak': '分页符',
+                'filter': '筛选器'
+            };
+            return names[type] || type;
+        }
+    </script>
+</body>
+</html>
