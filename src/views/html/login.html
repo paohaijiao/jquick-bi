@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JQuick BI - 用户注册</title>
+    <title>JQuick BI - 登录</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -104,7 +104,7 @@
             padding-right: 40px;
         }
         
-        .register-card {
+        .login-card {
             background-color: rgba(255, 255, 255, 0.97);
             border-radius: 16px;
             overflow: hidden;
@@ -114,7 +114,7 @@
             max-width: 420px;
         }
         
-        .register-card:hover {
+        .login-card:hover {
             transform: translateY(-5px);
         }
         
@@ -155,7 +155,7 @@
         }
         
         .input-group {
-            margin-bottom: 20px;
+            margin-bottom: 22px;
             position: relative;
         }
         
@@ -182,51 +182,114 @@
             outline: none;
         }
         
-        .password-strength {
-            height: 6px;
-            background-color: #eee;
-            border-radius: 3px;
-            margin-top: 8px;
+        /* 验证码区域样式 */
+        .captcha-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 22px;
+        }
+        
+        .captcha-input {
+            flex: 1;
+            position: relative;
+        }
+        
+        .captcha-input i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #ff8326;
+        }
+        
+        .captcha-input input {
+            width: 100%;
+            padding: 15px 20px 15px 50px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .captcha-input input:focus {
+            border-color: #ff8326;
+            box-shadow: 0 0 0 3px rgba(255, 131, 38, 0.2);
+            outline: none;
+        }
+        
+        .captcha-image {
+            height: 50px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            user-select: none;
+            border: 1px solid #ddd;
+            font-family: 'Arial', sans-serif;
+            font-weight: bold;
+            font-size: 20px;
+            color: #ff6a00;
+            letter-spacing: 5px;
+            padding: 0 10px;
+            position: relative;
             overflow: hidden;
         }
         
-        .strength-meter {
+        .captcha-image::before {
+            content: '';
+            position: absolute;
+            width: 100%;
             height: 100%;
-            width: 0;
-            border-radius: 3px;
-            transition: width 0.3s, background-color 0.3s;
+            background: linear-gradient(45deg, transparent 40%, rgba(255, 255, 255, 0.3) 50%, transparent 60%);
+            animation: shine 3s infinite linear;
         }
         
-        .strength-text {
-            font-size: 13px;
-            margin-top: 5px;
-            text-align: right;
-            color: #777;
+        @keyframes shine {
+            0% { left: -100%; }
+            100% { left: 100%; }
         }
         
-        .terms {
+        .captcha-image .refresh-icon {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            font-size: 10px;
+            color: #999;
+        }
+        
+        .remember-forgot {
             display: flex;
-            align-items: flex-start;
-            margin: 20px 0;
-            font-size: 14px;
+            justify-content: space-between;
+            margin-bottom: 22px;
+            font-size: 15px;
         }
         
-        .terms input {
-            margin-right: 10px;
-            margin-top: 3px;
+        .remember {
+            display: flex;
+            align-items: center;
+        }
+        
+        .remember input {
+            margin-right: 8px;
             accent-color: #ff8326;
         }
         
-        .terms a {
+        .forgot {
             color: #ff8326;
             text-decoration: none;
+            transition: color 0.3s;
+            font-weight: 500;
         }
         
-        .terms a:hover {
+        .forgot:hover {
+            color: #e65c00;
             text-decoration: underline;
         }
         
-        .btn-register {
+        .btn-login {
             width: 100%;
             padding: 16px;
             background: linear-gradient(to right, #ff8326, #ff6a00);
@@ -240,13 +303,13 @@
             box-shadow: 0 4px 10px rgba(255, 131, 38, 0.3);
         }
         
-        .btn-register:hover {
+        .btn-login:hover {
             background: linear-gradient(to right, #ff6a00, #ff8326);
             box-shadow: 0 6px 15px rgba(255, 131, 38, 0.4);
         }
         
         .divider {
-            margin: 25px 0;
+            margin: 28px 0;
             height: 1px;
             background: linear-gradient(to right, rgba(255, 131, 38, 0.1), rgba(255, 131, 38, 0.4), rgba(255, 131, 38, 0.1));
             position: relative;
@@ -263,21 +326,32 @@
             font-weight: 500;
         }
         
-        .login-link {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 15px;
-            color: #666;
+        .social-login {
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+            margin-bottom: 25px;
         }
         
-        .login-link a {
-            color: #ff8326;
+        .social-btn {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f8f8;
+            color: #555;
+            font-size: 20px;
             text-decoration: none;
-            font-weight: 500;
+            transition: all 0.3s;
+            border: 1px solid #eee;
         }
         
-        .login-link a:hover {
-            text-decoration: underline;
+        .social-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 7px 12px rgba(0, 0, 0, 0.12);
+            color: #ff8326;
         }
         
         .external-links {
@@ -409,6 +483,15 @@
                 padding: 20px 25px 30px;
             }
             
+            .captcha-group {
+                flex-direction: column;
+            }
+            
+            .captcha-image {
+                width: 100%;
+                margin-top: 10px;
+            }
+            
             .features li {
                 font-size: 16px;
             }
@@ -437,71 +520,78 @@
     <div class="main-container">
         <div class="left-content">
             <div class="app-info">
-                <h2>加入 JQuick BI 社区</h2>
-                <p>注册账号，开启您的数据智能分析之旅。我们的平台提供强大的数据可视化工具和实时分析功能。</p>
+                <h2>JQuick BI 数据智能分析平台</h2>
+                <p>将复杂数据转化为直观见解，助力企业智能决策。我们的平台提供强大的数据可视化工具和实时分析功能。</p>
                 
                 <ul class="features">
-                    <li><i class="fas fa-rocket"></i> 快速上手，轻松入门</li>
-                    <li><i class="fas fa-database"></i> 处理海量数据无压力</li>
-                    <li><i class="fas fa-lock"></i> 高级安全保护，数据隐私无忧</li>
-                    <li><i class="fas fa-users"></i> 加入活跃的数据分析社区</li>
+                    <li><i class="fas fa-bolt"></i> 快速数据处理与分析</li>
+                    <li><i class="fas fa-chart-line"></i> 多维度数据可视化</li>
+                    <li><i class="fas fa-cloud"></i> 云端报告实时共享</li>
+                    <li><i class="fas fa-shield-alt"></i> 企业级数据安全保障</li>
                 </ul>
             </div>
         </div>
         
         <div class="right-content">
-            <div class="register-card">
+            <div class="login-card">
                 <div class="header">
                     <div class="logo">
                         <i class="fas fa-chart-line logo-icon"></i>
                         <div class="logo-text">JQuick BI</div>
                     </div>
-                    <p class="tagline">创建您的账户 · 开启数据分析之旅</p>
+                    <p class="tagline">智能数据分析平台 · 助力企业决策</p>
                 </div>
                 
                 <div class="form-container">
                     <div class="input-group">
                         <i class="fas fa-user"></i>
-                        <input type="text" placeholder="用户名" required>
-                    </div>
-                    
-                    <div class="input-group">
-                        <i class="fas fa-envelope"></i>
-                        <input type="email" placeholder="电子邮箱" required>
-                    </div>
-                    
-                    <div class="input-group">
-                        <i class="fas fa-building"></i>
-                        <input type="text" placeholder="公司名称 (可选)">
+                        <input type="text" id="username" placeholder="用户名或邮箱" required>
                     </div>
                     
                     <div class="input-group">
                         <i class="fas fa-lock"></i>
-                        <input type="password" id="password" placeholder="密码" required onkeyup="checkPasswordStrength()">
-                        <div class="password-strength">
-                            <div class="strength-meter" id="strength-meter"></div>
+                        <input type="password" id="password" placeholder="密码" required>
+                    </div>
+                    
+                    <!-- 验证码区域 -->
+                    <div class="captcha-group">
+                        <div class="captcha-input">
+                            <i class="fas fa-shield-alt"></i>
+                            <input type="text" id="captcha-input" placeholder="请输入验证码" required>
                         </div>
-                        <div class="strength-text" id="strength-text">密码强度</div>
+                        <div class="captcha-image" id="captcha-image">
+                            <span id="captcha-text"></span>
+                            <i class="fas fa-sync-alt refresh-icon" id="refresh-captcha"></i>
+                        </div>
                     </div>
                     
-                    <div class="input-group">
-                        <i class="fas fa-lock"></i>
-                        <input type="password" placeholder="确认密码" required>
+                    <div class="remember-forgot">
+                        <label class="remember">
+                            <input type="checkbox" checked>
+                            记住我
+                        </label>
+                        <a href="#" class="forgot">忘记密码?</a>
                     </div>
                     
-                    <div class="terms">
-                        <input type="checkbox" id="agree-terms" required>
-                        <label for="agree-terms">我已阅读并同意 <a href="#">服务条款</a> 和 <a href="#">隐私政策</a></label>
-                    </div>
-                    
-                    <button class="btn-register">注册账号</button>
+                    <button class="btn-login" id="login-btn">登录</button>
                     
                     <div class="divider">
-                        <span>已经拥有账户?</span>
+                        <span>或使用其他方式登录</span>
                     </div>
                     
-                    <div class="login-link">
-                        已有账号? <a href="#">立即登录</a>
+                    <div class="social-login">
+                        <a href="#" class="social-btn">
+                            <i class="fab fa-weixin"></i>
+                        </a>
+                        <a href="#" class="social-btn">
+                            <i class="fab fa-qq"></i>
+                        </a>
+                        <a href="#" class="social-btn">
+                            <i class="fab fa-weibo"></i>
+                        </a>
+                        <a href="#" class="social-btn">
+                            <i class="fab fa-github"></i>
+                        </a>
                     </div>
                     
                     <div class="external-links">
@@ -522,54 +612,73 @@
     </div>
 
     <script>
-        function checkPasswordStrength() {
-            const password = document.getElementById('password').value;
-            const meter = document.getElementById('strength-meter');
-            const text = document.getElementById('strength-text');
-            
-            let strength = 0;
-            
-            // 检查密码长度
-            if (password.length > 6) strength += 20;
-            if (password.length > 10) strength += 20;
-            
-            // 检查是否包含数字
-            if (password.match(/([0-9])/)) strength += 20;
-            
-            // 检查是否包含小写字母
-            if (password.match(/([a-z])/)) strength += 20;
-            
-            // 检查是否包含大写字母
-            if (password.match(/([A-Z])/)) strength += 20;
-            
-            // 检查是否包含特殊字符
-            if (password.match(/([!,@,#,$,%,^,&,*,?,_,~])/)) strength += 20;
-            
-            // 限制最大值为100
-            strength = Math.min(strength, 100);
-            
-            // 更新强度条
-            meter.style.width = strength + '%';
-            
-            // 更新文本和颜色
-            if (strength === 0) {
-                meter.style.backgroundColor = '#eee';
-                text.textContent = '密码强度';
-                text.style.color = '#777';
-            } else if (strength < 40) {
-                meter.style.backgroundColor = '#ff4d4d';
-                text.textContent = '弱';
-                text.style.color = '#ff4d4d';
-            } else if (strength < 70) {
-                meter.style.backgroundColor = '#ff8326';
-                text.textContent = '中';
-                text.style.color = '#ff8326';
-            } else {
-                meter.style.backgroundColor = '#22bb33';
-                text.textContent = '强';
-                text.style.color = '#22bb33';
+        // 生成随机验证码
+        function generateCaptcha() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+            let captcha = '';
+            for (let i = 0; i < 4; i++) {
+                captcha += chars.charAt(Math.floor(Math.random() * chars.length));
             }
+            return captcha;
         }
+        
+        // 显示验证码
+        function displayCaptcha() {
+            const captchaText = generateCaptcha();
+            document.getElementById('captcha-text').textContent = captchaText;
+            // 存储验证码用于验证（在实际应用中应该存储在session或后端）
+            sessionStorage.setItem('captcha', captchaText);
+        }
+        
+        // 验证输入的验证码
+        function validateCaptcha(input) {
+            const storedCaptcha = sessionStorage.getItem('captcha');
+            return input.toLowerCase() === storedCaptcha.toLowerCase();
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 生成初始验证码
+            displayCaptcha();
+            
+            // 点击验证码刷新
+            document.getElementById('captcha-image').addEventListener('click', function() {
+                displayCaptcha();
+            });
+            
+            // 点击刷新图标刷新
+            document.getElementById('refresh-captcha').addEventListener('click', function(e) {
+                e.stopPropagation(); // 防止事件冒泡
+                displayCaptcha();
+            });
+            
+            // 登录按钮点击事件
+            document.getElementById('login-btn').addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                const captchaInput = document.getElementById('captcha-input').value;
+                
+                // 简单验证
+                if (!username || !password || !captchaInput) {
+                    alert('请填写所有必填字段！');
+                    return;
+                }
+                
+                // 验证验证码
+                if (!validateCaptcha(captchaInput)) {
+                    alert('验证码错误，请重新输入！');
+                    displayCaptcha(); // 刷新验证码
+                    document.getElementById('captcha-input').value = '';
+                    return;
+                }
+                
+                // 验证通过，这里可以添加登录逻辑
+                alert('登录验证通过！');
+                // 在实际应用中，这里应该提交表单或发送AJAX请求到服务器
+            });
+        });
     </script>
 </body>
 </html>

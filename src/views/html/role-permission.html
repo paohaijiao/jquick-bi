@@ -1,0 +1,1771 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>角色权限 - JQuick BI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #ff8326;
+            --secondary-color: #fff5eb;
+            --border-color: #ffd5b8;
+            --text-color: #2d3e50;
+            --light-bg: #f9f9f9;
+            --card-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            --card-shadow-hover: 0 6px 16px rgba(0, 0, 0, 0.12);
+            --sidebar-width: 260px;
+            --header-height: 60px;
+            --transition: all 0.3s ease;
+            --modal-overlay: rgba(0, 0, 0, 0.5);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            color: var(--text-color);
+            background-color: var(--light-bg);
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        /* 顶部导航栏 - 保持原有样式 */
+        .header {
+            height: var(--header-height);
+            background-color: white;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            z-index: 10;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            color: var(--primary-color);
+            font-size: 22px;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            font-size: 26px;
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .search-box {
+            position: relative;
+            width: 280px;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 8px 12px 8px 36px;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(255, 131, 38, 0.2);
+        }
+        
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 20px;
+            transition: background-color 0.2s;
+        }
+        
+        .user-info:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .user-name {
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        
+        .notification-icon {
+            position: relative;
+            font-size: 18px;
+            color: #666;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .notification-icon:hover {
+            color: var(--primary-color);
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: #ff4d4f;
+            color: white;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* 主内容区 */
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        /* 左侧菜单 - 保持原有样式 */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: white;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            height: calc(100vh - var(--header-height));
+        }
+        
+        .menu-section {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .menu-section-title {
+            padding: 0 20px;
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #666;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .menu-item:hover {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+        }
+        
+        .menu-item.active {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        .menu-item i {
+            width: 20px;
+            margin-right: 12px;
+            text-align: center;
+        }
+        
+        .menu-item .menu-badge {
+            margin-left: auto;
+            padding: 2px 8px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+        
+        .submenu {
+            background-color: #fff9f2;
+            padding: 0 0 0 52px;
+            display: none;
+        }
+        
+        .submenu.show {
+            display: block;
+        }
+        
+        .submenu-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            color: #666;
+            cursor: pointer;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+        
+        .submenu-item:hover {
+            color: var(--primary-color);
+        }
+        
+        .submenu-item.active {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        /* 右侧角色权限管理区域 */
+        .content-area {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            background-color: var(--light-bg);
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        
+        .page-description {
+            font-size: 14px;
+            color: #666;
+            margin-top: 4px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, #ff8326, #ff6a00);
+            color: white;
+            box-shadow: 0 2px 5px rgba(255, 131, 38, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(to right, #ff6a00, #ff8326);
+            box-shadow: 0 4px 8px rgba(255, 131, 38, 0.4);
+            transform: translateY(-1px);
+        }
+        
+        .btn-outline {
+            background-color: white;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .btn i {
+            margin-right: 8px;
+        }
+        
+        /* 筛选和搜索区域 */
+        .filter-bar {
+            background-color: white;
+            border-radius: 12px;
+            padding: 16px 20px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        
+        .filter-group {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .filter-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .filter-item label {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .filter-item select, .filter-item input {
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .search-filter {
+            position: relative;
+            width: 240px;
+        }
+        
+        .search-filter input {
+            width: 100%;
+            padding: 8px 12px 8px 36px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .search-filter i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+        
+        /* 角色列表 */
+        .role-list {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+        
+        .table-header {
+            display: grid;
+            grid-template-columns: 3fr 1fr 1fr 120px;
+            padding: 16px 20px;
+            background-color: var(--light-bg);
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .table-row {
+            display: grid;
+            grid-template-columns: 3fr 1fr 1fr 120px;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+        
+        .table-row:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .table-row:last-child {
+            border-bottom: none;
+        }
+        
+        .role-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .role-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        
+        .role-details {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .role-name {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .role-desc {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .role-count {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .role-status {
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+        }
+        
+        .status-active {
+            background-color: #f0f9eb;
+            color: #52c41a;
+        }
+        
+        .status-inactive {
+            background-color: #f5f5f5;
+            color: #8c8c8c;
+        }
+        
+        .operation-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+        
+        .operation-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .operation-btn:hover {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+        }
+        
+        /* 分页控件 */
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            font-size: 14px;
+        }
+        
+        .pagination-info {
+            color: #666;
+        }
+        
+        .pagination-controls {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .page-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            border: 1px solid var(--border-color);
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .page-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .page-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* 模态框样式 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--modal-overlay);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+        
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal {
+            background-color: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 1100px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+        
+        .modal-overlay.show .modal {
+            transform: translateY(0);
+        }
+        
+        .modal-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .modal-close:hover {
+            color: var(--primary-color);
+        }
+        
+        .modal-body {
+            padding: 24px;
+        }
+        
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        
+        /* 权限配置模态框样式 */
+        .permission-config-modal .modal-body {
+            padding: 0;
+        }
+        
+        .config-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .config-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .permission-tabs {
+            display: flex;
+            gap: 2px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .permission-tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        
+        .permission-tab.active {
+            border-bottom-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .permission-groups-container {
+            padding: 24px;
+        }
+        
+        .permission-groups {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .permission-group {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .permission-group-header {
+            padding: 12px 16px;
+            background-color: var(--light-bg);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .permission-group-body {
+            padding: 16px;
+        }
+        
+        .permission-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        
+        .permission-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .permission-item label {
+            flex: 1;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .permission-desc {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+        
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .form-hint {
+            display: block;
+            margin-top: 4px;
+            font-size: 12px;
+            color: #999;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(255, 131, 38, 0.2);
+        }
+        
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 16px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+            margin-bottom: 20px;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 1200px) {
+            .permission-groups {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .table-header, .table-row {
+                grid-template-columns: 2fr 1fr 80px;
+            }
+            
+            .table-header div:last-child, .table-row div:last-child {
+                display: none;
+            }
+            
+            .filter-bar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .search-filter {
+                width: 100%;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .modal {
+                width: 95%;
+            }
+            
+            .permission-groups {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部导航栏 -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-chart-line"></i>
+                <span>JQuick BI</span>
+            </div>
+            <div class="header-actions">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="搜索报表、数据源或文档...">
+                </div>
+                <div class="notification-icon">
+                    <i class="far fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar">ZL</div>
+                    <span class="user-name">张磊</span>
+                    <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
+                </div>
+            </div>
+        </header>
+        
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <!-- 左侧菜单 -->
+            <aside class="sidebar">
+                <div class="menu-section">
+                    <div class="menu-section-title">主导航</div>
+                    <div class="menu-item">
+                        <i class="fas fa-home"></i>
+                        <span>首页</span>
+                    </div>
+                    <div class="menu-item" id="dataSourceMenu">
+                        <i class="fas fa-database"></i>
+                        <span>数据源</span>
+                        <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
+                    </div>
+                    <div class="submenu" id="dataSourceSubmenu">
+                        <div class="submenu-item">数据源列表</div>
+                        <div class="submenu-item">新增数据源</div>
+                        <div class="submenu-item">数据源权限</div>
+                    </div>
+                    <div class="menu-item" id="reportMenu">
+                        <i class="fas fa-file-alt"></i>
+                        <span>报表</span>
+                        <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
+                    </div>
+                    <div class="submenu" id="reportSubmenu">
+                        <div class="submenu-item">我的报表</div>
+                        <div class="submenu-item">共享报表</div>
+                        <div class="submenu-item">收藏报表</div>
+                        <div class="submenu-item">回收站</div>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>仪表盘</span>
+                        <span class="menu-badge">5</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-cubes"></i>
+                        <span>数据集</span>
+                    </div>
+                </div>
+                
+                <div class="menu-section">
+                    <div class="menu-section-title">系统管理</div>
+                    <div class="menu-item">
+                        <i class="fas fa-users"></i>
+                        <span>用户管理</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-building"></i>
+                        <span>租户管理</span>
+                    </div>
+                    <div class="menu-item active">
+                        <i class="fas fa-user-shield"></i>
+                        <span>角色权限</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-history"></i>
+                        <span>操作日志</span>
+                    </div>
+                </div>
+                
+                <div class="menu-section">
+                    <div class="menu-section-title">帮助中心</div>
+                    <div class="menu-item">
+                        <i class="fas fa-question-circle"></i>
+                        <span>帮助文档</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-play-circle"></i>
+                        <span>视频教程</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-comment-dots"></i>
+                        <span>联系客服</span>
+                    </div>
+                </div>
+            </aside>
+            
+            <!-- 右侧角色权限管理区域 -->
+            <main class="content-area">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">角色权限管理</h1>
+                        <p class="page-description">管理系统角色及对应的权限配置</p>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-outline">
+                            <i class="fas fa-download"></i>
+                            导出角色
+                        </button>
+                        <button class="btn btn-primary" id="addRoleBtn">
+                            <i class="fas fa-plus"></i>
+                            新增角色
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 筛选和搜索区域 -->
+                <div class="filter-bar">
+                    <div class="filter-group">
+                        <div class="filter-item">
+                            <label>角色状态</label>
+                            <select>
+                                <option value="">全部状态</option>
+                                <option value="active">已启用</option>
+                                <option value="inactive">已禁用</option>
+                            </select>
+                        </div>
+                        <div class="filter-item">
+                            <label>角色类型</label>
+                            <select>
+                                <option value="">全部类型</option>
+                                <option value="system">系统角色</option>
+                                <option value="custom">自定义角色</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="search-filter">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="搜索角色名称或描述...">
+                    </div>
+                </div>
+                
+                <!-- 角色列表 -->
+                <div class="role-list">
+                    <div class="table-header">
+                        <div>角色信息</div>
+                        <div>用户数量</div>
+                        <div>状态</div>
+                        <div>操作</div>
+                    </div>
+                    
+                    <div class="table-row">
+                        <div class="role-info">
+                            <div class="role-icon">
+                                <i class="fas fa-user-shield"></i>
+                            </div>
+                            <div class="role-details">
+                                <div class="role-name">系统管理员</div>
+                                <div class="role-desc">拥有系统全部权限，可管理所有资源</div>
+                            </div>
+                        </div>
+                        <div class="role-count">3人</div>
+                        <div><span class="role-status status-active">已启用</span></div>
+                        <div class="operation-buttons">
+                            <button class="operation-btn" title="编辑" data-role="系统管理员" data-type="system">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="operation-btn" title="权限配置" data-role="系统管理员" data-type="system">
+                                <i class="fas fa-lock"></i>
+                            </button>
+                            <button class="operation-btn" title="用户列表" data-role="系统管理员">
+                                <i class="fas fa-users"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="table-row">
+                        <div class="role-info">
+                            <div class="role-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="role-details">
+                                <div class="role-name">分析师</div>
+                                <div class="role-desc">可创建和编辑报表，查看数据源，无管理权限</div>
+                            </div>
+                        </div>
+                        <div class="role-count">28人</div>
+                        <div><span class="role-status status-active">已启用</span></div>
+                        <div class="operation-buttons">
+                            <button class="operation-btn" title="编辑" data-role="分析师" data-type="system">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="operation-btn" title="权限配置" data-role="分析师" data-type="system">
+                                <i class="fas fa-lock"></i>
+                            </button>
+                            <button class="operation-btn" title="用户列表" data-role="分析师">
+                                <i class="fas fa-users"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="table-row">
+                        <div class="role-info">
+                            <div class="role-icon">
+                                <i class="fas fa-eye"></i>
+                            </div>
+                            <div class="role-details">
+                                <div class="role-name">查看者</div>
+                                <div class="role-desc">仅可查看已授权的报表和数据，无编辑权限</div>
+                            </div>
+                        </div>
+                        <div class="role-count">156人</div>
+                        <div><span class="role-status status-active">已启用</span></div>
+                        <div class="operation-buttons">
+                            <button class="operation-btn" title="编辑" data-role="查看者" data-type="system">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="operation-btn" title="权限配置" data-role="查看者" data-type="system">
+                                <i class="fas fa-lock"></i>
+                            </button>
+                            <button class="operation-btn" title="用户列表" data-role="查看者">
+                                <i class="fas fa-users"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="table-row">
+                        <div class="role-info">
+                            <div class="role-icon">
+                                <i class="fas fa-file-export"></i>
+                            </div>
+                            <div class="role-details">
+                                <div class="role-name">数据导出专员</div>
+                                <div class="role-desc">可查看报表并导出数据，无编辑权限</div>
+                            </div>
+                        </div>
+                        <div class="role-count">12人</div>
+                        <div><span class="role-status status-active">已启用</span></div>
+                        <div class="operation-buttons">
+                            <button class="operation-btn" title="编辑" data-role="数据导出专员" data-type="custom">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="operation-btn" title="权限配置" data-role="数据导出专员" data-type="custom">
+                                <i class="fas fa-lock"></i>
+                            </button>
+                            <button class="operation-btn" title="用户列表" data-role="数据导出专员">
+                                <i class="fas fa-users"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="table-row">
+                        <div class="role-info">
+                            <div class="role-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="role-details">
+                                <div class="role-name">租户管理员</div>
+                                <div class="role-desc">管理租户内资源和用户，无系统管理权限</div>
+                            </div>
+                        </div>
+                        <div class="role-count">8人</div>
+                        <div><span class="role-status status-inactive">已禁用</span></div>
+                        <div class="operation-buttons">
+                            <button class="operation-btn" title="编辑" data-role="租户管理员" data-type="custom">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="operation-btn" title="权限配置" data-role="租户管理员" data-type="custom">
+                                <i class="fas fa-lock"></i>
+                            </button>
+                            <button class="operation-btn" title="用户列表" data-role="租户管理员">
+                                <i class="fas fa-users"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 分页控件 -->
+                <div class="pagination">
+                    <div class="pagination-info">显示 1-5 条，共 12 条</div>
+                    <div class="pagination-controls">
+                        <button class="page-btn" disabled>
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="page-btn active">1</button>
+                        <button class="page-btn">2</button>
+                        <button class="page-btn">3</button>
+                        <button class="page-btn">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- 权限配置模态框 -->
+    <div class="modal-overlay permission-config-modal" id="permissionConfigModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">权限配置 - <span id="permissionRoleName">查看者</span></h3>
+                <button class="modal-close" id="closePermissionModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="config-header">
+                    <div class="config-title">权限设置</div>
+                    <button class="btn btn-primary" id="savePermissionBtn">
+                        <i class="fas fa-save"></i>
+                        保存配置
+                    </button>
+                </div>
+                
+                <div class="permission-tabs">
+                    <div class="permission-tab active">系统功能</div>
+                    <div class="permission-tab">数据源权限</div>
+                    <div class="permission-tab">报表权限</div>
+                    <div class="permission-tab">资源权限</div>
+                </div>
+                
+                <div class="permission-groups-container">
+                    <div class="permission-groups">
+                        <div class="permission-group">
+                            <div class="permission-group-header">
+                                <span>报表操作</span>
+                                <label>
+                                    <input type="checkbox" class="group-checkbox"> 全选
+                                </label>
+                            </div>
+                            <div class="permission-group-body">
+                                <div class="permission-item">
+                                    <input type="checkbox" id="perm-view-report">
+                                    <label for="perm-view-report">
+                                        查看报表
+                                        <div class="permission-desc">查看已授权的报表内容</div>
+                                    </label>
+                                </div>
+                                <div class="permission-item">
+                                    <input type="checkbox" id="perm-download-report" checked>
+                                    <label for="perm-download-report">
+                                        下载报表
+                                        <div class="permission-desc">将报表下载为图片或Excel格式</div>
+                                    </label>
+                                </div>
+                                <div class="permission-item">
+                                    <input type="checkbox" id="perm-print-report" checked>
+                                    <label for="perm-print-report">
+                                        打印报表
+                                        <div class="permission-desc">打印报表内容</div>
+                                    </label>
+                                </div>
+                                <div class="permission-item">
+                                    <input type="checkbox" id="perm-edit-report">
+                                    <label for="perm-edit-report">
+                                        编辑报表
+                                        <div class="permission-desc">修改报表结构和内容</div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="permission-group">
+                            <div class="permission-group-header">
+                                <span>数据源操作</span>
+                                <label>
+                                    <input type="checkbox" class="group-checkbox"> 全选
+                                </label>
+                            </div>
+                            <div class="permission-group-body">
+                                <div class="permission-item">
+                                    <input type="checkbox" id="perm-view-datasource" checked>
+                                    <label for="perm-view-datasource">
+                                        查看数据源
+                                        <div class="permission-desc">查看已授权的数据源信息</div>
+                                    </label>
+                                </div>
+                                <div class="permission-item">
+                                    <input type="checkbox" id="perm-edit-datasource">
+                                    <label for="perm-edit-datasource">
+                                        编辑数据源
+                                        <div class="permission-desc">修改数据源配置和连接信息</div>
+                                    </label>
+                                </div>
+                                <div class="permission-item">
+                                    <input type="checkbox" id="perm-delete-datasource">
+                                    <label for="perm-delete-datasource">
+                                        删除数据源
+                                        <div class="permission-desc">删除已存在的数据源</div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="permission-group">
+                            <div class="permission-group-header">
+                                <span>用户管理</span>
+                                <label>
+                                    <input type="checkbox" class="group-checkbox"> 全选
+                                </label>
+                            </div>
+                            <div class="permission-group-body">
+                                <div class="permission-item">
+                                    <input type="checkbox" id="perm-view-user">
+                                    <label for="perm-view-user">
+                                        查看用户
+                                        <div class="permission-desc">查看系统内的用户列表</div>
+                                    </label>
+                                </div>
+                                <div class="permission-item">
+                                    <input type="checkbox" id="perm-add-user">
+                                    <label for="perm-add-user">
+                                        添加用户
+                                        <div class="permission-desc">新增系统用户</div>
+                                    </label>
+                                </div>
+                                <div class="permission-item">
+                                    <input type="checkbox" id="perm-edit-user">
+                                    <label for="perm-edit-user">
+                                        编辑用户
+                                        <div class="permission-desc">修改用户信息和权限</div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="permission-group">
+                            <div class="permission-group-header">
+                                <span>系统设置</span>
+                                <label>
+                                    <input type="checkbox" class="group-checkbox"> 全选
+                                </label>
+                            </div>
+                            <div class="permission-group-body">
+                                <div class="permission-item">
+                                    <input type="checkbox" id="perm-view-log">
+                                    <label for="perm-view-log">
+                                        查看日志
+                                        <div class="permission-desc">查看系统操作日志</div>
+                                    </label>
+                                </div>
+                                <div class="permission-item">
+                                    <input type="checkbox" id="perm-system-config">
+                                    <label for="perm-system-config">
+                                        系统配置
+                                        <div class="permission-desc">修改系统全局配置</div>
+                                    </label>
+                                </div>
+                                <div class="permission-item">
+                                    <input type="checkbox" id="perm-role-manage">
+                                    <label for="perm-role-manage">
+                                        角色管理
+                                        <div class="permission-desc">创建和管理系统角色</div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 新增角色模态框 -->
+    <div class="modal-overlay" id="addRoleModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">新增角色</h3>
+                <button class="modal-close" id="closeAddRoleModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="addRoleForm">
+                    <div class="form-group">
+                        <label class="form-label" for="roleName">角色名称 <span style="color: #ff4d4f;">*</span></label>
+                        <input type="text" class="form-control" id="roleName" placeholder="请输入角色名称" required>
+                        <span class="form-hint">角色名称应清晰反映角色的职责和权限范围</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="roleDesc">角色描述</label>
+                        <textarea class="form-control" id="roleDesc" placeholder="请输入角色描述信息"></textarea>
+                        <span class="form-hint">简要描述该角色的职责、权限范围和适用场景</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="roleType">角色类型</label>
+                        <select class="form-control" id="roleType">
+                            <option value="custom">自定义角色</option>
+                            <option value="copy">复制现有角色</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" id="copyRoleGroup" style="display: none;">
+                        <label class="form-label" for="copyFromRole">复制自</label>
+                        <select class="form-control" id="copyFromRole">
+                            <option value="">请选择要复制的角色</option>
+                            <option value="admin">系统管理员</option>
+                            <option value="analyst">分析师</option>
+                            <option value="viewer">查看者</option>
+                            <option value="export">数据导出专员</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="roleStatus">角色状态</label>
+                        <select class="form-control" id="roleStatus">
+                            <option value="active">已启用</option>
+                            <option value="inactive">已禁用</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelAddRole">取消</button>
+                <button class="btn btn-primary" id="submitAddRole">创建角色</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 编辑角色模态框 -->
+    <div class="modal-overlay" id="editRoleModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">编辑角色 - <span id="editRoleName">查看者</span></h3>
+                <button class="modal-close" id="closeEditRoleModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editRoleForm">
+                    <div class="form-group">
+                        <label class="form-label" for="editRoleNameInput">角色名称 <span style="color: #ff4d4f;">*</span></label>
+                        <input type="text" class="form-control" id="editRoleNameInput" placeholder="请输入角色名称" required>
+                        <span class="form-hint">角色名称应清晰反映角色的职责和权限范围</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="editRoleDesc">角色描述</label>
+                        <textarea class="form-control" id="editRoleDesc" placeholder="请输入角色描述信息"></textarea>
+                        <span class="form-hint">简要描述该角色的职责、权限范围和适用场景</span>
+                    </div>
+                    
+                    <div class="form-group" id="roleTypeDisplay">
+                        <label class="form-label">角色类型</label>
+                        <div style="padding: 10px; background-color: var(--light-bg); border-radius: 6px;" id="roleTypeValue">
+                            系统角色
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="editRoleStatus">角色状态</label>
+                        <select class="form-control" id="editRoleStatus">
+                            <option value="active">已启用</option>
+                            <option value="inactive">已禁用</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelEditRole">取消</button>
+                <button class="btn btn-primary" id="submitEditRole">保存修改</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 角色用户列表模态框 -->
+    <div class="modal-overlay" id="roleUserModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">角色用户 - <span id="roleUserRoleName">查看者</span></h3>
+                <button class="modal-close" id="closeRoleUserModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
+                    <button class="btn btn-primary" id="addUserToRoleBtn">
+                        <i class="fas fa-plus"></i> 添加用户
+                    </button>
+                </div>
+                
+                <div class="filter-bar" style="margin-bottom: 16px;">
+                    <div class="search-filter">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="搜索用户名或邮箱...">
+                    </div>
+                    <div class="filter-group">
+                        <div class="filter-item">
+                            <label>用户状态</label>
+                            <select>
+                                <option value="">全部状态</option>
+                                <option value="active">已激活</option>
+                                <option value="inactive">未激活</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="user-list">
+                    <div class="table-header">
+                        <div>用户信息</div>
+                        <div>所属租户</div>
+                        <div>加入时间</div>
+                        <div>操作</div>
+                    </div>
+                    
+                    <div class="table-row">
+                        <div class="user-info">
+                            <div class="user-avatar-large viewer">
+                                ZH
+                            </div>
+                            <div class="user-details">
+                                <div class="user-name">赵华</div>
+                                <div class="user-email">zhaohua@example.com</div>
+                            </div>
+                        </div>
+                        <div>京东科技</div>
+                        <div>2023-09-15</div>
+                        <div class="operation-buttons">
+                            <button class="operation-btn" title="移除">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="table-row">
+                        <div class="user-info">
+                            <div class="user-avatar-large viewer">
+                                LJ
+                            </div>
+                            <div class="user-details">
+                                <div class="user-name">李静</div>
+                                <div class="user-email">lijing@example.com</div>
+                            </div>
+                        </div>
+                        <div>阿里巴巴</div>
+                        <div>2023-09-20</div>
+                        <div class="operation-buttons">
+                            <button class="operation-btn" title="移除">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="table-row">
+                        <div class="user-info">
+                            <div class="user-avatar-large viewer">
+                                WQ
+                            </div>
+                            <div class="user-details">
+                                <div class="user-name">王强</div>
+                                <div class="user-email">wangqiang@example.com</div>
+                            </div>
+                        </div>
+                        <div>腾讯控股</div>
+                        <div>2023-10-05</div>
+                        <div class="operation-buttons">
+                            <button class="operation-btn" title="移除">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="pagination" style="margin-top: 16px;">
+                    <div class="pagination-info">显示 1-3 条，共 156 条</div>
+                    <div class="pagination-controls">
+                        <button class="page-btn" disabled>
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="page-btn active">1</button>
+                        <button class="page-btn">2</button>
+                        <button class="page-btn">3</button>
+                        <button class="page-btn">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="closeRoleUser">关闭</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 添加用户到角色模态框 -->
+    <div class="modal-overlay" id="addUserToRoleModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">添加用户 - <span id="addUserRoleName">查看者</span></h3>
+                <button class="modal-close" id="closeAddUserToRoleModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">选择用户</label>
+                    <div class="search-filter" style="margin-bottom: 16px;">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="搜索用户名或邮箱...">
+                    </div>
+                    
+                    <div style="max-height: 300px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px;">
+                        <div class="permission-item">
+                            <input type="checkbox" id="user-select-1">
+                            <label for="user-select-1">
+                                张伟 (zhangwei@example.com)
+                                <div class="permission-desc">租户: 京东科技 | 角色: 无</div>
+                            </label>
+                        </div>
+                        <div class="permission-item">
+                            <input type="checkbox" id="user-select-2">
+                            <label for="user-select-2">
+                                刘芳 (liufang@example.com)
+                                <div class="permission-desc">租户: 阿里巴巴 | 角色: 无</div>
+                            </label>
+                        </div>
+                        <div class="permission-item">
+                            <input type="checkbox" id="user-select-3">
+                            <label for="user-select-3">
+                                陈明 (chenming@example.com)
+                                <div class="permission-desc">租户: 腾讯控股 | 角色: 分析师</div>
+                            </label>
+                        </div>
+                        <div class="permission-item">
+                            <input type="checkbox" id="user-select-4">
+                            <label for="user-select-4">
+                                赵静 (zhaojing@example.com)
+                                <div class="permission-desc">租户: 华米科技 | 角色: 无</div>
+                            </label>
+                        </div>
+                        <div class="permission-item">
+                            <input type="checkbox" id="user-select-5">
+                            <label for="user-select-5">
+                                王浩 (wanghao@example.com)
+                                <div class="permission-desc">租户: 京东科技 | 角色: 无</div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelAddUserToRole">取消</button>
+                <button class="btn btn-primary" id="submitAddUserToRole">确认添加</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 菜单展开/折叠功能
+        document.getElementById('dataSourceMenu').addEventListener('click', function() {
+            document.getElementById('dataSourceSubmenu').classList.toggle('show');
+        });
+        
+        document.getElementById('reportMenu').addEventListener('click', function() {
+            document.getElementById('reportSubmenu').classList.toggle('show');
+        });
+        
+        // 子菜单激活状态切换
+        const submenuItems = document.querySelectorAll('.submenu-item');
+        submenuItems.forEach(item => {
+            item.addEventListener('click', function() {
+                // 移除同级别子菜单的激活状态
+                const siblings = this.parentElement.querySelectorAll('.submenu-item');
+                siblings.forEach(sib => sib.classList.remove('active'));
+                // 激活当前子菜单
+                this.classList.add('active');
+            });
+        });
+        
+        // 分页按钮交互
+        const pageButtons = document.querySelectorAll('.page-btn:not([disabled])');
+        pageButtons.forEach(btn => {
+            if (!btn.querySelector('i')) { // 排除箭头按钮
+                btn.addEventListener('click', function() {
+                    pageButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            }
+        });
+        
+        // 模态框相关功能
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function hideModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+            document.body.style.overflow = '';
+        }
+        
+        // 新增角色模态框
+        document.getElementById('addRoleBtn').addEventListener('click', function() {
+            showModal('addRoleModal');
+        });
+        
+        document.getElementById('closeAddRoleModal').addEventListener('click', function() {
+            hideModal('addRoleModal');
+        });
+        
+        document.getElementById('cancelAddRole').addEventListener('click', function() {
+            hideModal('addRoleModal');
+        });
+        
+        document.getElementById('submitAddRole').addEventListener('click', function() {
+            // 这里添加表单提交逻辑
+            alert('角色创建成功！');
+            hideModal('addRoleModal');
+        });
+        
+        // 角色类型选择逻辑
+        document.getElementById('roleType').addEventListener('change', function() {
+            if (this.value === 'copy') {
+                document.getElementById('copyRoleGroup').style.display = 'block';
+            } else {
+                document.getElementById('copyRoleGroup').style.display = 'none';
+            }
+        });
+        
+        // 编辑角色模态框
+        const editButtons = document.querySelectorAll('.operation-btn[title="编辑"]');
+        editButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const roleName = this.getAttribute('data-role');
+                const roleType = this.getAttribute('data-type');
+                
+                document.getElementById('editRoleName').textContent = roleName;
+                document.getElementById('editRoleNameInput').value = roleName;
+                
+                // 设置角色类型显示
+                if (roleType === 'system') {
+                    document.getElementById('roleTypeValue').textContent = '系统角色（不可修改类型）';
+                } else {
+                    document.getElementById('roleTypeValue').textContent = '自定义角色';
+                }
+                
+                // 根据角色名称填充描述信息
+                let roleDesc = '';
+                switch(roleName) {
+                    case '系统管理员':
+                        roleDesc = '拥有系统全部权限，可管理所有资源';
+                        document.getElementById('editRoleStatus').value = 'active';
+                        break;
+                    case '分析师':
+                        roleDesc = '可创建和编辑报表，查看数据源，无管理权限';
+                        document.getElementById('editRoleStatus').value = 'active';
+                        break;
+                    case '查看者':
+                        roleDesc = '仅可查看已授权的报表和数据，无编辑权限';
+                        document.getElementById('editRoleStatus').value = 'active';
+                        break;
+                    case '数据导出专员':
+                        roleDesc = '可查看报表并导出数据，无编辑权限';
+                        document.getElementById('editRoleStatus').value = 'active';
+                        break;
+                    case '租户管理员':
+                        roleDesc = '管理租户内资源和用户，无系统管理权限';
+                        document.getElementById('editRoleStatus').value = 'inactive';
+                        break;
+                }
+                document.getElementById('editRoleDesc').value = roleDesc;
+                
+                showModal('editRoleModal');
+            });
+        });
+        
+        document.getElementById('closeEditRoleModal').addEventListener('click', function() {
+            hideModal('editRoleModal');
+        });
+        
+        document.getElementById('cancelEditRole').addEventListener('click', function() {
+            hideModal('editRoleModal');
+        });
+        
+        document.getElementById('submitEditRole').addEventListener('click', function() {
+            // 这里添加表单提交逻辑
+            alert('角色修改保存成功！');
+            hideModal('editRoleModal');
+        });
+        
+        // 角色用户列表模态框
+        const userListButtons = document.querySelectorAll('.operation-btn[title="用户列表"]');
+        userListButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const roleName = this.getAttribute('data-role');
+                document.getElementById('roleUserRoleName').textContent = roleName;
+                document.getElementById('addUserRoleName').textContent = roleName;
+                showModal('roleUserModal');
+            });
+        });
+        
+        document.getElementById('closeRoleUserModal').addEventListener('click', function() {
+            hideModal('roleUserModal');
+        });
+        
+        document.getElementById('closeRoleUser').addEventListener('click', function() {
+            hideModal('roleUserModal');
+        });
+        
+        // 添加用户到角色模态框
+        document.getElementById('addUserToRoleBtn').addEventListener('click', function() {
+            showModal('addUserToRoleModal');
+        });
+        
+        document.getElementById('closeAddUserToRoleModal').addEventListener('click', function() {
+            hideModal('addUserToRoleModal');
+        });
+        
+        document.getElementById('cancelAddUserToRole').addEventListener('click', function() {
+            hideModal('addUserToRoleModal');
+        });
+        
+        document.getElementById('submitAddUserToRole').addEventListener('click', function() {
+            // 这里添加表单提交逻辑
+            alert('用户添加成功！');
+            hideModal('addUserToRoleModal');
+        });
+        
+        // 权限配置模态框
+        const permissionButtons = document.querySelectorAll('.operation-btn[title="权限配置"]');
+        permissionButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const roleName = this.getAttribute('data-role');
+                document.getElementById('permissionRoleName').textContent = roleName;
+                // 这里可以根据角色加载不同的权限配置
+                showModal('permissionConfigModal');
+            });
+        });
+        
+        document.getElementById('closePermissionModal').addEventListener('click', function() {
+            hideModal('permissionConfigModal');
+        });
+        
+        // 权限标签切换
+        const permissionTabs = document.querySelectorAll('.permission-tab');
+        permissionTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                permissionTabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                // 实际应用中这里应该切换显示不同的权限内容
+            });
+        });
+        
+        // 权限组全选功能
+        const groupCheckboxes = document.querySelectorAll('.group-checkbox');
+        groupCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const group = this.closest('.permission-group');
+                const checkboxes = group.querySelectorAll('.permission-item input[type="checkbox"]');
+                checkboxes.forEach(cb => {
+                    cb.checked = this.checked;
+                });
+            });
+        });
+        
+        // 保存权限配置
+        document.getElementById('savePermissionBtn').addEventListener('click', function() {
+            alert('权限配置保存成功！');
+            hideModal('permissionConfigModal');
+        });
+    </script>
+</body>
+</html>

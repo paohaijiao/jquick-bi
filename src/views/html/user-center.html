@@ -1,0 +1,1567 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心 - JQuick BI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #ff8326;
+            --secondary-color: #fff5eb;
+            --border-color: #ffd5b8;
+            --text-color: #2d3e50;
+            --light-bg: #f9f9f9;
+            --card-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            --sidebar-width: 260px;
+            --header-height: 60px;
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            color: var(--text-color);
+            background-color: var(--light-bg);
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        /* 顶部导航栏 - 保持原有样式 */
+        .header {
+            height: var(--header-height);
+            background-color: white;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            z-index: 10;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            color: var(--primary-color);
+            font-size: 22px;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            font-size: 26px;
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .search-box {
+            position: relative;
+            width: 280px;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 8px 12px 8px 36px;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(255, 131, 38, 0.2);
+        }
+        
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 20px;
+            transition: background-color 0.2s;
+        }
+        
+        .user-info:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .user-name {
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        
+        .notification-icon {
+            position: relative;
+            font-size: 18px;
+            color: #666;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .notification-icon:hover {
+            color: var(--primary-color);
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: #ff4d4f;
+            color: white;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* 主内容区 */
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        /* 左侧菜单 - 保持原有样式 */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: white;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            height: calc(100vh - var(--header-height));
+        }
+        
+        .menu-section {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .menu-section-title {
+            padding: 0 20px;
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #666;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .menu-item:hover {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+        }
+        
+        .menu-item.active {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        .menu-item i {
+            width: 20px;
+            margin-right: 12px;
+            text-align: center;
+        }
+        
+        .menu-item .menu-badge {
+            margin-left: auto;
+            padding: 2px 8px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+        
+        .submenu {
+            background-color: #fff9f2;
+            padding: 0 0 0 52px;
+            display: none;
+        }
+        
+        .submenu.show {
+            display: block;
+        }
+        
+        .submenu-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            color: #666;
+            cursor: pointer;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+        
+        .submenu-item:hover {
+            color: var(--primary-color);
+        }
+        
+        .submenu-item.active {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        /* 右侧个人中心区域 */
+        .content-area {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            background-color: var(--light-bg);
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        
+        .page-description {
+            font-size: 14px;
+            color: #666;
+            margin-top: 4px;
+        }
+        
+        /* 个人信息卡片 */
+        .profile-card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            padding: 24px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+        
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: bold;
+            position: relative;
+        }
+        
+        .avatar-upload-btn {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background-color: white;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .avatar-upload-btn:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .profile-info {
+            flex: 1;
+        }
+        
+        .profile-name {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .profile-role {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .profile-role-badge {
+            padding: 2px 8px;
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+            border-radius: 8px;
+            font-size: 12px;
+        }
+        
+        .profile-contact {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .profile-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, #ff8326, #ff6a00);
+            color: white;
+            box-shadow: 0 2px 5px rgba(255, 131, 38, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(to right, #ff6a00, #ff8326);
+            box-shadow: 0 4px 8px rgba(255, 131, 38, 0.4);
+            transform: translateY(-1px);
+        }
+        
+        .btn-outline {
+            background-color: white;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .btn i {
+            margin-right: 8px;
+        }
+        
+        /* 个人中心内容区域 - 选项卡样式 */
+        .profile-tabs {
+            display: flex;
+            gap: 2px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+        
+        .profile-tab {
+            flex: 1;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .profile-tab:hover {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+        }
+        
+        .profile-tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+        
+        /* 表单样式 */
+        .form-container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .form-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .form-hint {
+            display: block;
+            margin-top: 4px;
+            font-size: 12px;
+            color: #999;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(255, 131, 38, 0.2);
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 16px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+            margin-bottom: 20px;
+        }
+        
+        .form-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        /* 安全设置特有样式 */
+        .security-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .security-item:last-child {
+            border-bottom: none;
+        }
+        
+        .security-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .security-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .security-desc {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .security-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .status-enabled {
+            color: #52c41a;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .status-disabled {
+            color: #ff4d4f;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        /* 偏好设置特有样式 */
+        .preference-group {
+            margin-bottom: 24px;
+        }
+        
+        .preference-group-title {
+            font-weight: 600;
+            margin-bottom: 16px;
+            font-size: 16px;
+        }
+        
+        .preference-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .preference-item label {
+            flex: 1;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .preference-desc {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+        
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+        }
+        
+        /* 近期活动样式 */
+        .activity-list {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            padding: 24px;
+        }
+        
+        .activity-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .activity-item {
+            display: flex;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .activity-content {
+            flex: 1;
+        }
+        
+        .activity-action {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .activity-time {
+            font-size: 12px;
+            color: #999;
+        }
+        
+        /* 模态框样式 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+        
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal {
+            background-color: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+        
+        .modal-overlay.show .modal {
+            transform: translateY(0);
+        }
+        
+        .modal-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .modal-close:hover {
+            color: var(--primary-color);
+        }
+        
+        .modal-body {
+            padding: 24px;
+        }
+        
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .profile-card {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .profile-actions {
+                margin-top: 16px;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .profile-tabs {
+                flex-direction: column;
+            }
+            
+            .activity-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .activity-icon {
+                margin-bottom: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部导航栏 -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-chart-line"></i>
+                <span>JQuick BI</span>
+            </div>
+            <div class="header-actions">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="搜索报表、数据源或文档...">
+                </div>
+                <div class="notification-icon">
+                    <i class="far fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar">ZL</div>
+                    <span class="user-name">张磊</span>
+                    <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
+                </div>
+            </div>
+        </header>
+        
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <!-- 左侧菜单 -->
+            <aside class="sidebar">
+                <div class="menu-section">
+                    <div class="menu-section-title">主导航</div>
+                    <div class="menu-item">
+                        <i class="fas fa-home"></i>
+                        <span>首页</span>
+                    </div>
+                    <div class="menu-item" id="dataSourceMenu">
+                        <i class="fas fa-database"></i>
+                        <span>数据源</span>
+                        <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
+                    </div>
+                    <div class="submenu" id="dataSourceSubmenu">
+                        <div class="submenu-item">数据源列表</div>
+                        <div class="submenu-item">新增数据源</div>
+                        <div class="submenu-item">数据源权限</div>
+                    </div>
+                    <div class="menu-item" id="reportMenu">
+                        <i class="fas fa-file-alt"></i>
+                        <span>报表</span>
+                        <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
+                    </div>
+                    <div class="submenu" id="reportSubmenu">
+                        <div class="submenu-item">我的报表</div>
+                        <div class="submenu-item">共享报表</div>
+                        <div class="submenu-item">收藏报表</div>
+                        <div class="submenu-item">回收站</div>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>仪表盘</span>
+                        <span class="menu-badge">5</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-cubes"></i>
+                        <span>数据集</span>
+                    </div>
+                </div>
+                
+                <div class="menu-section">
+                    <div class="menu-section-title">系统管理</div>
+                    <div class="menu-item">
+                        <i class="fas fa-users"></i>
+                        <span>用户管理</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-user-shield"></i>
+                        <span>角色权限</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-history"></i>
+                        <span>操作日志</span>
+                    </div>
+                </div>
+                
+                <div class="menu-section">
+                    <div class="menu-section-title">个人中心</div>
+                    <div class="menu-item active">
+                        <i class="fas fa-user-circle"></i>
+                        <span>个人信息</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-lock"></i>
+                        <span>安全设置</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-cog"></i>
+                        <span>偏好配置</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>退出登录</span>
+                    </div>
+                </div>
+                
+                <div class="menu-section">
+                    <div class="menu-section-title">帮助中心</div>
+                    <div class="menu-item">
+                        <i class="fas fa-question-circle"></i>
+                        <span>帮助文档</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-play-circle"></i>
+                        <span>视频教程</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-comment-dots"></i>
+                        <span>联系客服</span>
+                    </div>
+                </div>
+            </aside>
+            
+            <!-- 右侧个人中心区域 -->
+            <main class="content-area">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">个人中心</h1>
+                        <p class="page-description">管理您的个人信息、安全设置和偏好配置</p>
+                    </div>
+                </div>
+                
+                <!-- 个人信息卡片 -->
+                <div class="profile-card">
+                    <div class="profile-avatar">
+                        ZL
+                        <div class="avatar-upload-btn" title="更换头像">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                    </div>
+                    <div class="profile-info">
+                        <div class="profile-name">张磊</div>
+                        <div class="profile-role">
+                            <span>系统管理员</span>
+                            <span class="profile-role-badge">企业版</span>
+                        </div>
+                        <div class="profile-contact">
+                            <div class="contact-item">
+                                <i class="fas fa-envelope"></i>
+                                <span>zhanglei@example.com</span>
+                            </div>
+                            <div class="contact-item">
+                                <i class="fas fa-phone"></i>
+                                <span>138****1234</span>
+                            </div>
+                            <div class="contact-item">
+                                <i class="fas fa-building"></i>
+                                <span>京东科技</span>
+                            </div>
+                            <div class="contact-item">
+                                <i class="fas fa-calendar-check"></i>
+                                <span>加入时间: 2023-01-15</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="profile-actions">
+                        <button class="btn btn-outline" id="editProfileBtn">
+                            <i class="fas fa-edit"></i>
+                            编辑信息
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 个人中心选项卡 -->
+                <div class="profile-tabs">
+                    <div class="profile-tab active" data-tab="basic-info">基本信息</div>
+                    <div class="profile-tab" data-tab="security-setting">安全设置</div>
+                    <div class="profile-tab" data-tab="preference">偏好配置</div>
+                    <div class="profile-tab" data-tab="activity">近期活动</div>
+                </div>
+                
+                <!-- 基本信息表单 -->
+                <div class="form-container" id="basic-info-tab">
+                    <div class="form-title">基本信息</div>
+                    <form id="basicInfoForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="fullName">姓名 <span style="color: #ff4d4f;">*</span></label>
+                                <input type="text" class="form-control" id="fullName" value="张磊" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="nickName">昵称</label>
+                                <input type="text" class="form-control" id="nickName" value="磊哥">
+                                <span class="form-hint">显示在系统内的个性化名称</span>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="email">电子邮箱 <span style="color: #ff4d4f;">*</span></label>
+                                <input type="email" class="form-control" id="email" value="zhanglei@example.com" required>
+                                <span class="form-hint">用于登录和接收系统通知</span>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="phone">手机号码</label>
+                                <input type="tel" class="form-control" id="phone" value="138****1234">
+                                <span class="form-hint">用于账号安全验证</span>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="department">所属部门</label>
+                            <input type="text" class="form-control" id="department" value="技术部">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="jobTitle">职位</label>
+                            <input type="text" class="form-control" id="jobTitle" value="技术架构师">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="signature">个人签名</label>
+                            <textarea class="form-control" id="signature" placeholder="输入个人签名，将显示在个人主页">专注数据可视化与BI系统建设</textarea>
+                        </div>
+                        
+                        <div class="form-footer">
+                            <button type="button" class="btn btn-outline" id="cancelBasicInfo">取消</button>
+                            <button type="submit" class="btn btn-primary">保存修改</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- 安全设置表单 (默认隐藏) -->
+                <div class="form-container" id="security-setting-tab" style="display: none;">
+                    <div class="form-title">安全设置</div>
+                    
+                    <div class="security-item">
+                        <div class="security-info">
+                            <div class="security-title">修改密码</div>
+                            <div class="security-desc">定期修改密码可提高账号安全性，建议包含字母、数字和特殊字符</div>
+                        </div>
+                        <button class="btn btn-outline" id="changePwdBtn">
+                            <i class="fas fa-key"></i>
+                            修改
+                        </button>
+                    </div>
+                    
+                    <div class="security-item">
+                        <div class="security-info">
+                            <div class="security-title">手机验证</div>
+                            <div class="security-desc">开启后，敏感操作需通过手机验证码验证身份</div>
+                        </div>
+                        <div class="security-status">
+                            <span class="status-enabled">
+                                <i class="fas fa-check-circle"></i>
+                                已开启
+                            </span>
+                            <button class="btn btn-outline" id="togglePhoneVerify">
+                                关闭
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="security-item">
+                        <div class="security-info">
+                            <div class="security-title">邮箱验证</div>
+                            <div class="security-desc">开启后，登录异常时需通过邮箱验证码验证身份</div>
+                        </div>
+                        <div class="security-status">
+                            <span class="status-enabled">
+                                <i class="fas fa-check-circle"></i>
+                                已开启
+                            </span>
+                            <button class="btn btn-outline" id="toggleEmailVerify">
+                                关闭
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="security-item">
+                        <div class="security-info">
+                            <div class="security-title">登录保护</div>
+                            <div class="security-desc">开启后，陌生设备登录需验证身份</div>
+                        </div>
+                        <div class="security-status">
+                            <span class="status-disabled">
+                                <i class="fas fa-times-circle"></i>
+                                未开启
+                            </span>
+                            <button class="btn btn-outline" id="toggleLoginProtect">
+                                开启
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="security-item">
+                        <div class="security-info">
+                            <div class="security-title">登录日志</div>
+                            <div class="security-desc">查看最近登录记录，检测异常登录行为</div>
+                        </div>
+                        <button class="btn btn-outline" id="viewLoginLogBtn">
+                            <i class="fas fa-history"></i>
+                            查看
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 偏好配置表单 (默认隐藏) -->
+                <div class="form-container" id="preference-tab" style="display: none;">
+                    <div class="form-title">偏好配置</div>
+                    
+                    <div class="preference-group">
+                        <div class="preference-group-title">界面设置</div>
+                        
+                        <div class="preference-item">
+                            <label>
+                                主题风格
+                                <div class="preference-desc">选择系统显示主题</div>
+                            </label>
+                            <select class="form-control" style="width: 200px;">
+                                <option value="default">默认主题</option>
+                                <option value="dark">暗黑主题</option>
+                                <option value="blue">蓝色主题</option>
+                            </select>
+                        </div>
+                        
+                        <div class="preference-item">
+                            <label>
+                                首页显示
+                                <div class="preference-desc">设置登录后默认显示的页面</div>
+                            </label>
+                            <select class="form-control" style="width: 200px;">
+                                <option value="dashboard">仪表盘</option>
+                                <option value="report-list" selected>报表列表</option>
+                                <option value="data-source">数据源</option>
+                            </select>
+                        </div>
+                        
+                        <div class="preference-item">
+                            <label>
+                                <input type="checkbox" checked>
+                                显示快捷操作栏
+                                <div class="preference-desc">在首页显示常用功能快捷入口</div>
+                            </label>
+                        </div>
+                        
+                        <div class="preference-item">
+                            <label>
+                                <input type="checkbox" checked>
+                                记住上次访问位置
+                                <div class="preference-desc">下次登录时自动跳转到上次退出时的页面</div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="preference-group">
+                        <div class="preference-group-title">通知设置</div>
+                        
+                        <div class="preference-item">
+                            <label>
+                                <input type="checkbox" checked>
+                                报表分享通知
+                                <div class="preference-desc">收到报表分享时发送通知</div>
+                            </label>
+                        </div>
+                        
+                        <div class="preference-item">
+                            <label>
+                                <input type="checkbox" checked>
+                                数据刷新通知
+                                <div class="preference-desc">数据源或报表数据刷新完成时发送通知</div>
+                            </label>
+                        </div>
+                        
+                        <div class="preference-item">
+                            <label>
+                                <input type="checkbox">
+                                系统公告通知
+                                <div class="preference-desc">收到系统公告时发送通知</div>
+                            </label>
+                        </div>
+                        
+                        <div class="preference-item">
+                            <label>
+                                <input type="checkbox" checked>
+                                邮件通知
+                                <div class="preference-desc">重要通知同时发送邮件提醒</div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="preference-group">
+                        <div class="preference-group-title">数据设置</div>
+                        
+                        <div class="preference-item">
+                            <label>
+                                默认数据刷新频率
+                                <div class="preference-desc">新建报表默认的数据刷新频率</div>
+                            </label>
+                            <select class="form-control" style="width: 200px;">
+                                <option value="1h">每小时</option>
+                                <option value="4h" selected>每4小时</option>
+                                <option value="1d">每天</option>
+                            </select>
+                        </div>
+                        
+                        <div class="preference-item">
+                            <label>
+                                <input type="checkbox" checked>
+                                数据导出权限
+                                <div class="preference-desc">允许导出报表数据到本地文件</div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-footer">
+                        <button type="button" class="btn btn-outline">重置默认</button>
+                        <button type="button" class="btn btn-primary">保存设置</button>
+                    </div>
+                </div>
+                
+                <!-- 近期活动 (默认隐藏) -->
+                <div class="activity-list" id="activity-tab" style="display: none;">
+                    <div class="activity-title">近期活动</div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-action">创建了新报表「2023年Q4销售分析」</div>
+                            <div class="activity-time">2023-10-15 09:23:45</div>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-action">更新了数据源「MySQL销售数据库」的连接配置</div>
+                            <div class="activity-time">2023-10-14 16:45:12</div>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-share-alt"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-action">将报表「用户行为分析」分享给王鑫、陈丽</div>
+                            <div class="activity-time">2023-10-13 14:20:36</div>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-action">新增用户「赵华」并分配「查看者」角色</div>
+                            <div class="activity-time">2023-10-12 11:05:28</div>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-action">修改了账号密码</div>
+                            <div class="activity-time">2023-10-10 16:30:18</div>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-sign-in-alt"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-action">账号在Windows设备登录（IP: 10.128.3.45）</div>
+                            <div class="activity-time">2023-10-09 08:15:42</div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- 修改密码模态框 -->
+    <div class="modal-overlay" id="changePwdModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">修改密码</h3>
+                <button class="modal-close" id="closeChangePwdModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="changePwdForm">
+                    <div class="form-group">
+                        <label class="form-label" for="oldPwd">当前密码 <span style="color: #ff4d4f;">*</span></label>
+                        <input type="password" class="form-control" id="oldPwd" placeholder="请输入当前密码" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="newPwd">新密码 <span style="color: #ff4d4f;">*</span></label>
+                        <input type="password" class="form-control" id="newPwd" placeholder="请输入新密码" required>
+                        <span class="form-hint">密码长度至少8位，包含大小写字母、数字和特殊字符</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="confirmPwd">确认新密码 <span style="color: #ff4d4f;">*</span></label>
+                        <input type="password" class="form-control" id="confirmPwd" placeholder="请再次输入新密码" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelChangePwd">取消</button>
+                <button class="btn btn-primary" id="submitChangePwd">确认修改</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 登录日志模态框 -->
+    <div class="modal-overlay" id="loginLogModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">登录日志</h3>
+                <button class="modal-close" id="closeLoginLogModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="filter-bar" style="margin-bottom: 16px;">
+                    <div class="search-filter">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="搜索IP地址...">
+                    </div>
+                    <div class="filter-group">
+                        <div class="filter-item">
+                            <label>登录状态</label>
+                            <select>
+                                <option value="">全部状态</option>
+                                <option value="success">登录成功</option>
+                                <option value="fail">登录失败</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="user-list">
+                    <div class="table-header">
+                        <div>登录时间</div>
+                        <div>IP地址</div>
+                        <div>登录设备</div>
+                        <div>登录地点</div>
+                        <div>登录状态</div>
+                    </div>
+                    
+                    <div class="table-row">
+                        <div>2023-10-15 09:23:45</div>
+                        <div>10.128.3.45</div>
+                        <div>Windows 10 / Chrome 117.0</div>
+                        <div>北京市 阿里云</div>
+                        <div><span class="status-badge status-active">登录成功</span></div>
+                    </div>
+                    
+                    <div class="table-row">
+                        <div>2023-10-14 16:45:12</div>
+                        <div>10.128.3.45</div>
+                        <div>Windows 10 / Chrome 117.0</div>
+                        <div>北京市 阿里云</div>
+                        <div><span class="status-badge status-active">登录成功</span></div>
+                    </div>
+                    
+                    <div class="table-row">
+                        <div>2023-10-13 22:10:05</div>
+                        <div>220.181.5.67</div>
+                        <div>iOS 16.5 / Safari</div>
+                        <div>上海市 移动</div>
+                        <div><span class="status-badge status-active">登录成功</span></div>
+                    </div>
+                    
+                    <div class="table-row">
+                        <div>2023-10-13 22:08:32</div>
+                        <div>220.181.5.67</div>
+                        <div>iOS 16.5 / Safari</div>
+                        <div>上海市 移动</div>
+                        <div><span class="status-badge status-offline">登录失败</span></div>
+                    </div>
+                    
+                    <div class="table-row">
+                        <div>2023-10-12 08:15:42</div>
+                        <div>10.128.3.45</div>
+                        <div>Windows 10 / Edge 117.0</div>
+                        <div>北京市 阿里云</div>
+                        <div><span class="status-badge status-active">登录成功</span></div>
+                    </div>
+                </div>
+                
+                <div class="pagination" style="margin-top: 16px;">
+                    <div class="pagination-info">显示 1-5 条，共 32 条</div>
+                    <div class="pagination-controls">
+                        <button class="page-btn" disabled>
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="page-btn active">1</button>
+                        <button class="page-btn">2</button>
+                        <button class="page-btn">3</button>
+                        <button class="page-btn">4</button>
+                        <button class="page-btn">5</button>
+                        <button class="page-btn">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="closeLoginLog">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 菜单展开/折叠功能
+        document.getElementById('dataSourceMenu').addEventListener('click', function() {
+            document.getElementById('dataSourceSubmenu').classList.toggle('show');
+        });
+        
+        document.getElementById('reportMenu').addEventListener('click', function() {
+            document.getElementById('reportSubmenu').classList.toggle('show');
+        });
+        
+        // 子菜单激活状态切换
+        const submenuItems = document.querySelectorAll('.submenu-item');
+        submenuItems.forEach(item => {
+            item.addEventListener('click', function() {
+                const siblings = this.parentElement.querySelectorAll('.submenu-item');
+                siblings.forEach(sib => sib.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+        
+        // 个人中心选项卡切换
+        const profileTabs = document.querySelectorAll('.profile-tab');
+        const tabContents = ['basic-info-tab', 'security-setting-tab', 'preference-tab', 'activity-tab'];
+        
+        profileTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // 切换选项卡激活状态
+                profileTabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                // 切换内容区域显示
+                const tabName = this.getAttribute('data-tab');
+                tabContents.forEach(contentId => {
+                    const content = document.getElementById(contentId);
+                    if (contentId === `${tabName}-tab`) {
+                        content.style.display = 'block';
+                    } else {
+                        content.style.display = 'none';
+                    }
+                });
+            });
+        });
+        
+        // 模态框相关功能
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function hideModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+            document.body.style.overflow = '';
+        }
+        
+        // 修改密码模态框
+        document.getElementById('changePwdBtn').addEventListener('click', function() {
+            showModal('changePwdModal');
+        });
+        
+        document.getElementById('closeChangePwdModal').addEventListener('click', function() {
+            hideModal('changePwdModal');
+        });
+        
+        document.getElementById('cancelChangePwd').addEventListener('click', function() {
+            hideModal('changePwdModal');
+        });
+        
+        document.getElementById('submitChangePwd').addEventListener('click', function() {
+            // 密码验证逻辑
+            const oldPwd = document.getElementById('oldPwd').value;
+            const newPwd = document.getElementById('newPwd').value;
+            const confirmPwd = document.getElementById('confirmPwd').value;
+            
+            if (!oldPwd || !newPwd || !confirmPwd) {
+                alert('请填写完整密码信息');
+                return;
+            }
+            
+            if (newPwd !== confirmPwd) {
+                alert('两次输入的新密码不一致');
+                return;
+            }
+            
+            if (newPwd.length < 8) {
+                alert('密码长度至少8位');
+                return;
+            }
+            
+            // 密码修改成功
+            alert('密码修改成功！请重新登录');
+            hideModal('changePwdModal');
+            document.getElementById('changePwdForm').reset();
+        });
+        
+        // 登录日志模态框
+        document.getElementById('viewLoginLogBtn').addEventListener('click', function() {
+            showModal('loginLogModal');
+        });
+        
+        document.getElementById('closeLoginLogModal').addEventListener('click', function() {
+            hideModal('loginLogModal');
+        });
+        
+        document.getElementById('closeLoginLog').addEventListener('click', function() {
+            hideModal('loginLogModal');
+        });
+        
+        // 安全设置开关切换
+        document.getElementById('togglePhoneVerify').addEventListener('click', function() {
+            const statusText = this.parentElement.querySelector('span');
+            if (statusText.classList.contains('status-enabled')) {
+                statusText.className = 'status-disabled';
+                statusText.innerHTML = '<i class="fas fa-times-circle"></i> 未开启';
+                this.textContent = '开启';
+                alert('手机验证已关闭，账号安全性将降低');
+            } else {
+                statusText.className = 'status-enabled';
+                statusText.innerHTML = '<i class="fas fa-check-circle"></i> 已开启';
+                this.textContent = '关闭';
+                alert('手机验证已开启');
+            }
+        });
+        
+        document.getElementById('toggleEmailVerify').addEventListener('click', function() {
+            const statusText = this.parentElement.querySelector('span');
+            if (statusText.classList.contains('status-enabled')) {
+                statusText.className = 'status-disabled';
+                statusText.innerHTML = '<i class="fas fa-times-circle"></i> 未开启';
+                this.textContent = '开启';
+                alert('邮箱验证已关闭，账号安全性将降低');
+            } else {
+                statusText.className = 'status-enabled';
+                statusText.innerHTML = '<i class="fas fa-check-circle"></i> 已开启';
+                this.textContent = '关闭';
+                alert('邮箱验证已开启');
+            }
+        });
+        
+        document.getElementById('toggleLoginProtect').addEventListener('click', function() {
+            const statusText = this.parentElement.querySelector('span');
+            if (statusText.classList.contains('status-disabled')) {
+                statusText.className = 'status-enabled';
+                statusText.innerHTML = '<i class="fas fa-check-circle"></i> 已开启';
+                this.textContent = '关闭';
+                alert('登录保护已开启，陌生设备登录需验证身份');
+            } else {
+                statusText.className = 'status-disabled';
+                statusText.innerHTML = '<i class="fas fa-times-circle"></i> 未开启';
+                this.textContent = '开启';
+                alert('登录保护已关闭，账号安全性将降低');
+            }
+        });
+        
+        // 基本信息表单提交
+        document.getElementById('basicInfoForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('个人信息修改保存成功！');
+        });
+        
+        document.getElementById('cancelBasicInfo').addEventListener('click', function() {
+            // 重置表单为初始值
+            document.getElementById('fullName').value = '张磊';
+            document.getElementById('nickName').value = '磊哥';
+            document.getElementById('email').value = 'zhanglei@example.com';
+            document.getElementById('phone').value = '138****1234';
+            document.getElementById('department').value = '技术部';
+            document.getElementById('jobTitle').value = '技术架构师';
+            document.getElementById('signature').value = '专注数据可视化与BI系统建设';
+        });
+        
+        // 编辑个人信息按钮（滚动到表单区域）
+        document.getElementById('editProfileBtn').addEventListener('click', function() {
+            // 切换到基本信息选项卡
+            profileTabs[0].click();
+            
+            // 滚动到表单区域
+            document.getElementById('basic-info-tab').scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+        
+        // 头像上传按钮
+        document.querySelector('.avatar-upload-btn').addEventListener('click', function() {
+            alert('请选择要上传的头像图片（支持JPG、PNG格式，建议尺寸200x200px）');
+            // 实际应用中这里应该触发文件选择对话框
+        });
+    </script>
+</body>
+</html>
