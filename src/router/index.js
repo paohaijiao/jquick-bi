@@ -47,6 +47,11 @@ const routes = [
     path: '/permission',
     name: 'permissionPage',
     component: () => import('../views/permission.vue')
+  },
+  {
+    path: '/tenant',
+    name: 'tenantPage',
+    component: () => import('../views/Tenant.vue')
   }
 ]
 
