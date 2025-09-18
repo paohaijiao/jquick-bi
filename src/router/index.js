@@ -42,6 +42,11 @@ const routes = [
     path: '/myReport',
     name: 'myReportPage',
     component: () => import('../views/myReport.vue')
+  },
+  {
+    path: '/permission',
+    name: 'permissionPage',
+    component: () => import('../views/permission.vue')
   }
 ]
 
