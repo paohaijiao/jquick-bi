@@ -62,6 +62,11 @@ const routes = [
     path: '/userCenter',
     name: 'userCenterPage',
     component: () => import('../views/UserCenter.vue')
+  },
+  {
+    path: '/message',
+    name: 'messagePage',
+    component: () => import('../views/MessagePage.vue')
   }
 ]
 
