@@ -57,6 +57,11 @@ const routes = [
     path: '/userManage',
     name: 'userManagePage',
     component: () => import('../views/UserManage.vue')
+  },
+  {
+    path: '/userCenter',
+    name: 'userCenterPage',
+    component: () => import('../views/UserCenter.vue')
   }
 ]
 
