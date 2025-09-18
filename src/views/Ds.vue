@@ -8,7 +8,7 @@
       </div>
       <div class="header-actions">
         <div class="search-box">
-          <i class="fas fa-search"></i>
+             <el-icon><Search /></el-icon>
           <input type="text" placeholder="搜索报表、数据源或文档...">
         </div>
         <div class="notification-icon">
@@ -148,7 +148,7 @@
             </div>
           </div>
           <div class="search-filter">
-            <i class="fas fa-search"></i>
+            <el-icon><Search /></el-icon>
             <input type="text" placeholder="搜索数据源名称..." v-model="filter.keyword">
           </div>
         </div>

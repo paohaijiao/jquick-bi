@@ -8,7 +8,7 @@
       </div>
       <div class="header-actions">
         <div class="search-box">
-          <i class="fas fa-search"></i>
+            <el-icon><search /></el-icon>
           <input type="text" placeholder="搜索报表、数据源或文档...">
         </div>
         <div class="notification-icon">
@@ -158,7 +158,7 @@
           <div class="doc-section-content">
             <div class="doc-item">
               <div class="doc-item-icon">
-                <i class="fas fa-file-alt"></i>
+                <el-icon><Files /></el-icon>
               </div>
               <div class="doc-item-content">
                 <div class="doc-item-title">JQuick BI 简介</div>
@@ -173,7 +173,7 @@
             
             <div class="doc-item">
               <div class="doc-item-icon">
-                <i class="fas fa-user-plus"></i>
+                   <el-icon><User /></el-icon>
               </div>
               <div class="doc-item-content">
                 <div class="doc-item-title">注册与登录</div>
@@ -188,7 +188,7 @@
             
             <div class="doc-item">
               <div class="doc-item-icon">
-                <i class="fas fa-clipboard-check"></i>
+                <el-icon><PieChart /></el-icon>
               </div>
               <div class="doc-item-content">
                 <div class="doc-item-title">快速创建第一个报表</div>
