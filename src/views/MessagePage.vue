@@ -25,83 +25,12 @@
     
     <!-- 主内容区 -->
     <div class="main-content">
-      <!-- 左侧BI菜单 -->
-      <aside class="sidebar">
-        <div class="menu-section">
-          <div class="menu-section-title">主导航</div>
-          <div class="menu-item" :class="{ active: activeMenu === 'home' }" @click="setActiveMenu('home')">
-            <i class="fas fa-home"></i>
-            <span>首页</span>
-          </div>
-          <div class="menu-item" @click="toggleSubmenu('datasource')">
-            <i class="fas fa-database"></i>
-            <span>数据源</span>
-            <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
-          </div>
-          <div class="submenu" :class="{ show: showSubmenu.datasource }">
-            <div class="submenu-item" :class="{ active: activeSubmenu.datasource === 'list' }" @click="setActiveSubmenu('datasource', 'list')">数据源列表</div>
-            <div class="submenu-item" :class="{ active: activeSubmenu.datasource === 'new' }" @click="setActiveSubmenu('datasource', 'new')">新增数据源</div>
-            <div class="submenu-item" :class="{ active: activeSubmenu.datasource === 'permission' }" @click="setActiveSubmenu('datasource', 'permission')">数据源权限</div>
-          </div>
-          <div class="menu-item" @click="toggleSubmenu('report')">
-            <i class="fas fa-file-alt"></i>
-            <span>报表</span>
-            <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
-          </div>
-          <div class="submenu" :class="{ show: showSubmenu.report }">
-            <div class="submenu-item" :class="{ active: activeSubmenu.report === 'my' }" @click="setActiveSubmenu('report', 'my')">我的报表</div>
-            <div class="submenu-item" :class="{ active: activeSubmenu.report === 'shared' }" @click="setActiveSubmenu('report', 'shared')">共享报表</div>
-            <div class="submenu-item" :class="{ active: activeSubmenu.report === 'favorite' }" @click="setActiveSubmenu('report', 'favorite')">收藏报表</div>
-            <div class="submenu-item" :class="{ active: activeSubmenu.report === 'recycle' }" @click="setActiveSubmenu('report', 'recycle')">回收站</div>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'dashboard' }" @click="setActiveMenu('dashboard')">
-            <i class="fas fa-chart-pie"></i>
-            <span>仪表盘</span>
-            <span class="menu-badge">5</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'dataset' }" @click="setActiveMenu('dataset')">
-            <i class="fas fa-cubes"></i>
-            <span>数据集</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'message' }" @click="setActiveMenu('message')">
-            <i class="fas fa-envelope"></i>
-            <span>站内消息</span>
-            <span class="menu-badge">{{ unreadCount }}</span>
-          </div>
-        </div>
-        
-        <div class="menu-section">
-          <div class="menu-section-title">系统管理</div>
-          <div class="menu-item" :class="{ active: activeMenu === 'user' }" @click="setActiveMenu('user')">
-            <i class="fas fa-users"></i>
-            <span>用户管理</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'role' }" @click="setActiveMenu('role')">
-            <i class="fas fa-user-shield"></i>
-            <span>角色权限</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'log' }" @click="setActiveMenu('log')">
-            <i class="fas fa-history"></i>
-            <span>操作日志</span>
-          </div>
-        </div>
-        
-        <div class="menu-section">
-          <div class="menu-section-title">帮助中心</div>
-          <div class="menu-item" :class="{ active: activeMenu === 'doc' }" @click="setActiveMenu('doc')">
-            <i class="fas fa-question-circle"></i>
-            <span>帮助文档</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'video' }" @click="setActiveMenu('video')">
-            <i class="fas fa-play-circle"></i>
-            <span>视频教程</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'service' }" @click="setActiveMenu('service')">
-            <i class="fas fa-comment-dots"></i>
-            <span>联系客服</span>
-          </div>
-        </div>
-      </aside>
+      <SidebarMenu 
+        :active-menu="activeMenu" 
+        :unread-count="unreadCount"
+        @menu-click="setActiveMenu"
+        @submenu-click="setActiveSubmenu"
+      />
       
       <!-- 右侧消息列表区域 -->
       <main class="content-area">
@@ -252,7 +181,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-
+import SidebarMenu from '@/components/SidebarMenu.vue';
 // 用户信息
 const userName = ref('张磊');
 const userNameInitials = computed(() => {
@@ -261,10 +190,6 @@ const userNameInitials = computed(() => {
 
 // 菜单状态
 const activeMenu = ref('message');
-const showSubmenu = ref({
-  datasource: false,
-  report: false
-});
 const activeSubmenu = ref({
   datasource: '',
   report: ''
@@ -424,11 +349,11 @@ const filteredMessages = computed(() => {
 const setActiveMenu = (menu) => {
   activeMenu.value = menu;
 };
-
+/**
 const toggleSubmenu = (menu) => {
   showSubmenu.value[menu] = !showSubmenu.value[menu];
 };
-
+**/
 const setActiveSubmenu = (parent, sub) => {
   activeSubmenu.value[parent] = sub;
 };
