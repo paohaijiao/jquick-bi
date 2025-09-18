@@ -37,6 +37,11 @@ const routes = [
     path: '/ds',
     name: 'DsPage',
     component: () => import('../views/Ds.vue')
+  },
+  {
+    path: '/myReport',
+    name: 'myReportPage',
+    component: () => import('../views/myReport.vue')
   }
 ]
 
