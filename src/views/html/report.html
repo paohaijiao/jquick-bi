@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JQuick BI 设计器</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #ff8326;
+            --secondary-color: #fff5eb;
+            --border-color: #ffd5b8;
+            --text-color: #2d3e50;
+            --light-bg: #f9f9f9;
+            --card-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            --sidebar-width: 260px;
+            --header-height: 60px;
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            color: var(--text-color);
+            background-color: var(--light-bg);
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        /* 顶部导航栏 */
+        .header {
+            height: var(--header-height);
+            background-color: white;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            z-index: 10;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            color: var(--primary-color);
+            font-size: 22px;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            font-size: 26px;
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .action-btn {
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition);
+        }
+        
+        .action-btn:hover {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+        }
+        
+        /* 个人中心样式 */
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 20px;
+            transition: var(--transition);
+        }
+        
+        .user-profile:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        /* 主内容区 */
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        /* 左侧菜单 */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: white;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            height: calc(100vh - var(--header-height));
+            transition: var(--transition);
+            z-index: 5;
+        }
+        
+        .menu-section {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .menu-section-title {
+            padding: 0 20px;
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #666;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .menu-item:hover, .menu-item.active {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+        }
+        
+        .menu-item i {
+            width: 20px;
+            margin-right: 12px;
+            text-align: center;
+        }
+        
+        /* 工作区 */
+        .workspace {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            background-color: var(--light-bg);
+        }
+        
+        .workspace-header {
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .workspace-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .workspace-description {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .canvas-container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            padding: 24px;
+            min-height: 500px;
+        }
+        
+        /* 右侧属性面板 */
+        .properties-panel {
+            width: 300px;
+            background-color: white;
+            border-left: 1px solid var(--border-color);
+            padding: 15px;
+            overflow-y: auto;
+            height: calc(100vh - var(--header-height));
+        }
+        
+        .panel-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        /* 模态框样式 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: var(--transition);
+        }
+        
+        .modal-overlay.active .modal {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .modal-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #666;
+            cursor: pointer;
+        }
+        
+        .modal-body {
+            padding: 24px;
+        }
+        
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+        }
+        
+        /* 组件列表样式 */
+        .components-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+        
+        .component-item {
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .component-item:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        
+        .component-item i {
+            font-size: 24px;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+        }
+        
+        /* 表单控件样式 */
+        .form-control {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(255, 131, 38, 0.2);
+        }
+        
+        .setting-group {
+            margin-bottom: 25px;
+        }
+        
+        .setting-title {
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-color);
+        }
+        
+        .setting-item {
+            margin-bottom: 15px;
+        }
+        
+        .setting-item label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .color-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        
+        .color-box {
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: var(--transition);
+        }
+        
+        .color-box.selected {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(255, 131, 38, 0.2);
+        }
+        
+        .filter-item {
+            margin-bottom: 15px;
+        }
+        
+        .filter-item label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .data-source-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .data-source-item:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 1100px) {
+            .sidebar {
+                width: 240px;
+            }
+            
+            .properties-panel {
+                width: 260px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                position: absolute;
+                z-index: 100;
+                transform: translateX(-100%);
+                transition: transform 0.3s;
+                width: 80%;
+                max-width: 300px;
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .properties-panel {
+                position: absolute;
+                right: 0;
+                left: auto;
+                transform: translateX(100%);
+                transition: transform 0.3s;
+                width: 80%;
+                max-width: 300px;
+                z-index: 100;
+            }
+            
+            .properties-panel.active {
+                transform: translateX(0);
+            }
+            
+            .mobile-menu-toggle {
+                display: block !important;
+            }
+        }
+        
+        /* 移动端菜单切换按钮 */
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--primary-color);
+            cursor: pointer;
+            margin-right: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部导航 -->
+        <header class="header">
+            <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="logo">
+                <i class="fas fa-chart-line"></i>
+                <span>JQuick BI 设计器</span>
+            </div>
+            <div class="header-actions">
+                <button class="action-btn" id="openComponentsModal">
+                    <i class="fas fa-cubes"></i>组件
+                </button>
+                <button class="action-btn" id="openFiltersModal">
+                    <i class="fas fa-filter"></i>筛选器
+                </button>
+                <button class="action-btn" id="openDataSourceModal">
+                    <i class="fas fa-database"></i>数据源
+                </button>
+                <button class="action-btn" id="openSettingsModal">
+                    <i class="fas fa-cog"></i>设置
+                </button>
+                <!-- 个人中心 -->
+                <div class="user-profile" id="userProfile">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <span>张经理</span>
+                </div>
+            </div>
+        </header>
+        
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <!-- 左侧菜单 -->
+            <aside class="sidebar" id="sidebar">
+                <div class="menu-section">
+                    <div class="menu-section-title">报表管理</div>
+                    <div class="menu-item active">
+                        <i class="fas fa-file-alt"></i>
+                        <span>销售仪表板</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-file-alt"></i>
+                        <span>区域分析</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-file-alt"></i>
+                        <span>产品业绩</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-file-alt"></i>
+                        <span>客户分析</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-plus"></i>
+                        <span>新建报表</span>
+                    </div>
+                </div>
+                
+                <div class="menu-section">
+                    <div class="menu-section-title">资源</div>
+                    <div class="menu-item">
+                        <i class="fas fa-image"></i>
+                        <span>图片库</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-font"></i>
+                        <span>样式库</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-template"></i>
+                        <span>模板</span>
+                    </div>
+                </div>
+                
+                <div class="menu-section">
+                    <div class="menu-section-title">系统</div>
+                    <div class="menu-item">
+                        <i class="fas fa-user-cog"></i>
+                        <span>个人设置</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-users-cog"></i>
+                        <span>团队管理</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-history"></i>
+                        <span>操作日志</span>
+                    </div>
+                </div>
+            </aside>
+            
+            <!-- 工作区 -->
+            <div class="workspace">
+                <div class="workspace-header">
+                    <div>
+                        <h1 class="workspace-title">销售仪表板</h1>
+                        <p class="workspace-description">拖放组件到画布中创建您的报表，使用右侧面板编辑属性</p>
+                    </div>
+                </div>
+                
+                <div class="canvas-container" id="canvas">
+                    <!-- 画布内容将在这里动态生成 -->
+                    <div class="drop-zone" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 400px; border: 2px dashed var(--border-color); border-radius: 8px; color: #999;">
+                        <i class="fas fa-plus-circle" style="font-size: 36px; margin-bottom: 15px;"></i>
+                        <p>点击顶部"组件"按钮添加元素到画布</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 右侧属性面板 -->
+            <div class="properties-panel" id="propertiesPanel">
+                <div class="panel-title">
+                    <i class="fas fa-sliders-h"></i>属性设置
+                </div>
+                
+                <div class="setting-group">
+                    <div class="setting-title">基本信息</div>
+                    <div class="setting-item">
+                        <label>名称</label>
+                        <input type="text" class="form-control" value="销售仪表板">
+                    </div>
+                    <div class="setting-item">
+                        <label>描述</label>
+                        <textarea class="form-control" rows="3">销售数据分析仪表板</textarea>
+                    </div>
+                    <div class="setting-item">
+                        <label>所有者</label>
+                        <input type="text" class="form-control" value="张经理" readonly>
+                    </div>
+                    <div class="setting-item">
+                        <label>创建时间</label>
+                        <input type="text" class="form-control" value="2023-06-15 14:30" readonly>
+                    </div>
+                </div>
+                
+                <div class="setting-group">
+                    <div class="setting-title">样式设置</div>
+                    <div class="setting-item">
+                        <label>背景颜色</label>
+                        <div class="color-options">
+                            <div class="color-box selected" style="background-color: #fff;"></div>
+                            <div class="color-box" style="background-color: #f5f5f5;"></div>
+                            <div class="color-box" style="background-color: #e8f4f8;"></div>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label>画布尺寸</label>
+                        <select class="form-control">
+                            <option>自适应</option>
+                            <option>A4 (横向)</option>
+                            <option>A4 (纵向)</option>
+                            <option>自定义</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="setting-group">
+                    <div class="setting-title">权限设置</div>
+                    <div class="setting-item">
+                        <label>查看权限</label>
+                        <select class="form-control">
+                            <option>仅自己可见</option>
+                            <option>团队可见</option>
+                            <option>公司可见</option>
+                            <option>公开</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <label>编辑权限</label>
+                        <select class="form-control">
+                            <option>仅自己可编辑</option>
+                            <option>指定人员</option>
+                            <option>团队可编辑</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 个人中心模态框 -->
+    <div class="modal-overlay" id="userProfileModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">个人中心</div>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+                    <div class="user-avatar" style="width: 60px; height: 60px; font-size: 24px;">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 18px; font-weight: 600;">张经理</div>
+                        <div style="color: #666;">销售部 | 经理</div>
+                    </div>
+                </div>
+                
+                <div class="setting-group">
+                    <div class="setting-item">
+                        <label>姓名</label>
+                        <input type="text" class="form-control" value="张明">
+                    </div>
+                    <div class="setting-item">
+                        <label>邮箱</label>
+                        <input type="email" class="form-control" value="zhang.ming@example.com">
+                    </div>
+                    <div class="setting-item">
+                        <label>电话</label>
+                        <input type="tel" class="form-control" value="13800138000">
+                    </div>
+                    <div class="setting-item">
+                        <label>部门</label>
+                        <input type="text" class="form-control" value="销售部" readonly>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline modal-cancel">取消</button>
+                <button class="btn btn-primary">保存修改</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 组件模态框 -->
+    <div class="modal-overlay" id="componentsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">添加组件</div>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="components-grid">
+                    <div class="component-item" data-type="chart">
+                        <i class="fas fa-chart-line"></i>
+                        <div>图表</div>
+                    </div>
+                    <div class="component-item" data-type="table">
+                        <i class="fas fa-table"></i>
+                        <div>表格</div>
+                    </div>
+                    <div class="component-item" data-type="text">
+                        <i class="fas fa-font"></i>
+                        <div>文本</div>
+                    </div>
+                    <div class="component-item" data-type="image">
+                        <i class="fas fa-image"></i>
+                        <div>图片</div>
+                    </div>
+                    <div class="component-item" data-type="section">
+                        <i class="fas fa-border-all"></i>
+                        <div>分区</div>
+                    </div>
+                    <div class="component-item" data-type="pagebreak">
+                        <i class="fas fa-file-page-break"></i>
+                        <div>分页符</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline modal-cancel">取消</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 筛选器模态框 -->
+    <div class="modal-overlay" id="filtersModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">筛选器设置</div>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="filter-item">
+                    <label>时间范围</label>
+                    <select class="form-control">
+                        <option>近7天</option>
+                        <option>近30天</option>
+                        <option>本月</option>
+                        <option>上月</option>
+                        <option>自定义</option>
+                    </select>
+                </div>
+                
+                <div class="filter-item" style="margin-top: 15px;">
+                    <label>产品类别</label>
+                    <select class="form-control">
+                        <option>全部</option>
+                        <option>电子产品</option>
+                        <option>服装</option>
+                        <option>食品</option>
+                    </select>
+                </div>
+                
+                <div class="filter-item" style="margin-top: 15px;">
+                    <label>销售区域</label>
+                    <select class="form-control">
+                        <option>全部</option>
+                        <option>华东</option>
+                        <option>华北</option>
+                        <option>华南</option>
+                        <option>西部</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline modal-cancel">取消</button>
+                <button class="btn btn-primary">应用筛选</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 数据源模态框 -->
+    <div class="modal-overlay" id="dataSourceModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">数据源管理</div>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="data-source-item">
+                    <i class="fas fa-database"></i>
+                    <div>
+                        <div>销售订单数据</div>
+                        <div style="font-size: 12px; color: #666;">最后更新: 2023-06-15</div>
+                    </div>
+                </div>
+                
+                <div class="data-source-item" style="margin-top: 10px;">
+                    <i class="fas fa-database"></i>
+                    <div>
+                        <div>客户信息表</div>
+                        <div style="font-size: 12px; color: #666;">最后更新: 2023-06-14</div>
+                    </div>
+                </div>
+                
+                <div class="data-source-item" style="margin-top: 10px;">
+                    <i class="fas fa-database"></i>
+                    <div>
+                        <div>产品目录</div>
+                        <div style="font-size: 12px; color: #666;">最后更新: 2023-06-10</div>
+                    </div>
+                </div>
+                
+                <button class="btn btn-outline" style="margin-top: 20px; width: 100%;">
+                    <i class="fas fa-plus"></i> 添加数据源
+                </button>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline modal-cancel">关闭</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 设置模态框 -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">报表设置</div>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-item">
+                    <label>页面尺寸</label>
+                    <select class="form-control">
+                        <option>A4</option>
+                        <option>A3</option>
+                        <option>自定义</option>
+                    </select>
+                </div>
+                
+                <div class="setting-item" style="margin-top: 15px;">
+                    <label>背景设置</label>
+                    <select class="form-control">
+                        <option>白色</option>
+                        <option>浅色网格</option>
+                        <option>深色网格</option>
+                    </select>
+                </div>
+                
+                <div class="setting-item" style="margin-top: 15px;">
+                    <label>自动刷新</label>
+                    <select class="form-control">
+                        <option>关闭</option>
+                        <option>每5分钟</option>
+                        <option>每30分钟</option>
+                        <option>每小时</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline modal-cancel">取消</button>
+                <button class="btn btn-primary">保存设置</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 模态框控制
+        const modalTriggers = {
+            'openComponentsModal': 'componentsModal',
+            'openFiltersModal': 'filtersModal',
+            'openDataSourceModal': 'dataSourceModal',
+            'openSettingsModal': 'settingsModal',
+            'userProfile': 'userProfileModal'
+        };
+        
+        // 打开模态框
+        Object.keys(modalTriggers).forEach(triggerId => {
+            document.getElementById(triggerId).addEventListener('click', () => {
+                document.getElementById(modalTriggers[triggerId]).classList.add('active');
+            });
+        });
+        
+        // 关闭模态框
+        document.querySelectorAll('.modal-close, .modal-cancel').forEach(elem => {
+            elem.addEventListener('click', () => {
+                document.querySelectorAll('.modal-overlay').forEach(modal => {
+                    modal.classList.remove('active');
+                });
+            });
+        });
+        
+        // 点击模态框外部关闭
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    overlay.classList.remove('active');
+                }
+            });
+        });
+        
+        // 移动端菜单切换
+        document.getElementById('mobileMenuToggle').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('active');
+        });
+        
+        // 组件添加功能
+        document.querySelectorAll('.component-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const type = item.getAttribute('data-type');
+                addComponentToCanvas(type);
+                document.getElementById('componentsModal').classList.remove('active');
+            });
+        });
+        
+        // 添加组件到画布
+        function addComponentToCanvas(type) {
+            const canvas = document.getElementById('canvas');
+            // 清除初始提示
+            if (canvas.querySelector('.drop-zone')) {
+                canvas.innerHTML = '';
+            }
+            
+            const component = document.createElement('div');
+            component.className = 'canvas-component';
+            component.style.margin = '15px';
+            component.style.padding = '15px';
+            component.style.border = '1px solid var(--border-color)';
+            component.style.borderRadius = '8px';
+            component.style.backgroundColor = 'white';
+            
+            // 为组件添加点击选中效果
+            component.addEventListener('click', () => {
+                document.querySelectorAll('.canvas-component').forEach(c => {
+                    c.style.borderColor = 'var(--border-color)';
+                    c.style.boxShadow = 'none';
+                });
+                component.style.borderColor = 'var(--primary-color)';
+                component.style.boxShadow = '0 0 0 2px rgba(255, 131, 38, 0.2)';
+            });
+            
+            switch(type) {
+                case 'chart':
+                    component.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <div><i class="fas fa-chart-line" style="color: var(--primary-color);"></i> 图表组件</div>
+                            <div style="color: #999; font-size: 12px;">双击编辑</div>
+                        </div>
+                        <div style="height: 200px; background-color: #f9f9f9; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #666;">
+                            图表预览
+                        </div>
+                    `;
+                    break;
+                case 'table':
+                    component.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <div><i class="fas fa-table" style="color: var(--primary-color);"></i> 表格组件</div>
+                            <div style="color: #999; font-size: 12px;">双击编辑</div>
+                        </div>
+                        <div style="height: 200px; background-color: #f9f9f9; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #666;">
+                            表格预览
+                        </div>
+                    `;
+                    break;
+                default:
+                    component.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <div><i class="${getComponentIcon(type)}" style="color: var(--primary-color);"></i> ${getComponentName(type)}</div>
+                            <div style="color: #999; font-size: 12px;">双击编辑</div>
+                        </div>
+                        <div style="height: 100px; background-color: #f9f9f9; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #666;">
+                            ${getComponentName(type)} 内容
+                        </div>
+                    `;
+            }
+            
+            canvas.appendChild(component);
+        }
+        
+        // 辅助函数：获取组件图标
+        function getComponentIcon(type) {
+            const icons = {
+                'text': 'fas fa-font',
+                'image': 'fas fa-image',
+                'section': 'fas fa-border-all',
+                'pagebreak': 'fas fa-file-page-break'
+            };
+            return icons[type] || 'fas fa-cube';
+        }
+        
+        // 辅助函数：获取组件名称
+        function getComponentName(type) {
+            const names = {
+                'text': '文本组件',
+                'image': '图片组件',
+                'section': '分区组件',
+                'pagebreak': '分页符'
+            };
+            return names[type] || '组件';
+        }
+        
+        // 颜色选择功能
+        document.querySelectorAll('.color-box').forEach(box => {
+            box.addEventListener('click', () => {
+                // 移除同组中其他颜色框的选中状态
+                box.parentElement.querySelectorAll('.color-box').forEach(b => {
+                    b.classList.remove('selected');
+                });
+                // 添加当前颜色框的选中状态
+                box.classList.add('selected');
+            });
+        });
+    </script>
+</body>
+</html>
