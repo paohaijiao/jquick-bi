@@ -22,6 +22,10 @@
         <button class="action-btn" @click="showSettingsModal = true">
           <i class="fas fa-cog"></i>设置
         </button>
+        <!-- 新增保存按钮 -->
+        <button class="action-btn btn-primary" @click="handleSave">
+          <i class="fas fa-save"></i>保存
+        </button>
         <!-- 个人中心 -->
         <div class="user-profile" @click="showUserProfileModal = true">
           <div class="user-avatar">
@@ -98,7 +102,7 @@
         <div class="workspace-header">
           <div>
             <h1 class="workspace-title">{{ reportInfo.name }}</h1>
-            <p class="workspace-description">拖放组件到画布中创建您的报表，使用右侧面板编辑属性</p>
+            <p class="workspace-description">拖放组件到画布中创建您的报表，使用右侧面板面板编辑属性</p>
           </div>
         </div>
         
@@ -537,6 +541,11 @@
         </div>
       </div>
     </div>
+    
+    <!-- 保存成功提示 -->
+    <div v-if="showSaveSuccess" class="save-success-toast">
+      保存成功！
+    </div>
   </div>
 </template>
 <script >
@@ -561,6 +570,8 @@ const showDataSourceModal = ref(false);
 const showSettingsModal = ref(false);
 const showComponentEditModal = ref(false);
 const editingComponent = ref(null);
+// 新增保存成功提示状态
+const showSaveSuccess = ref(false);
 
 // 可用组件列表
 const availableComponents = ref([
@@ -569,7 +580,7 @@ const availableComponents = ref([
   { id: 'comp-text', type: 'text', name: '文本', icon: 'fas fa-font' },
   { id: 'comp-image', type: 'image', name: '图片', icon: 'fas fa-image' },
   { id: 'comp-section', type: 'section', name: '分区', icon: 'fas fa-border-all' },
-  { id: 'comp-pagebreak', type: 'pagebreak', name: '分页符', icon: 'fas fa-file-page-break' }
+  { id: 'comp-pagebreak', type: 'pagebreak', name: '分页符符', icon: 'fas fa-file-page-break' }
 ]);
 
 // 报表信息
@@ -692,7 +703,7 @@ const selectedComponent = computed(() => {
 
 // 处理画布变化
 const handleCanvasChange = () => {
-  saveToLocalStorage();
+  // 移除了自动保存，改为手动保存
 };
 
 // 更新组件属性
@@ -700,7 +711,7 @@ const updateComponentProperty = (id, property, value) => {
   const component = canvasComponents.value.find(comp => comp.id === id);
   if (component) {
     component[property] = value;
-    saveToLocalStorage();
+    // 移除了自动保存，改为手动保存
   }
 };
 
@@ -721,7 +732,6 @@ const saveComponentEdit = () => {
     if (index !== -1) {
       canvasComponents.value.splice(index, 1, editingComponent.value);
       selectComponent(editingComponent.value.id);
-      saveToLocalStorage();
     }
     showComponentEditModal.value = false;
   }
@@ -731,20 +741,19 @@ const saveComponentEdit = () => {
 const changeBgColor = (color) => {
   reportStyle.bgColor = color;
   document.querySelector('.canvas-container').style.backgroundColor = color;
-  saveReportSettings();
+  // 移除了自动保存，改为手动保存
 };
 
 // 应用筛选器
 const applyFilters = () => {
   showFiltersModal.value = false;
-  saveToLocalStorage();
-  // 这里可以添加筛选器应用逻辑
+  // 移除了自动保存，改为手动保存
 };
 
 // 保存用户信息
 const saveUserInfo = () => {
   showUserProfileModal.value = false;
-  saveToLocalStorage();
+  // 移除了自动保存，改为手动保存
 };
 
 // 选择数据源
@@ -754,31 +763,40 @@ const selectDataSource = (id) => {
 
 // 添加数据源
 const addDataSource = () => {
-  // 这里可以添加新数据源逻辑
   const newId = Math.max(...dataSources.map(s => s.id), 0) + 1;
   dataSources.push({
     id: newId,
     name: '新数据源',
     lastUpdate: new Date().toLocaleDateString().replace(/\//g, '-')
   });
-  saveToLocalStorage();
+  // 移除了自动保存，改为手动保存
 };
 
 // 保存报表设置
 const saveReportSettings = () => {
   showSettingsModal.value = false;
-  saveToLocalStorage();
+  // 移除了自动保存，改为手动保存
 };
 
 // 新建报表
 const newReport = () => {
-  if (confirm('确定要新建报表吗？当前报表将被清空。')) {
+  if (confirm('确定要新建报表报表吗？当前报表将被清空。')) {
     reportInfo.name = '新报表';
     reportInfo.description = '';
     canvasComponents.value = [];
     selectedComponentId.value = null;
-    saveToLocalStorage();
+    // 移除了自动保存，改为手动保存
   }
+};
+
+// 新增：手动保存函数
+const handleSave = () => {
+  saveToLocalStorage();
+  // 显示保存成功提示
+  showSaveSuccess.value = true;
+  setTimeout(() => {
+    showSaveSuccess.value = false;
+  }, 2000);
 };
 
 // 保存数据到本地存储
@@ -877,6 +895,16 @@ body {
 .action-btn:hover {
   background-color: var(--secondary-color);
   color: var(--primary-color);
+}
+
+/* 新增：保存按钮样式 */
+.action-btn.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.action-btn.btn-primary:hover {
+  background-color: #e67010;
 }
 
 /* 个人中心样式 */
@@ -1213,6 +1241,30 @@ body {
 
 .data-source-item:hover {
   background-color: var(--secondary-color);
+}
+
+/* 新增：保存成功提示样式 */
+.save-success-toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: #4CAF50;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+
+@keyframes fadein {
+  from {top: 0; opacity: 0;}
+  to {top: 20px; opacity: 1;}
+}
+
+@keyframes fadeout {
+  from {top: 20px; opacity: 1;}
+  to {top: 0; opacity: 0;}
 }
 
 /* 响应式调整 */
