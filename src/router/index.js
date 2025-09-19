@@ -61,6 +61,16 @@ const routes = [
     path: '/message',
     name: 'messagePage',
     component: () => import('../views/MessagePage.vue')
+  },
+  {
+    path: '/video',
+    name: 'videoPage',
+    component: () => import('../views/Video.vue')
+  },
+  {
+    path: '/contact',
+    name: 'contactPage',
+    component: () => import('../views/Contact.vue')
   }
 ]
 
