@@ -22,10 +22,6 @@
         <button class="action-btn" @click="showSettingsModal = true">
           <i class="fas fa-cog"></i>设置
         </button>
-        <!-- 新增保存按钮 -->
-        <button class="action-btn btn-primary" @click="handleSave">
-          <i class="fas fa-save"></i>保存
-        </button>
         <!-- 个人中心 -->
         <div class="user-profile" @click="showUserProfileModal = true">
           <div class="user-avatar">
@@ -102,12 +98,12 @@
         <div class="workspace-header">
           <div>
             <h1 class="workspace-title">{{ reportInfo.name }}</h1>
-            <p class="workspace-description">拖放组件到画布中创建您的报表，使用右侧面板面板编辑属性</p>
+            <p class="workspace-description">拖放组件到画布中创建您的报表，使用右侧面板编辑属性</p>
           </div>
         </div>
         
         <div class="canvas-container" id="canvas" ref="canvasContainer">
-          <!-- 可拖拽区域 -->
+          <!-- 可拖拽区域 - 修改为可接收外部拖拽 -->
           <draggable 
             v-model="canvasComponents" 
             :group="{ name: 'components', pull: false, put: true }"
@@ -133,7 +129,17 @@
                     <i :class="getComponentIcon(element.type)" style="color: var(--primary-color);"></i>
                     <span> {{ element.name }}</span>
                   </div>
-                  <div style="color: #999; font-size: 12px;">双击编辑</div>
+                  <div style="display: flex; gap: 8px;">
+                    <div style="color: #999; font-size: 12px;">双击编辑</div>
+                    <!-- 添加删除按钮 -->
+                    <button 
+                      class="delete-btn" 
+                      @click.stop="deleteComponent(element.id)"
+                      title="删除组件"
+                    >
+                      <i class="fas fa-trash-alt"></i>
+                    </button>
+                  </div>
                 </div>
                 <div 
                   :style="{
@@ -348,7 +354,7 @@
       </div>
     </div>
     
-    <!-- 组件模态框 -->
+    <!-- 组件模态框 - 改为可全局拖拽 -->
     <div class="modal-overlay" :class="{ active: showComponentsModal }" @click="showComponentsModal = false">
       <div class="modal" @click.stop>
         <div class="modal-header">
@@ -356,7 +362,7 @@
           <button class="modal-close" @click="showComponentsModal = false">&times;</button>
         </div>
         <div class="modal-body">
-          <!-- 可拖拽组件列表 -->
+          <!-- 可拖拽组件列表 - 修改为可向外部拖拽 -->
           <draggable 
             v-model="availableComponents" 
             :group="{ name: 'components', pull: 'clone', put: false }"
@@ -377,6 +383,7 @@
       </div>
     </div>
     
+    <!-- 其他模态框保持不变 -->
     <!-- 筛选器模态框 -->
     <div class="modal-overlay" :class="{ active: showFiltersModal }" @click="showFiltersModal = false">
       <div class="modal" @click.stop>
@@ -541,11 +548,6 @@
         </div>
       </div>
     </div>
-    
-    <!-- 保存成功提示 -->
-    <div v-if="showSaveSuccess" class="save-success-toast">
-      保存成功！
-    </div>
   </div>
 </template>
 <script >
@@ -570,8 +572,6 @@ const showDataSourceModal = ref(false);
 const showSettingsModal = ref(false);
 const showComponentEditModal = ref(false);
 const editingComponent = ref(null);
-// 新增保存成功提示状态
-const showSaveSuccess = ref(false);
 
 // 可用组件列表
 const availableComponents = ref([
@@ -580,7 +580,7 @@ const availableComponents = ref([
   { id: 'comp-text', type: 'text', name: '文本', icon: 'fas fa-font' },
   { id: 'comp-image', type: 'image', name: '图片', icon: 'fas fa-image' },
   { id: 'comp-section', type: 'section', name: '分区', icon: 'fas fa-border-all' },
-  { id: 'comp-pagebreak', type: 'pagebreak', name: '分页符符', icon: 'fas fa-file-page-break' }
+  { id: 'comp-pagebreak', type: 'pagebreak', name: '分页符', icon: 'fas fa-file-page-break' }
 ]);
 
 // 报表信息
@@ -703,7 +703,7 @@ const selectedComponent = computed(() => {
 
 // 处理画布变化
 const handleCanvasChange = () => {
-  // 移除了自动保存，改为手动保存
+  saveToLocalStorage();
 };
 
 // 更新组件属性
@@ -711,7 +711,7 @@ const updateComponentProperty = (id, property, value) => {
   const component = canvasComponents.value.find(comp => comp.id === id);
   if (component) {
     component[property] = value;
-    // 移除了自动保存，改为手动保存
+    saveToLocalStorage();
   }
 };
 
@@ -732,6 +732,7 @@ const saveComponentEdit = () => {
     if (index !== -1) {
       canvasComponents.value.splice(index, 1, editingComponent.value);
       selectComponent(editingComponent.value.id);
+      saveToLocalStorage();
     }
     showComponentEditModal.value = false;
   }
@@ -741,19 +742,20 @@ const saveComponentEdit = () => {
 const changeBgColor = (color) => {
   reportStyle.bgColor = color;
   document.querySelector('.canvas-container').style.backgroundColor = color;
-  // 移除了自动保存，改为手动保存
+  saveReportSettings();
 };
 
 // 应用筛选器
 const applyFilters = () => {
   showFiltersModal.value = false;
-  // 移除了自动保存，改为手动保存
+  saveToLocalStorage();
+  // 这里可以添加筛选器应用逻辑
 };
 
 // 保存用户信息
 const saveUserInfo = () => {
   showUserProfileModal.value = false;
-  // 移除了自动保存，改为手动保存
+  saveToLocalStorage();
 };
 
 // 选择数据源
@@ -763,40 +765,31 @@ const selectDataSource = (id) => {
 
 // 添加数据源
 const addDataSource = () => {
+  // 这里可以添加新数据源逻辑
   const newId = Math.max(...dataSources.map(s => s.id), 0) + 1;
   dataSources.push({
     id: newId,
     name: '新数据源',
     lastUpdate: new Date().toLocaleDateString().replace(/\//g, '-')
   });
-  // 移除了自动保存，改为手动保存
+  saveToLocalStorage();
 };
 
 // 保存报表设置
 const saveReportSettings = () => {
   showSettingsModal.value = false;
-  // 移除了自动保存，改为手动保存
+  saveToLocalStorage();
 };
 
 // 新建报表
 const newReport = () => {
-  if (confirm('确定要新建报表报表吗？当前报表将被清空。')) {
+  if (confirm('确定要新建报表吗？当前报表将被清空。')) {
     reportInfo.name = '新报表';
     reportInfo.description = '';
     canvasComponents.value = [];
     selectedComponentId.value = null;
-    // 移除了自动保存，改为手动保存
+    saveToLocalStorage();
   }
-};
-
-// 新增：手动保存函数
-const handleSave = () => {
-  saveToLocalStorage();
-  // 显示保存成功提示
-  showSaveSuccess.value = true;
-  setTimeout(() => {
-    showSaveSuccess.value = false;
-  }, 2000);
 };
 
 // 保存数据到本地存储
@@ -812,9 +805,40 @@ const saveToLocalStorage = () => {
   };
   localStorage.setItem('biDesignerData', JSON.stringify(data));
 };
+
+// 添加删除组件方法
+const deleteComponent = (id) => {
+  if (confirm('确定要删除此组件吗？')) {
+    const index = canvasComponents.value.findIndex(comp => comp.id === id);
+    if (index !== -1) {
+      canvasComponents.value.splice(index, 1);
+      // 如果删除的是当前选中的组件，清除选中状态
+      if (id === selectedComponentId.value) {
+        selectedComponentId.value = null;
+      }
+      saveToLocalStorage();
+    }
+  }
+};
 </script>
 
 <style>
+/* 原有样式保持不变，添加删除按钮样式 */
+.delete-btn {
+  background: none;
+  border: none;
+  color: #ff4d4f;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px;
+  transition: color 0.2s;
+}
+
+.delete-btn:hover {
+  color: #d93025;
+}
+
+/* 其他原有样式保持不变 */
 :root {
   --primary-color: #ff8326;
   --secondary-color: #fff5eb;
@@ -895,16 +919,6 @@ body {
 .action-btn:hover {
   background-color: var(--secondary-color);
   color: var(--primary-color);
-}
-
-/* 新增：保存按钮样式 */
-.action-btn.btn-primary {
-  background-color: var(--primary-color);
-  color: white;
-}
-
-.action-btn.btn-primary:hover {
-  background-color: #e67010;
 }
 
 /* 个人中心样式 */
@@ -1241,30 +1255,6 @@ body {
 
 .data-source-item:hover {
   background-color: var(--secondary-color);
-}
-
-/* 新增：保存成功提示样式 */
-.save-success-toast {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background-color: #4CAF50;
-  color: white;
-  padding: 12px 20px;
-  border-radius: 4px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-  animation: fadein 0.5s, fadeout 0.5s 2.5s;
-}
-
-@keyframes fadein {
-  from {top: 0; opacity: 0;}
-  to {top: 20px; opacity: 1;}
-}
-
-@keyframes fadeout {
-  from {top: 20px; opacity: 1;}
-  to {top: 0; opacity: 0;}
 }
 
 /* 响应式调整 */
