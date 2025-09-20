@@ -102,6 +102,7 @@
           </div>
         </div>
         
+
         <div class="canvas-container" id="canvas" ref="canvasContainer">
           <!-- 可拖拽区域 - 修改为可接收外部拖拽 -->
           <draggable 
@@ -109,6 +110,7 @@
             :group="{ name: 'components', pull: false, put: true }"
             @change="handleCanvasChange"
             class="canvas-drag-area"
+            :sort="true"
           >
             <template #item="{ element }">
               <div 
@@ -368,6 +370,7 @@
             :group="{ name: 'components', pull: 'clone', put: false }"
             :clone="cloneComponent"
             class="components-grid"
+            :sort="false"
           >
             <template #item="{ element }">
               <div class="component-item">
@@ -556,7 +559,7 @@ export default {
 }
 </script>
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue';
+import { ref, reactive, onMounted, computed, nextTick } from 'vue';
 import draggable from 'vuedraggable';
 
 // 状态管理
@@ -653,7 +656,8 @@ const generateId = () => {
 
 // 组件克隆函数（用于拖拽）
 const cloneComponent = (component) => {
-  return {
+  // 创建新组件并确保ID唯一
+  const newComponent = {
     id: generateId(),
     type: component.type,
     name: component.name,
@@ -662,6 +666,14 @@ const cloneComponent = (component) => {
     height: component.type === 'chart' || component.type === 'table' ? 200 : 100,
     chartType: component.type === 'chart' ? '折线图' : null
   };
+  
+  // 使用nextTick确保DOM更新后再添加组件
+  nextTick(() => {
+    canvasComponents.value.push(newComponent);
+    handleCanvasChange();
+  });
+  
+  return newComponent;
 };
 
 // 获取组件图标
@@ -703,6 +715,7 @@ const selectedComponent = computed(() => {
 
 // 处理画布变化
 const handleCanvasChange = () => {
+  console.log("Canvas components changed:", canvasComponents.value);
   saveToLocalStorage();
 };
 
