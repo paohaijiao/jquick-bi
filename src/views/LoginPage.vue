@@ -66,12 +66,12 @@
               </div>
               <div 
                 class="captcha-image" 
-                @click="displayCaptcha"
+                @click="generateCaptcha"
               >
-                <span>{{ captchaText }}</span>
+               <img :src="captchaImage" style="width:50px;height:50px" />
                 <i 
                   class="fas fa-sync-alt refresh-icon" 
-                  @click.stop="displayCaptcha"
+                  @click.stop="generateCaptcha"
                 ></i>
               </div>
             </div>
@@ -140,28 +140,30 @@
 </template>
 <script setup>
 import { ref, onMounted } from 'vue';
+import request from '../api/request';
 const username = ref('');
 const password = ref('');
 const captchaInput = ref('');
 const rememberMe = ref(true);
-const captchaText = ref('');
-
-// 生成随机验证码
+const captchaImage = ref('');
 function generateCaptcha() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
-  let captcha = '';
-  for (let i = 0; i < 4; i++) {
-    captcha += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return captcha;
-}
-
-// 显示验证码
-function displayCaptcha() {
-  const captcha = generateCaptcha();
-  captchaText.value = captcha;
-  // 存储验证码用于验证
-  sessionStorage.setItem('captcha', captcha);
+ request.get('/api/pub/captcha/image?deviceId=13198530807', {
+    responseType: 'arraybuffer'  
+  })
+  .then(response => {
+    console.log(response)
+    const blob = new Blob([response], { type: 'image/png' })
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      console.log(e.target.result)
+      captchaImage.value = e.target.result
+    }
+    reader.readAsDataURL(blob)
+  })
+  .catch(error => {
+    console.error('获取验证码失败:', error);
+//    ElMessage.error('获取验证码失败，请重试');
+  });
 }
 
 // 验证输入的验证码
@@ -181,7 +183,7 @@ function handleLogin() {
   // 验证验证码
   if (!validateCaptcha(captchaInput.value)) {
     alert('验证码错误，请重新输入！');
-    displayCaptcha(); // 刷新验证码
+    generateCaptcha(); // 刷新验证码
     captchaInput.value = '';
     return;
   }
@@ -193,7 +195,7 @@ function handleLogin() {
 
 // 组件挂载时初始化验证码
 onMounted(() => {
-  displayCaptcha();
+  generateCaptcha();
 });
 </script>
 

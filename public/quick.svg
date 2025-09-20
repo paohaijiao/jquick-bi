@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <!-- 背景圆形 -->
+  <circle cx="120" cy="120" r="100" fill="#f8f9fa" stroke="#e9ecef" stroke-width="2"/>
+  
+  <!-- BI核心元素 - 数据分析圆环（类似仪表盘） -->
+  <circle cx="120" cy="120" r="70" fill="none" stroke="#e9ecef" stroke-width="10"/>
+  <path d="M120,50 A70,70 0 0,1 186.5,106.5" 
+        fill="none" stroke="#3498db" stroke-width="10" stroke-linecap="round"/>
+  
+  <!-- 数据可视化元素 - 柱状图 -->
+  <rect x="80" y="140" width="15" height="40" fill="#ff8326" rx="2"/>
+  <rect x="105" y="120" width="15" height="60" fill="#ff8326" rx="2"/>
+  <rect x="130" y="160" width="15" height="20" fill="#ff8326" rx="2"/>
+  <rect x="155" y="100" width="15" height="80" fill="#ff8326" rx="2"/>
+  
+  <!-- 数据流动元素 - 连接线 -->
+  <path d="M120,80 L105,120 M120,80 L130,160" 
+        fill="none" stroke="#2ecc71" stroke-width="3" stroke-linecap="round"/>
+  
+  <!-- 核心数据点 -->
+  <circle cx="120" cy="80" r="6" fill="#2ecc71"/>
+</svg>
+    
