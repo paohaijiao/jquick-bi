@@ -122,10 +122,9 @@
                 <i class="fab fa-github"></i> GitHub项目
               </a>
               <a 
-                href="mailto:goudingcheng@gmail.com" 
-                class="email-link"
+                @click="register"
               >
-                <i class="fas fa-envelope"></i> 联系我们
+                <i class="fab fa-user"></i> 注册账号
               </a>
             </div>
           </div>
@@ -140,6 +139,8 @@
 </template>
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+const router = useRouter();
 import request from '../api/request';
 const username = ref('');
 const password = ref('');
@@ -168,6 +169,9 @@ function generateCaptcha() {
     console.error('获取验证码失败:', error);
   });
 }
+function register(){
+      router.push('/register');
+}
 function handleLogin() {
   if (!username.value || !password.value||!captchaInput.value ) {
     alert('请填写所有必填字段！');
@@ -192,9 +196,10 @@ const config = {
   .then(response => {
     localStorage.setItem('tokenInfo', JSON.stringify(response));
     localStorage.setItem('token', response.access_token);
+    router.push('/index');
   })
   .catch(error => {
-    console.error('获取验证码失败:', error);
+    console.error('获取用户token失败:', error);
   });
 
 }

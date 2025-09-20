@@ -192,7 +192,7 @@
             </button>
             
             <div class="login-link">
-              已有账号？<a href="login.html">立即登录</a>
+              已有账号？<a @click="login">立即登录</a>
             </div>
           </div>
         </div>
@@ -208,14 +208,12 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-
-// 状态管理
+import { useRouter } from 'vue-router';
+const router = useRouter();
 const activeTab = ref('tenant');
 const captchaText = ref('');
 const captchaInput = ref('');
 const agreeTerms = ref(false);
-
-// 租户表单数据
 const tenantForm = ref({
   name: '',
   license: '',
@@ -223,7 +221,9 @@ const tenantForm = ref({
   industry: '',
   address: ''
 });
-
+function login(){
+      router.push('/login');
+}
 // 管理员表单数据
 const adminForm = ref({
   name: '',
