@@ -143,11 +143,15 @@ import { ref, onMounted } from 'vue';
 import request from '../api/request';
 const username = ref('');
 const password = ref('');
-const captchaInput = ref('');
 const rememberMe = ref(true);
 const captchaImage = ref('');
+const captchaInput = ref('');
+
+const deviceId = ref('');
 function generateCaptcha() {
- request.get('/api/pub/captcha/image?deviceId=13198530807', {
+ const currentTimestamp = Date.now();
+ deviceId.value=currentTimestamp
+ request.get('/api/pub/captcha/image?deviceId='+currentTimestamp, {
     responseType: 'arraybuffer'  
   })
   .then(response => {
@@ -162,35 +166,37 @@ function generateCaptcha() {
   })
   .catch(error => {
     console.error('获取验证码失败:', error);
-//    ElMessage.error('获取验证码失败，请重试');
   });
 }
-
-// 验证输入的验证码
-function validateCaptcha(input) {
-  const storedCaptcha = sessionStorage.getItem('captcha');
-  return input.toLowerCase() === storedCaptcha.toLowerCase();
-}
-
-// 处理登录
 function handleLogin() {
-  // 简单验证
-  if (!username.value || !password.value || !captchaInput.value) {
+  if (!username.value || !password.value||!captchaInput.value ) {
     alert('请填写所有必填字段！');
     return;
   }
-  
-  // 验证验证码
-  if (!validateCaptcha(captchaInput.value)) {
-    alert('验证码错误，请重新输入！');
-    generateCaptcha(); // 刷新验证码
-    captchaInput.value = '';
-    return;
+const params = new URLSearchParams();
+params.append('client_id', 'client');
+params.append('client_secret', '1qaz@WSX');
+params.append('grant_type', 'captcha');
+params.append('username', username.value);
+params.append('password', password.value);
+params.append('scope', 'all');
+params.append('captcha', captchaInput.value);
+params.append('deviceId', deviceId.value);
+
+const config = {
+  headers: {
+    'Content-Type': 'application/x-www-form-urlencoded'
   }
-  
-  // 验证通过，这里可以添加登录逻辑
-  alert('登录验证通过！');
-  // 在实际应用中，这里应该提交表单或发送AJAX请求到服务器
+};
+  request.post('/api/oauth/token',  params.toString(), config)
+  .then(response => {
+    localStorage.setItem('tokenInfo', JSON.stringify(response));
+    localStorage.setItem('token', response.access_token);
+  })
+  .catch(error => {
+    console.error('获取验证码失败:', error);
+  });
+
 }
 
 // 组件挂载时初始化验证码
