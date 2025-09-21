@@ -11,8 +11,6 @@
         <h1 class="page-title">创建您的账号</h1>
         <p class="page-desc">请填写租户及管理员信息完成注册，带 <span style="color: var(--primary-color);">*</span> 为必填项</p>
       </div>
-      
-      <!-- 注册卡片容器 -->
       <div class="register-card">
         <!-- Tab导航 -->
         <div class="tabs">
@@ -51,7 +49,7 @@
               <el-icon><Collection /></el-icon>
               <input 
                 type="text" 
-                v-model="tenantForm.license" 
+                v-model="tenantForm.code" 
                 placeholder="营业执照/机构代码 *" 
                 required
               >
@@ -61,7 +59,7 @@
               <el-icon><Phone /></el-icon>
               <input 
                 type="tel" 
-                v-model="tenantForm.phone" 
+                v-model="tenantForm.tel" 
                 placeholder="企业联系电话 *" 
                 required
               >
@@ -70,17 +68,11 @@
             <div class="input-group">
               <el-icon><Suitcase /></el-icon>
               <select 
-                v-model="tenantForm.industry" 
+                v-model="tenantForm.industryId" 
                 required
               >
                 <option value="" disabled>请选择所属行业 *</option>
-                <option value="it">信息技术</option>
-                <option value="finance">金融</option>
-                <option value="retail">零售</option>
-                <option value="manufacturing">制造业</option>
-                <option value="education">教育</option>
-                <option value="healthcare">医疗健康</option>
-                <option value="other">其他行业</option>
+                <option  v-for="industry in industrys" :key="industry.id" :value="industry.id">{{industry.name }}</option>
               </select>
             </div>
             
@@ -100,8 +92,8 @@
               <el-icon><User /></el-icon>
               <input 
                 type="text" 
-                v-model="adminForm.name" 
-                placeholder="管理员姓名 *" 
+                v-model="adminForm.loginName" 
+                placeholder="登录名 *" 
                 required
               >
             </div>
@@ -120,7 +112,7 @@
               <el-icon><Cellphone /></el-icon>
               <input 
                 type="tel" 
-                v-model="adminForm.mobile" 
+                v-model="adminForm.phone" 
                 placeholder="手机号码 *" 
                 required
               >
@@ -130,7 +122,7 @@
               <el-icon><Compass /></el-icon>
               <input 
                 type="password" 
-                v-model="adminForm.password" 
+                v-model="adminForm.passwd" 
                 placeholder="设置密码 *" 
                 required
               >
@@ -162,7 +154,7 @@
                 id="captcha-image"
                 @click="generateCaptcha"
               >
-                <span>{{ captchaText }}</span>
+                 <img :src="captchaImage" style="width:50px;height:50px" />
                 <i 
                   class="fas fa-sync-alt refresh-icon" 
                   id="refresh-captcha"
@@ -209,16 +201,17 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import request from '../api/request';
 const router = useRouter();
 const activeTab = ref('tenant');
-const captchaText = ref('');
 const captchaInput = ref('');
 const agreeTerms = ref(false);
+const industrys = ref([]);
 const tenantForm = ref({
   name: '',
-  license: '',
-  phone: '',
-  industry: '',
+  code: '',
+  tel: '',
+  industryId: '',
   address: ''
 });
 function login(){
@@ -226,79 +219,106 @@ function login(){
 }
 // 管理员表单数据
 const adminForm = ref({
-  name: '',
+  loginName: '',
   email: '',
-  mobile: '',
-  password: '',
+  phone: '',
+  passwd: '',
   confirmPassword: ''
 });
-
-// 生成随机验证码
+const captchaImage = ref('');
+const deviceId = ref('');
 const generateCaptcha = () => {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
-  let captcha = '';
-  for (let i = 0; i < 4; i++) {
-    captcha += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  captchaText.value = captcha;
+const currentTimestamp = Date.now();
+ deviceId.value=currentTimestamp
+ request.get('/api/pub/captcha/image?deviceId='+currentTimestamp, {
+    responseType: 'arraybuffer'  
+  })
+  .then(response => {
+    console.log(response)
+    const blob = new Blob([response], { type: 'image/png' })
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      console.log(e.target.result)
+      captchaImage.value = e.target.result
+    }
+    reader.readAsDataURL(blob)
+  })
+  .catch(error => {
+    console.error('获取验证码失败:', error);
+  });
 };
+function getIndustry() {
+ request.get('/api/pub/industry/list')
+  .then(response => {
+    console.log(response)
+    industrys.value=response.data;
+  })
+  .catch(error => {
+    console.error('获取行业失败:', error);
+  });
+}
 
-// 验证验证码
-const validateCaptcha = () => {
-  return captchaInput.value.toLowerCase() === captchaText.value.toLowerCase();
-};
-
-// 验证密码是否一致
 const validatePasswords = () => {
-  return adminForm.value.password === adminForm.value.confirmPassword;
+  return adminForm.value.passwd === adminForm.value.confirmPassword;
 };
 
-// 处理注册逻辑
 const handleRegister = () => {
-  // 验证租户信息
-  if (!tenantForm.value.name || !tenantForm.value.license || 
-      !tenantForm.value.phone || !tenantForm.value.industry || !tenantForm.value.address) {
+  if (!tenantForm.value.name || !tenantForm.value.code || 
+      !tenantForm.value.tel || !tenantForm.value.industryId || !tenantForm.value.address) {
     alert('请填写完整的租户信息！');
     activeTab.value = 'tenant';
     return;
   }
   
-  // 验证管理员信息
-  if (!adminForm.value.name || !adminForm.value.email || 
-      !adminForm.value.mobile || !adminForm.value.password || !adminForm.value.confirmPassword) {
+  if (!adminForm.value.loginName || !adminForm.value.email || 
+      !adminForm.value.phone || !adminForm.value.passwd || !adminForm.value.confirmPassword) {
     alert('请填写完整的管理员信息！');
     return;
   }
-  
-  // 验证密码
+
   if (!validatePasswords()) {
     alert('两次输入的密码不一致！');
     return;
   }
-  
-  // 验证验证码
-  if (!validateCaptcha()) {
-    alert('验证码错误，请重新输入！');
-    generateCaptcha();
-    captchaInput.value = '';
-    return;
-  }
-  
-  // 验证条款同意
+
   if (!agreeTerms.value) {
     alert('请阅读并同意服务条款和隐私政策！');
     return;
   }
-  
-  // 验证通过，提交注册
-  alert('注册信息验证通过！即将提交注册...');
-  // 在实际应用中，这里应该提交表单数据到服务器
-  console.log('租户信息:', tenantForm.value);
-  console.log('管理员信息:', adminForm.value);
+  console.log('注册信息验证通过！即将提交注册...');
+  var param=new Object();
+  param.deviceId= deviceId.value;
+  param.validateCode= captchaInput.value;
+  param.tenant=tenantForm.value;
+  param.user=adminForm.value;
+  //param.tenant.name=tenantForm.value.name;
+  //param.tenant.code=tenantForm.value.code;
+  //param.tenant.tel=tenantForm.value.tel;
+  //param.tenant.industryId=tenantForm.value.industryId;
+  //param.tenant.address=tenantForm.value.address;
+
+  //param.user.loginName=adminForm.value.loginName;
+  //param.user.email=adminForm.value.email;
+  //param.user.phone=adminForm.value.phone;
+  //param.user.password=adminForm.value.password;
+  request.post('/api/pub/tenant/create',param)
+  .then(response => {
+    if(response.code==200){
+      console.log('注册成功');
+      router.push('/login');
+    }else{
+      alert(response.message)
+    }
+  })
+  .catch(error => {
+    console.error('获取行业失败:', error);
+  });
+
 };
 
 // 组件挂载时生成初始验证码
 onMounted(() => {
+  getIndustry();
   generateCaptcha();
 });
 </script>
