@@ -26,97 +26,12 @@
     <!-- 主内容区 -->
     <div class="main-content">
       <!-- 左侧菜单 -->
-      <aside class="sidebar" :class="{ show: sidebarShow }">
-        <div class="menu-section">
-          <div class="menu-section-title">主导航</div>
-          <div class="menu-item" @click="handleMenuItemClick('home')">
-            <i class="fas fa-home"></i>
-            <span>首页</span>
-          </div>
-          <div class="menu-item" @click="toggleSubmenu('dataSource')">
-            <i class="fas fa-database"></i>
-            <span>数据源</span>
-            <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
-          </div>
-          <div class="submenu" :class="{ show: submenus.dataSource }">
-            <div class="submenu-item" @click="handleSubmenuItemClick('dataSourceList')">数据源列表</div>
-            <div class="submenu-item" @click="handleSubmenuItemClick('addDataSource')">新增数据源</div>
-            <div class="submenu-item" @click="handleSubmenuItemClick('dataSourcePermission')">数据源权限</div>
-          </div>
-          <div class="menu-item" @click="toggleSubmenu('report')">
-            <i class="fas fa-file-alt"></i>
-            <span>报表</span>
-            <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
-          </div>
-          <div class="submenu" :class="{ show: submenus.report }">
-            <div class="submenu-item" @click="handleSubmenuItemClick('myReport')">我的报表</div>
-            <div class="submenu-item" @click="handleSubmenuItemClick('sharedReport')">共享报表</div>
-            <div class="submenu-item" @click="handleSubmenuItemClick('favoriteReport')">收藏报表</div>
-            <div class="submenu-item" @click="handleSubmenuItemClick('recycleBin')">回收站</div>
-          </div>
-          <div class="menu-item" @click="handleMenuItemClick('dashboard')">
-            <i class="fas fa-chart-pie"></i>
-            <span>仪表盘</span>
-            <span class="menu-badge">5</span>
-          </div>
-          <div class="menu-item" @click="handleMenuItemClick('dataset')">
-            <i class="fas fa-cubes"></i>
-            <span>数据集</span>
-          </div>
-        </div>
-        
-        <div class="menu-section">
-          <div class="menu-section-title">系统管理</div>
-          <div class="menu-item" @click="handleMenuItemClick('userManagement')">
-            <i class="fas fa-users"></i>
-            <span>用户管理</span>
-          </div>
-          <div class="menu-item" @click="handleMenuItemClick('rolePermission')">
-            <i class="fas fa-user-shield"></i>
-            <span>角色权限</span>
-          </div>
-          <div class="menu-item" @click="handleMenuItemClick('operationLog')">
-            <i class="fas fa-history"></i>
-            <span>操作日志</span>
-          </div>
-        </div>
-        
-        <div class="menu-section">
-          <div class="menu-section-title">个人中心</div>
-          <div class="menu-item" @click="handleMenuItemClick('personalInfo')">
-            <i class="fas fa-user-circle"></i>
-            <span>个人信息</span>
-          </div>
-          <div class="menu-item" @click="handleMenuItemClick('securitySetting')">
-            <i class="fas fa-lock"></i>
-            <span>安全设置</span>
-          </div>
-          <div class="menu-item" @click="handleMenuItemClick('preference')">
-            <i class="fas fa-cog"></i>
-            <span>偏好配置</span>
-          </div>
-          <div class="menu-item" @click="handleMenuItemClick('logout')">
-            <i class="fas fa-sign-out-alt"></i>
-            <span>退出登录</span>
-          </div>
-        </div>
-        
-        <div class="menu-section">
-          <div class="menu-section-title">帮助中心</div>
-          <div class="menu-item" @click="handleMenuItemClick('helpDoc')">
-            <i class="fas fa-question-circle"></i>
-            <span>帮助文档</span>
-          </div>
-          <div class="menu-item" @click="handleMenuItemClick('videoTutorial')">
-            <i class="fas fa-play-circle"></i>
-            <span>视频教程</span>
-          </div>
-          <div class="menu-item active" @click="handleMenuItemClick('contact')">
-            <i class="fas fa-comment-dots"></i>
-            <span>联系客服</span>
-          </div>
-        </div>
-      </aside>
+     <SidebarMenu 
+        :active-menu="activeMenu" 
+        :unread-count="unreadCount"
+        @menu-click="setActiveMenu"
+        @submenu-click="setActiveSubmenu"
+      />
       
       <!-- 右侧联系客服区域 -->
       <main class="content-area">
@@ -215,7 +130,7 @@
         
         <!-- 常见问题 -->
         <div class="faq-section">
-          <div class="form-title">常见问题</div>
+          <div class="form-title text-align-left">常见问题</div>
           
           <div class="faq-item" v-for="(faq, index) in faqs" :key="index">
             <div class="faq-question" @click="toggleFaq(index)">
@@ -233,20 +148,12 @@
 </template>
 <script>
 export default {
-  name: 'contactPage'
+  name: 'supportPage'
 }
 </script>
 <script setup>
-import { ref, reactive } from 'vue';
-
-// 侧边栏状态
-const sidebarShow = ref(true);
-
-// 子菜单状态管理
-const submenus = reactive({
-  dataSource: false,
-  report: false
-});
+import {  reactive } from 'vue';
+import SidebarMenu from '@/components/SidebarMenu.vue';
 
 // 表单数据
 const formData = reactive({
@@ -275,23 +182,6 @@ const faqs = reactive([
     open: false
   }
 ]);
-
-// 切换子菜单显示/隐藏
-const toggleSubmenu = (menuName) => {
-  submenus[menuName] = !submenus[menuName];
-};
-
-// 处理菜单项点击
-const handleMenuItemClick = (itemName) => {
-  console.log('点击菜单项:', itemName);
-  // 可以在这里添加路由跳转逻辑
-};
-
-// 处理子菜单项点击
-const handleSubmenuItemClick = (itemName) => {
-  console.log('点击子菜单项:', itemName);
-  // 可以在这里添加路由跳转逻辑
-};
 
 // 处理用户信息点击
 const handleUserClick = () => {
