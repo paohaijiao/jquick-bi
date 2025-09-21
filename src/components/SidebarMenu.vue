@@ -65,7 +65,7 @@
 
 <script setup>
 import { ref, defineProps, watch, defineEmits, onMounted } from 'vue';
-
+import request from '../api/request';
 // 定义组件参数
 const props = defineProps({
   activeSection: {
@@ -194,54 +194,40 @@ watch(() => [props.activeSection, props.activeMenu, props.activeSubmenu],
 
 // 初始化菜单数据（为section添加id）
 const initMenu = () => {
-  menus.value = [
-    {
-      id: 'main-nav', // 新增section的id
-      title: '主导航',
-      children: [
-        {
-          id: 'home',
-          title: '首页',
-          icon: 'fas fa-home'
-        },
-        {
-          id: 'report',
-          title: '报表管理',
-          icon: 'fas fa-file-alt',
-          children: [
-            { id: 'myReport', title: '我的报表' },
-            { id: 'template', title: '报表模板' }
-          ]
-        },
-        {
-          id: 'datasource',
-          title: '数据源',
-          icon: 'fas fa-database',
-          children: [
-            { id: 'database', title: '数据库' },
-            { id: 'file', title: '文件数据' },
-            { id: 'api', title: 'API连接' }
-          ]
-        }
-      ]
-    },
-    {
-      id: 'system-setting', // 新增section的id
-      title: '系统设置',
-      children: [
-        {
-          id: 'user',
-          title: '用户管理',
-          icon: 'fas fa-user'
-        },
-        {
-          id: 'setting',
-          title: '系统设置',
-          icon: 'fas fa-cog'
-        }
-      ]
-    }
-  ];
+request.get('/api/menus/getMenus')
+  .then(response => {
+    console.log(response)
+    if(response.code==200){
+      menus.value=response.data;
+       // 初始化展开所有section和二级菜单
+        menus.value.forEach(section => {
+          // 展开所有第一级菜单
+          if (!expandedSections.value.includes(section.id)) {
+            expandedSections.value.push(section.id);
+          }
+          
+          // 初始化当前section的二级菜单展开状态数组
+          if (!expandedLevel2.value[section.id]) {
+            expandedLevel2.value[section.id] = [];
+          }
+          
+          // 展开所有二级菜单
+          if (section.children && section.children.length > 0) {
+            section.children.forEach(level2 => {
+              if (!expandedLevel2.value[section.id].includes(level2.id)) {
+                expandedLevel2.value[section.id].push(level2.id);
+              }
+            });
+          }
+        });
+      }
+    
+  }
+)
+  .catch(error => {
+    console.error('获取行业失败:', error);
+  });
+
 };
 
 onMounted(() => {
@@ -338,7 +324,7 @@ onMounted(() => {
 .submenu-item.level3-item {
   display: flex;
   align-items: center;
-  padding: 10px 20px 10px 68px; /* 更深缩进 */
+  padding: 10px 20px 10px 20px; /* 更深缩进 */
   color: #666;
   cursor: pointer;
   font-size: 13px;
