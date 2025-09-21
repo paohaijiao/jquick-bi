@@ -1,148 +1,277 @@
 <template>
   <aside class="sidebar">
-    <div class="menu-section">
-      <div class="menu-section-title">主导航</div>
-      <div class="menu-item" :class="{ active: activeMenu === 'home' }" @click="handleMenuClick('home')">
-        <i class="fas fa-home"></i>
-        <span>首页</span>
-      </div>
-      <div class="menu-item" @click="toggleSubmenu('datasource')">
-        <i class="fas fa-database"></i>
-        <span>数据源</span>
-        <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
-      </div>
-      <div class="submenu" :class="{ show: showSubmenu.datasource }">
-        <div class="submenu-item" :class="{ active: activeSubmenu.datasource === 'list' }" @click="handleSubmenuClick('datasource', 'list')">数据源列表</div>
-        <div class="submenu-item" :class="{ active: activeSubmenu.datasource === 'new' }" @click="handleSubmenuClick('datasource', 'new')">新增数据源</div>
-        <div class="submenu-item" :class="{ active: activeSubmenu.datasource === 'permission' }" @click="handleSubmenuClick('datasource', 'permission')">数据源权限</div>
-      </div>
-      <div class="menu-item" @click="toggleSubmenu('report')">
-        <i class="fas fa-file-alt"></i>
-        <span>报表</span>
-        <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
-      </div>
-      <div class="submenu" :class="{ show: showSubmenu.report }">
-        <div class="submenu-item" :class="{ active: activeSubmenu.report === 'my' }" @click="handleSubmenuClick('report', 'my')">我的报表</div>
-        <div class="submenu-item" :class="{ active: activeSubmenu.report === 'shared' }" @click="handleSubmenuClick('report', 'shared')">共享报表</div>
-        <div class="submenu-item" :class="{ active: activeSubmenu.report === 'favorite' }" @click="handleSubmenuClick('report', 'favorite')">收藏报表</div>
-        <div class="submenu-item" :class="{ active: activeSubmenu.report === 'recycle' }" @click="handleSubmenuClick('report', 'recycle')">回收站</div>
-      </div>
-      <div class="menu-item" :class="{ active: activeMenu === 'dashboard' }" @click="handleMenuClick('dashboard')">
-        <i class="fas fa-chart-pie"></i>
-        <span>仪表盘</span>
-        <span class="menu-badge">5</span>
-      </div>
-      <div class="menu-item" :class="{ active: activeMenu === 'dataset' }" @click="handleMenuClick('dataset')">
-        <i class="fas fa-cubes"></i>
-        <span>数据集</span>
-      </div>
-      <div class="menu-item" :class="{ active: activeMenu === 'message' }" @click="handleMenuClick('message')">
-        <i class="fas fa-envelope"></i>
-        <span>站内消息</span>
-        <span class="menu-badge">{{ unreadCount }}</span>
-      </div>
-    </div>
-    
-    <div class="menu-section">
-      <div class="menu-section-title">系统管理</div>
-      <div class="menu-item" :class="{ active: activeMenu === 'user' }" @click="handleMenuClick('user')">
-        <i class="fas fa-users"></i>
-        <span>用户管理</span>
-      </div>
-      <div class="menu-item" :class="{ active: activeMenu === 'role' }" @click="handleMenuClick('role')">
-        <i class="fas fa-user-shield"></i>
-        <span>角色权限</span>
-      </div>
-      <div class="menu-item" :class="{ active: activeMenu === 'log' }" @click="handleMenuClick('log')">
-        <i class="fas fa-history"></i>
-        <span>操作日志</span>
-      </div>
-    </div>
-    
-    <div class="menu-section">
-      <div class="menu-section-title">帮助中心</div>
-      <div class="menu-item" :class="{ active: activeMenu === 'doc' }" @click="handleMenuClick('doc')">
-        <i class="fas fa-question-circle"></i>
-        <span>帮助文档</span>
-      </div>
-      <div class="menu-item" :class="{ active: activeMenu === 'video' }" @click="handleMenuClick('video')">
-        <i class="fas fa-play-circle"></i>
-        <span>视频教程</span>
-      </div>
-      <div class="menu-item" :class="{ active: activeMenu === 'service' }" @click="handleMenuClick('service')">
-        <i class="fas fa-comment-dots"></i>
-        <span>联系客服</span>
+    <div class="menu-section" v-for="(section, sectionIndex) in menus" :key="sectionIndex">
+      <div class="menu-section-title text-align-left">{{ section.title }}</div>
+      
+      <!-- 一级菜单容器 -->
+      <div class="level1-container">
+        <!-- 一级菜单 -->
+        <div 
+          class="menu-item text-align-left" 
+          v-for="(level1, level1Index) in section.children" 
+          :key="level1Index"
+          @click.stop="toggleLevel1Menu(level1)"
+          :class="{ active: isLevel1Active(level1) }"
+        >
+          <i :class="level1.icon"></i>
+          <span class="text-align-left">{{ level1.title }}</span>
+          
+          <!-- 一级菜单箭头 -->
+          <i 
+            class="fas fa-chevron-down" 
+            style="font-size: 12px; transition: transform 0.3s;"
+            v-if="level1.children && level1.children.length > 0"
+            :class="{ 'rotate-180': expandedLevel1.includes(level1.id) }"
+          ></i>
+        </div>
+        <template v-for="(level1, level1Index) in section.children" :key="`container-${level1Index}`">
+          <div 
+            class="level2-container" 
+            v-if="level1.children && expandedLevel1.includes(level1.id)"
+          >
+            <div 
+              class="submenu-item level2-item" 
+              v-for="(level2, level2Index) in level1.children" 
+              :key="level2Index"
+              @click.stop="toggleLevel2Menu(level1, level2)"
+              :class="{ active: isLevel2Active(level1, level2) }"
+            >
+              <span>{{ level2.title }}</span>
+              
+              <!-- 二级菜单箭头 -->
+              <i 
+                class="fas fa-chevron-down" 
+                style="font-size: 12px; margin-left: auto; transition: transform 0.3s;"
+                v-if="level2.children && level2.children.length > 0"
+                :class="{ 'rotate-180': expandedLevel2[level1.id]?.includes(level2.id) }"
+              ></i>
+              
+              <!-- 三级菜单 - 显示在对应二级菜单下方 -->
+              <div 
+                class="level3-container" 
+                v-if="level2.children && expandedLevel2[level1.id]?.includes(level2.id)"
+              >
+                <div 
+                  class="submenu-item level3-item" 
+                  v-for="(level3, level3Index) in level2.children" 
+                  :key="level3Index"
+                  @click.stop="handleLevel3Click(level1, level2, level3)"
+                  :class="{ active: isLevel3Active(level1, level2, level3) }"
+                >
+                  {{ level3.title }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
       </div>
     </div>
   </aside>
 </template>
-<script setup>
-import { ref, defineProps, defineEmits, watch } from 'vue'
 
-// 定义组件属性
+<script setup>
+import { ref, defineProps, watch, defineEmits, onMounted } from 'vue';
+
+// 定义组件参数
 const props = defineProps({
   activeMenu: {
     type: String,
     default: ''
   },
+  activeSubmenu: {
+    type: Object,
+    default: () => ({})
+  },
   unreadCount: {
     type: Number,
     default: 0
   }
-})
+});
 
-// 定义组件事件
-const emit = defineEmits(['menu-click', 'submenu-click'])
+// 定义事件
+const emit = defineEmits(['menu-click', 'submenu-click']);
 
-// 子菜单状态
-const showSubmenu = ref({
-  datasource: false,
-  report: false
-})
+// 菜单数据
+const menus = ref([]);
 
-const activeSubmenu = ref({
-  datasource: '',
-  report: ''
-})
+// 展开状态管理
+const expandedLevel1 = ref([]); // 一级菜单展开状态
+const expandedLevel2 = ref({}); // 二级菜单展开状态 { level1Id: [level2Id1, level2Id2] }
 
-// 切换子菜单显示状态
-const toggleSubmenu = (menu) => {
-  showSubmenu.value[menu] = !showSubmenu.value[menu]
-}
+// 一级菜单展开/折叠
+const toggleLevel1Menu = (level1) => {
+  if (!level1.children || level1.children.length === 0) {
+    // 没有子菜单时直接触发点击事件
+    emit('menu-click', level1.id);
+    return;
+  }
 
-// 处理菜单点击事件
-const handleMenuClick = (menu) => {
-  emit('menu-click', menu)
-}
+  // 切换展开状态
+  if (expandedLevel1.value.includes(level1.id)) {
+    expandedLevel1.value = expandedLevel1.value.filter(id => id !== level1.id);
+  } else {
+    expandedLevel1.value.push(level1.id);
+    // 初始化二级菜单展开状态
+    if (!expandedLevel2.value[level1.id]) {
+      expandedLevel2.value[level1.id] = [];
+    }
+  }
+  
+  // 触发菜单点击事件
+  emit('menu-click', level1.id);
+};
 
-// 处理子菜单点击事件
-const handleSubmenuClick = (parent, sub) => {
-  activeSubmenu.value[parent] = sub
-  emit('submenu-click', { parent, sub })
-}
+// 二级菜单展开/折叠
+const toggleLevel2Menu = (level1, level2) => {
+  if (!level2.children || level2.children.length === 0) {
+    // 没有子菜单时直接触发点击事件
+    emit('submenu-click', level1.id, level2.id);
+    return;
+  }
 
-// 监听外部传入的 activeMenu 变化
-watch(() => props.activeMenu, (newValue) => {
-  console.log(newValue)
-  // 可以根据需要处理菜单激活状态的同步
-})
+  // 确保当前一级菜单的二级状态数组存在
+  if (!expandedLevel2.value[level1.id]) {
+    expandedLevel2.value[level1.id] = [];
+  }
+
+  // 切换展开状态
+  const level2Index = expandedLevel2.value[level1.id].indexOf(level2.id);
+  if (level2Index > -1) {
+    expandedLevel2.value[level1.id].splice(level2Index, 1);
+  } else {
+    expandedLevel2.value[level1.id].push(level2.id);
+  }
+  
+  // 触发子菜单点击事件
+  emit('submenu-click', level1.id, level2.id);
+};
+
+// 三级菜单点击处理
+const handleLevel3Click = (level1, level2, level3) => {
+  emit('submenu-click', level1.id, level2.id, level3.id);
+};
+
+// 检查一级菜单是否激活
+const isLevel1Active = (level1) => {
+  return props.activeMenu === level1.id;
+};
+
+// 检查二级菜单是否激活
+const isLevel2Active = (level1, level2) => {
+  return props.activeMenu === level1.id && props.activeSubmenu[level1.id] === level2.id;
+};
+
+// 检查三级菜单是否激活
+const isLevel3Active = (level1, level2, level3) => {
+  return props.activeMenu === level1.id && 
+         props.activeSubmenu[level1.id] === `${level2.id}-${level3.id}`;
+};
+
+// 监听外部激活状态变化
+watch(() => [props.activeMenu, props.activeSubmenu], ([newActiveMenu, newActiveSubmenu]) => {
+  // 自动展开当前激活菜单的父级
+  menus.value.forEach(section => {
+    section.children.forEach(level1 => {
+      if (level1.id === newActiveMenu) {
+        // 展开当前一级菜单
+        if (!expandedLevel1.value.includes(level1.id)) {
+          expandedLevel1.value.push(level1.id);
+        }
+        
+        // 展开当前二级菜单
+        const activeLevel2Id = newActiveSubmenu[level1.id];
+        if (activeLevel2Id && level1.children) {
+          const level2Id = activeLevel2Id.split('-')[0];
+          if (!expandedLevel2.value[level1.id]) {
+            expandedLevel2.value[level1.id] = [];
+          }
+          if (!expandedLevel2.value[level1.id].includes(level2Id)) {
+            expandedLevel2.value[level1.id].push(level2Id);
+          }
+        }
+      }
+    });
+  });
+}, { deep: true });
+
+// 初始化菜单数据
+const initMenu = () => {
+  menus.value = [
+    {
+      title: '主导航',
+      children: [
+        {
+          id: 'home',
+          title: '首页',
+          icon: 'fas fa-home'
+        },
+        {
+          id: 'report',
+          title: '报表管理',
+          icon: 'fas fa-file-alt',
+          children: [
+            {
+              id: 'myReport',
+              title: '我的报表'
+            },
+            {
+              id: 'template',
+              title: '报表模板'
+            }
+          ]
+        },
+        {
+          id: 'datasource',
+          title: '数据源',
+          icon: 'fas fa-database',
+          children: [
+            { id: 'database', title: '数据库' },
+            { id: 'file', title: '文件数据' },
+            { id: 'api', title: 'API连接' }
+          ]
+        }
+      ]
+    },
+    {
+      title: '系统设置',
+      children: [
+        {
+          id: 'user',
+          title: '用户管理',
+          icon: 'fas fa-user'
+        },
+        {
+          id: 'setting',
+          title: '系统设置',
+          icon: 'fas fa-cog'
+        }
+      ]
+    }
+  ];
+};
+
+onMounted(() => {
+  console.log('初始化菜单');
+  initMenu();
+});
 </script>
 
 <style scoped>
-/* 这里保留原有的所有菜单样式 */
 .sidebar {
-  width: var(--sidebar-width);
+  width: 220px;
   background-color: white;
-  border-right: 1px solid var(--border-color);
-  display: flex;
-  flex-direction: column;
+  border-right: 1px solid #e5e7eb;
   overflow-y: auto;
-  height: calc(100vh - var(--header-height));
+  height: 100vh;
+}
+
+.text-align-left {
+  text-align: left;
 }
 
 .menu-section {
   padding: 12px 0;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid #f3f4f6;
 }
 
 .menu-section-title {
@@ -154,6 +283,13 @@ watch(() => props.activeMenu, (newValue) => {
   letter-spacing: 0.5px;
 }
 
+/* 一级菜单容器 - 确保子菜单能正确显示在下方 */
+.level1-container {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 一级菜单项 */
 .menu-item {
   display: flex;
   align-items: center;
@@ -162,17 +298,20 @@ watch(() => props.activeMenu, (newValue) => {
   text-decoration: none;
   transition: all 0.2s;
   cursor: pointer;
+  justify-content: space-between;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .menu-item:hover {
-  background-color: var(--secondary-color);
-  color: var(--primary-color);
+  background-color: #f9fafb;
+  color: #f97316; /* 橙色，与JQuick BI品牌色匹配 */
 }
 
 .menu-item.active {
-  background-color: var(--secondary-color);
-  color: var(--primary-color);
-  border-left: 3px solid var(--primary-color);
+  background-color: #fff7ed;
+  color: #f97316;
+  border-left: 3px solid #f97316;
 }
 
 .menu-item i {
@@ -181,41 +320,74 @@ watch(() => props.activeMenu, (newValue) => {
   text-align: center;
 }
 
-.menu-item .menu-badge {
-  margin-left: auto;
-  padding: 2px 8px;
-  background-color: var(--primary-color);
-  color: white;
-  border-radius: 10px;
-  font-size: 12px;
+/* 二级菜单容器 - 显示在对应一级菜单下方 */
+.level2-container {
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
 }
 
-.submenu {
-  background-color: #fff9f2;
-  padding: 0 0 0 52px;
-  display: none;
-}
-
-.submenu.show {
-  display: block;
-}
-
-.submenu-item {
+/* 二级菜单项 */
+.submenu-item.level2-item {
   display: flex;
   align-items: center;
-  padding: 10px 0;
+  padding: 10px 20px 10px 48px; /* 缩进更多，区分层级 */
   color: #666;
   cursor: pointer;
   font-size: 14px;
-  transition: color 0.2s;
+  transition: all 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #fff7ed;
 }
 
-.submenu-item:hover {
-  color: var(--primary-color);
+.submenu-item.level2-item:hover {
+  background-color: #ffedd5;
+  color: #f97316;
 }
 
-.submenu-item.active {
-  color: var(--primary-color);
+.submenu-item.level2-item.active {
+  background-color: #ffedd5;
+  color: #f97316;
   font-weight: 500;
+}
+
+/* 三级菜单容器 */
+.level3-container {
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+
+/* 三级菜单项 */
+.submenu-item.level3-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 20px 10px 68px; /* 缩进更多 */
+  color: #666;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #ffedd5;
+}
+
+.submenu-item.level3-item:hover {
+  background-color: #fed7aa;
+  color: #f97316;
+}
+
+.submenu-item.level3-item.active {
+  background-color: #fed7aa;
+  color: #f97316;
+  font-weight: 500;
+}
+
+/* 箭头旋转动画 */
+.rotate-180 {
+  transform: rotate(180deg);
 }
 </style>

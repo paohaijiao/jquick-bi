@@ -48,7 +48,7 @@ const routes = [
     component: () => import('../views/Tenant.vue')
   },
   {
-    path: '/userManage',
+    path: '/users',
     name: 'userManagePage',
     component: () => import('../views/UserManage.vue')
   },
