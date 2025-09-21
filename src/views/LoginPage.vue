@@ -147,7 +147,7 @@ const password = ref('');
 const rememberMe = ref(true);
 const captchaImage = ref('');
 const captchaInput = ref('');
-
+import { ElMessage } from 'element-plus';
 const deviceId = ref('');
 function generateCaptcha() {
  const currentTimestamp = Date.now();
@@ -194,6 +194,7 @@ const config = {
 };
   request.post('/api/oauth/token',  params.toString(), config)
   .then(response => {
+    ElMessage.success('登录成功');
     localStorage.setItem('tokenInfo', JSON.stringify(response));
     localStorage.setItem('token', response.access_token);
     router.push('/index');

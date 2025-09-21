@@ -57,11 +57,7 @@ const routes = [
     name: 'messagePage',
     component: () => import('../views/MessagePage.vue')
   },
-  {
-    path: '/video',
-    name: 'videoPage',
-    component: () => import('../views/Video.vue')
-  },
+
   {
     path: '/contact',
     name: 'contactPage',
@@ -76,6 +72,11 @@ const routes = [
     path: '/tutorials',
     name: 'tutorialsPage',
     component: () => import('../views/Tutorials.vue')
+  },
+  {
+    path: '/help',
+    name: 'helpPage',
+    component: () => import('../views/Help.vue')
   }
 ]
 

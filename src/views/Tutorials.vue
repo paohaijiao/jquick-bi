@@ -8,14 +8,14 @@
       </div>
       <div class="header-actions">
         <div class="search-box">
-            <el-icon><search /></el-icon>
+          <el-icon><Search /></el-icon>
           <input type="text" placeholder="搜索报表、数据源或文档...">
         </div>
         <div class="notification-icon">
           <i class="far fa-bell"></i>
           <span class="notification-badge">3</span>
         </div>
-        <div class="user-info" @click="toggleUserMenu">
+        <div class="user-info" @click="handleUserClick">
           <div class="user-avatar">ZL</div>
           <span class="user-name">张磊</span>
           <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
@@ -33,226 +33,82 @@
         @submenu-click="setActiveSubmenu"
       />
       
-      <!-- 右侧帮助文档区域 -->
+      <!-- 右侧视频教程区域 -->
       <main class="content-area">
         <div class="page-header">
           <div>
-            <h1 class="page-title text-align-left">帮助文档</h1>
-            <p class="page-description">所有文档和资源均托管在GitHub上，点击链接查看详细内容</p>
+            <h1 class="page-title text-align-left">视频教程</h1>
+            <p class="page-description">观看教程视频，快速掌握JQuick BI的使用技巧</p>
           </div>
         </div>
         
-        <div class="github-banner">
-          <i class="fab fa-github"></i>
-          <div class="github-banner-content">
-            <div class="github-banner-title text-align-left">JQuick BI 文档库</div>
-            <div class="github-banner-desc text-align-left">所有官方文档均托管在GitHub上，欢迎贡献和反馈</div>
-          </div>
-          <a href="https://github.com/paohaijiao" target="_blank" class="github-banner-link">
-            访问 GitHub 仓库 <i class="fas fa-external-link-alt"></i>
-          </a>
-        </div>
-        
-        <div class="documentation-grid">
-          <div class="doc-card">
-            <div class="doc-card-icon">
-              <i class="fas fa-book"></i>
+        <!-- 视频分类筛选 -->
+        <div class="video-filters">
+          <div class="filter-title text-align-left">教程分类</div>
+          <div class="filter-tags" >
+            <div 
+             v-for="(c, index) in category" :key="index"
+              class="filter-tag" 
+              :class="{ active: activeFilter === c.code }" 
+              @click="handleFilterClick(c.code)"
+            >
+              {{c.category}}
             </div>
-            <div class="doc-card-title text-align-left">用户手册</div>
-            <div class="doc-card-desc">详细介绍JQuick BI的各项功能和使用方法，适合新用户快速上手。</div>
-            <a href="https://github.com/paohaijiao" target="_blank" class="doc-card-link text-align-left">
-              查看用户手册 <i class="fas fa-arrow-right"></i>
-            </a>
-          </div>
-          
-          <div class="doc-card">
-            <div class="doc-card-icon">
-              <i class="fas fa-code"></i>
-            </div>
-            <div class="doc-card-title text-align-left">开发者指南</div>
-            <div class="doc-card-desc">包含API文档、集成指南和二次开发教程，帮助开发者扩展系统功能。</div>
-            <a href="https://github.com/paohaijiao" target="_blank" class="doc-card-link">
-              查看开发者指南 <i class="fas fa-arrow-right"></i>
-            </a>
-          </div>
-          
-          <div class="doc-card">
-            <div class="doc-card-icon">
-              <i class="fas fa-cogs"></i>
-            </div>
-            <div class="doc-card-title text-align-left">管理员手册</div>
-            <div class="doc-card-desc">系统部署、配置和维护的详细指南，适合系统管理员参考。</div>
-            <a href="https://github.com/paohaijiao" target="_blank" class="doc-card-link">
-              查看管理员手册 <i class="fas fa-arrow-right"></i>
-            </a>
           </div>
         </div>
         
-        <div class="doc-section">
-          <div class="doc-section-title">快速入门</div>
-          <div class="doc-section-content">
-            <div class="doc-item">
-              <div class="doc-item-icon">
-                <el-icon><Files /></el-icon>
-              </div>
-              <div class="doc-item-content">
-                <div class="doc-item-title text-align-left">JQuick BI 简介</div>
-                <div class="doc-item-desc text-align-left">了解JQuick BI的核心功能、优势和适用场景。</div>
-                <div class="doc-item-links">
-                  <a href="https://github.com/paohaijiao" target="_blank" class="doc-item-link">
-                    <i class="fab fa-github"></i> 查看文档
-                  </a>
-                </div>
+        <!-- 视频列表 -->
+        <div class="video-list">
+          <div 
+            class="video-card" 
+            v-for="(v) in videos" 
+            :key="v.id"
+            @click="handleVideoClick(v)"
+          >
+            <div class="video-thumbnail">
+              <img :src="`https://picsum.photos/400/225?random=${v.id}`" :alt="v.title">
+              <div class="video-duration">{{ v.duration }}</div>
+              <div class="video-play-icon">
+                <i class="fas fa-play"></i>
               </div>
             </div>
-            
-            <div class="doc-item">
-              <div class="doc-item-icon">
-                   <el-icon><User /></el-icon>
-              </div>
-              <div class="doc-item-content">
-                <div class="doc-item-title text-align-left">注册与登录</div>
-                <div class="doc-item-desc text-align-left">如何注册账号、登录系统以及找回密码的详细步骤。</div>
-                <div class="doc-item-links">
-                  <a href="https://github.com/paohaijiao" target="_blank" class="doc-item-link">
-                    <i class="fab fa-github"></i> 查看文档
-                  </a>
+            <div class="video-info">
+              <div class="video-title">{{ v.title }}</div>
+              <div class="video-meta">
+                <div class="video-views">
+                  <i class="fas fa-eye"></i>
+                  <span>{{ v.viewCount }}</span>
                 </div>
-              </div>
-            </div>
-            
-            <div class="doc-item">
-              <div class="doc-item-icon">
-                <el-icon><PieChart /></el-icon>
-              </div>
-              <div class="doc-item-content">
-                <div class="doc-item-title text-align-left">快速创建第一个报表</div>
-                <div class="doc-item-desc text-align-left">从数据源连接到报表发布的完整流程演示。</div>
-                <div class="doc-item-links">
-                  <a href="https://github.com/paohaijiao" target="_blank" class="doc-item-link">
-                    <i class="fab fa-github"></i> 查看文档
-                  </a>
-                  <a href="https://github.com/paohaijiao" target="_blank" class="doc-item-link">
-                    <i class="fab fa-github"></i> 示例代码
-                  </a>
-                </div>
+                <div class="video-date">{{ v.createdTime }}</div>
               </div>
             </div>
           </div>
         </div>
         
-        <div class="doc-section">
-          <div class="doc-section-title text-align-left">功能指南</div>
-          <div class="doc-section-content">
-            <div class="doc-item">
-              <div class="doc-item-icon">
-                <i class="fas fa-database"></i>
-              </div>
-              <div class="doc-item-content">
-                <div class="doc-item-title text-align-left">数据源管理</div>
-                <div class="doc-item-desc text-align-left">连接、配置和管理各种类型的数据源。</div>
-                <div class="doc-item-links">
-                  <a href="https://github.com/paohaijiao" target="_blank" class="doc-item-link">
-                    <i class="fab fa-github"></i> 关系型数据库
-                  </a>
-                  <a href="https://github.com/paohaijiao" target="_blank" class="doc-item-link">
-                    <i class="fab fa-github"></i> 大数据平台
-                  </a>
-                  <a href="https://github.com/paohaijiao" target="_blank" class="doc-item-link">
-                    <i class="fab fa-github"></i> API数据源
-                  </a>
-                </div>
-              </div>
-            </div>
-            
-            <div class="doc-item">
-              <div class="doc-item-icon">
-                <i class="fas fa-chart-line"></i>
-              </div>
-              <div class="doc-item-content">
-                <div class="doc-item-title text-align-left">报表设计</div>
-                <div class="doc-item-desc text-align-left">使用报表设计器创建和编辑交互式报表。</div>
-                <div class="doc-item-links">
-                  <a href="https://github.com/paohaijiaom" target="_blank" class="doc-item-link">
-                    <i class="fab fa-github"></i> 基础操作
-                  </a>
-                  <a href="https://github.com/paohaijiao" target="_blank" class="doc-item-link">
-                    <i class="fab fa-github"></i> 图表类型
-                  </a>
-                  <a href="https://github.com/paohaijiao" target="_blank" class="doc-item-link">
-                    <i class="fab fa-github"></i> 交互设置
-                  </a>
-                </div>
-              </div>
-            </div>
-            
-            <div class="doc-item">
-              <div class="doc-item-icon">
-                <i class="fas fa-users"></i>
-              </div>
-              <div class="doc-item-content">
-                <div class="doc-item-title text-align-left">用户与权限管理</div>
-                <div class="doc-item-desc text-align-left">管理用户账户、角色和资源访问权限。</div>
-                <div class="doc-item-links">
-                  <a href="https://github.com/paohaijiaom" target="_blank" class="doc-item-link">
-                    <i class="fab fa-github"></i> 用户管理
-                  </a>
-                  <a href="https://github.com/paohaijiao" target="_blank" class="doc-item-link">
-                    <i class="fab fa-github"></i> 角色配置
-                  </a>
-                  <a href="https://github.com/paohaijiao" target="_blank" class="doc-item-link">
-                    <i class="fab fa-github"></i> 权限设置
-                  </a>
-                </div>
-              </div>
-            </div>
+        <!-- 分页控件 -->
+        <div class="pagination">
+          <div 
+            class="pagination-btn" 
+            :class="{ disabled: currentPage === 1 }"
+            @click="handlePrevPage"
+          >
+            <i class="fas fa-chevron-left"></i>
           </div>
-        </div>
-        
-        <div class="help-resources">
-          <div class="resources-title">其他资源</div>
-          <div class="resources-grid">
-            <a href="https://github.com/paohaijiao" target="_blank" class="resource-item">
-              <div class="resource-icon">
-                <i class="fas fa-bug"></i>
-              </div>
-              <div class="resource-name">问题反馈</div>
-            </a>
-            
-            <a href="https://github.com/paohaijiao" target="_blank" class="resource-item">
-              <div class="resource-icon">
-                <i class="fas fa-code-branch"></i>
-              </div>
-              <div class="resource-name">源码仓库</div>
-            </a>
-            
-            <a href="https://github.com/paohaijiao" target="_blank" class="resource-item">
-              <div class="resource-icon">
-                <i class="fas fa-file-export"></i>
-              </div>
-              <div class="resource-name">下载中心</div>
-            </a>
-            
-            <a href="https://github.com/paohaijiao" target="_blank" class="resource-item">
-              <div class="resource-icon">
-                <i class="fas fa-exchange-alt"></i>
-              </div>
-              <div class="resource-name">API文档</div>
-            </a>
-            
-            <a href="https://github.com/paohaijiao" target="_blank" class="resource-item">
-              <div class="resource-icon">
-                <i class="fas fa-book-open"></i>
-              </div>
-              <div class="resource-name">知识库</div>
-            </a>
-            
-            <a href="https://github.com/paohaijiao" target="_blank" class="resource-item">
-              <div class="resource-icon">
-                <i class="fas fa-lightbulb"></i>
-              </div>
-              <div class="resource-name">最佳实践</div>
-            </a>
+          <div 
+            class="pagination-number" 
+            :class="{ active: currentPage === page }"
+            v-for="page in totalPages" 
+            :key="page"
+            @click="handlePageClick(page)"
+          >
+            {{ page }}
+          </div>
+          <div 
+            class="pagination-btn" 
+            :class="{ disabled: currentPage === totalPages }"
+            @click="handleNextPage"
+          >
+            <i class="fas fa-chevron-right"></i>
           </div>
         </div>
       </main>
@@ -265,45 +121,106 @@ export default {
 }
 </script>
 <script setup>
-import { ref } from 'vue';
+import { ref,onMounted } from 'vue';
+import request from '../api/request';
 import SidebarMenu from '@/components/SidebarMenu.vue';
-// 菜单状态管理
-const activeMenu = ref('help'); // 默认激活帮助文档
-const submenus = ref({
-  dataSource: false,
-  report: false
+import { ElMessage } from 'element-plus';
+// 侧边栏状态
+const isSidebarShow = ref(true);
+
+
+// 视频筛选状态
+const activeFilter = ref('all');
+const category = ref([]);
+// 处理筛选标签点击
+const handleFilterClick = (filter) => {
+  activeFilter.value = filter;
+  currentPage.value = 1;
+  handleTutorial();
+};
+
+// 视频数据
+const videos = ref([]);
+
+// 分页相关
+const currentPage = ref(1);
+const pageSize = ref(4);
+const totalPages = ref(5);
+
+// 处理页码点击
+const handlePageClick = (page) => {
+  currentPage.value = page;
+  handleTutorial();
+};
+
+// 上一页
+const handlePrevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+    handleTutorial();
+  }
+};
+
+// 下一页
+const handleNextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+    handleTutorial();
+  }
+};
+
+// 处理视频点击
+const handleVideoClick = (video) => {
+  alert(`准备播放视频: ${video.title}`);
+};
+
+// 响应式处理 - 移动端自动隐藏侧边栏
+const handleResize = () => {
+  if (window.innerWidth <= 768) {
+    isSidebarShow.value = false;
+  } else {
+    isSidebarShow.value = true;
+  }
+};
+
+// 初始化时检查窗口大小
+const initCategory = () => {
+request.get('/api/tutorial/category/list')
+  .then(response => {
+    console.log(response)
+    if(200==response.code){
+      category.value=response.data
+    }else{
+      ElMessage.success(`分类加载出错`);
+    }
+  }
+)}
+const handleTutorial = () => {
+let param=new Object();
+param.pageNum=currentPage.value;
+param.pageSize=pageSize.value;
+if(activeFilter.value !== 'all'){
+  param.categoryCode=activeFilter.value;
+}
+request.post('/api/tutorial/page',param)
+  .then(response => {
+    console.log(response)
+    debugger;
+    if(200==response.code){
+      videos.value=response.data.records;
+      totalPages.value=response.data.pages;
+    }else{
+      ElMessage.success(`加载数据出错`);
+    }
+  }
+)}
+onMounted(() => {
+  initCategory();
+  handleTutorial();
+  handleResize();
+  window.addEventListener('resize', handleResize);
+
 });
-const activeSubmenu = ref({
-  dataSource: '',
-  report: ''
-});
-
-
-
-// 设置激活的主菜单
-const setActiveMenu = (menu) => {
-  activeMenu.value = menu;
-  // 关闭所有子菜单
-  Object.keys(submenus.value).forEach(key => {
-    submenus.value[key] = false;
-  });
-  // 清空子菜单激活状态
-  Object.keys(activeSubmenu.value).forEach(key => {
-    activeSubmenu.value[key] = '';
-  });
-};
-
-// 设置激活的子菜单
-const setActiveSubmenu = (parentMenu, submenu) => {
-  activeMenu.value = parentMenu;
-  activeSubmenu.value[parentMenu] = submenu;
-};
-
-// 用户菜单切换
-const toggleUserMenu = () => {
-  // 实际项目中可以实现用户菜单的显示/隐藏逻辑
-  console.log('用户菜单被点击');
-};
 </script>
 
 <style>
@@ -316,10 +233,10 @@ const toggleUserMenu = () => {
   --card-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
   --sidebar-width: 260px;
   --header-height: 60px;
-  --github-color: #24292e;
+  --transition: all 0.3s ease;
 }
 .text-align-left{
-  text-align:left
+    text-align:left;
 }
 * {
   margin: 0;
@@ -516,7 +433,6 @@ body {
   width: 20px;
   margin-right: 12px;
   text-align: center;
-  transition: transform 0.3s;
 }
 
 .menu-item .menu-badge {
@@ -557,7 +473,7 @@ body {
   font-weight: 500;
 }
 
-/* 右侧帮助文档区域 */
+/* 右侧视频教程区域 */
 .content-area {
   flex: 1;
   padding: 24px;
@@ -584,237 +500,219 @@ body {
   margin-top: 4px;
 }
 
-.github-banner {
-  background-color: var(--github-color);
-  color: white;
+/* 视频分类筛选 */
+.video-filters {
+  background-color: white;
   border-radius: 12px;
+  box-shadow: var(--card-shadow);
   padding: 16px 24px;
-  margin-bottom: 32px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
+  margin-bottom: 24px;
 }
 
-.github-banner i {
-  font-size: 24px;
-}
-
-.github-banner-content {
-  flex: 1;
-}
-
-.github-banner-title {
+.filter-title {
+  font-size: 16px;
   font-weight: 600;
-  margin-bottom: 4px;
+  margin-bottom: 12px;
 }
 
-.github-banner-desc {
-  font-size: 14px;
-  opacity: 0.9;
-}
-
-.github-banner-link {
-  color: #58a6ff;
-  text-decoration: none;
-  font-weight: 500;
+.filter-tags {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
-.github-banner-link:hover {
-  text-decoration: underline;
+.filter-tag {
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid var(--border-color);
 }
 
-.documentation-grid {
+.filter-tag:hover {
+  background-color: var(--secondary-color);
+}
+
+.filter-tag.active {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+/* 视频列表 */
+.video-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 24px;
   margin-bottom: 32px;
 }
 
-.doc-card {
+.video-card {
   background-color: white;
   border-radius: 12px;
   box-shadow: var(--card-shadow);
-  padding: 24px;
-  transition: all 0.3s;
+  overflow: hidden;
+  transition: transform 0.3s, box-shadow 0.3s;
+  cursor: pointer;
 }
 
-.doc-card:hover {
-  transform: translateY(-4px);
+.video-card:hover {
+  transform: translateY(-5px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
-.doc-card-icon {
+.video-thumbnail {
+  position: relative;
+  width: 100%;
+  height: 160px;
+  background-color: #f0f0f0;
+  overflow: hidden;
+}
+
+.video-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s;
+}
+
+.video-card:hover .video-thumbnail img {
+  transform: scale(1.05);
+}
+
+.video-duration {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.video-play-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   width: 48px;
   height: 48px;
-  border-radius: 12px;
-  background-color: var(--secondary-color);
-  color: var(--primary-color);
+  background-color: rgba(255, 131, 38, 0.9);
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
-  margin-bottom: 16px;
+  color: white;
+  opacity: 0;
+  transition: opacity 0.3s;
 }
 
-.doc-card-title {
-  font-size: 18px;
+.video-card:hover .video-play-icon {
+  opacity: 1;
+}
+
+.video-info {
+  padding: 16px;
+}
+
+.video-title {
   font-weight: 600;
   margin-bottom: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  height: 40px;
 }
 
-.doc-card-desc {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 16px;
-  line-height: 1.5;
-}
-
-.doc-card-link {
-  display: inline-flex;
+.video-meta {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  color: var(--github-color);
-  font-weight: 500;
-  text-decoration: none;
-  gap: 8px;
-  transition: color 0.2s;
+  font-size: 12px;
+  color: #999;
 }
 
-.doc-card-link:hover {
-  color: var(--primary-color);
-}
-
-.doc-section {
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: var(--card-shadow);
-  padding: 24px;
-  margin-bottom: 32px;
-}
-
-.doc-section-title {
-  font-size: 20px;
-  font-weight: 600;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.doc-section-content {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.doc-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  padding: 12px 0;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.doc-item:last-child {
-  border-bottom: none;
-}
-
-.doc-item-icon {
-  width: 24px;
-  height: 24px;
-  color: var(--github-color);
+.video-views {
   display: flex;
   align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  margin-top: 3px;
-}
-
-.doc-item-content {
-  flex: 1;
-}
-
-.doc-item-title {
-  font-weight: 500;
-  margin-bottom: 4px;
-}
-
-.doc-item-desc {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 8px;
-}
-
-.doc-item-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.doc-item-link {
-  display: inline-flex;
-  align-items: center;
-  color: #58a6ff;
-  font-size: 14px;
-  text-decoration: none;
   gap: 4px;
 }
 
-.doc-item-link:hover {
-  text-decoration: underline;
+.video-date {
+  white-space: nowrap;
 }
 
-.help-resources {
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: var(--card-shadow);
-  padding: 24px;
-}
-
-.resources-title {
-  font-size: 20px;
-  font-weight: 600;
-  margin-bottom: 16px;
-}
-
-.resources-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 16px;
-}
-
-.resource-item {
+/* 分页控件 */
+.pagination {
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  padding: 16px;
-  border-radius: 8px;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.pagination-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
   border: 1px solid var(--border-color);
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
   transition: all 0.2s;
-  text-decoration: none;
-  color: var(--text-color);
 }
 
-.resource-item:hover {
+.pagination-btn:hover {
   background-color: var(--secondary-color);
-  border-color: var(--primary-color);
+  color: var(--primary-color);
 }
 
-.resource-icon {
-  font-size: 24px;
-  color: var(--github-color);
-  margin-bottom: 8px;
+.pagination-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #f5f5f5;
 }
 
-.resource-name {
-  font-size: 14px;
-  font-weight: 500;
-  text-align: center;
+.pagination-number {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-/* 旋转动画类 */
-.rotate-180 {
-  transform: rotate(180deg);
+.pagination-number:hover {
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
+}
+
+.pagination-number.active {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 0;
+    overflow: hidden;
+    transition: width var(--transition);
+  }
+  
+  .sidebar.show {
+    width: var(--sidebar-width);
+  }
+  
+  .video-list {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
 }
 </style>
