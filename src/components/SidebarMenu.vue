@@ -51,7 +51,7 @@
               class="submenu-item level3-item" 
               v-for="(level3, level3Index) in level2.children" 
               :key="level3Index"
-              @click.stop="handleLevel3Click(section, level2, level3)"
+              @click.stop="handleRoute(level3)"
               :class="{ 'active': isLevel3Active(section, level2, level3) }"
             >
               {{ level3.title }}
@@ -66,6 +66,10 @@
 <script setup>
 import { ref, defineProps, watch, defineEmits, onMounted } from 'vue';
 import request from '../api/request';
+import { useRouter } from 'vue-router';
+import { ElMessage } from 'element-plus';
+
+const router = useRouter();
 // 定义组件参数
 const props = defineProps({
   activeSection: {
@@ -117,10 +121,19 @@ const toggleSection = (section) => {
     }
   }
 };
+const handleRoute = (menu) => {
+     ElMessage.success(`已选择三级菜单：`);
+     if(null!=menu||null!=menu.route){
+        router.push(menu.route);
+     }
 
-// 第二级展开/折叠
+}
+
 const toggleLevel2 = (section, level2) => {
-  // 触发菜单点击事件
+  if(!section||null!=section.route){
+      debugger;
+      router.push(section.route);
+  }
   emit('menu-click', section.id, level2.id);
   
   // 没有子菜单时不需要展开/折叠
@@ -143,9 +156,9 @@ const toggleLevel2 = (section, level2) => {
 };
 
 // 第三级点击处理
-const handleLevel3Click = (section, level2, level3) => {
-  emit('submenu-click', section.id, level2.id, level3.id);
-};
+//const handleLevel3Click = (section, level2, level3) => {
+ // emit('submenu-click', section.id, level2.id, level3.id);
+//};
 
 // 检查第一级（section）是否激活
 const isSectionActive = (section) => {

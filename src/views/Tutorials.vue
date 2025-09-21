@@ -26,83 +26,18 @@
     <!-- 主内容区 -->
     <div class="main-content">
       <!-- 左侧菜单 -->
-      <aside class="sidebar">
-        <div class="menu-section">
-          <div class="menu-section-title">主导航</div>
-          <div class="menu-item" :class="{ active: activeMenu === 'home' }" @click="setActiveMenu('home')">
-            <i class="fas fa-home"></i>
-            <span>首页</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'dataSource' }" @click="toggleSubmenu('dataSource')">
-            <i class="fas fa-database"></i>
-            <span>数据源</span>
-            <i class="fas fa-chevron-down" style="font-size: 12px;" :class="{ 'rotate-180': submenus.dataSource }"></i>
-          </div>
-          <div class="submenu" :class="{ show: submenus.dataSource }">
-            <div class="submenu-item" :class="{ active: activeSubmenu.dataSource === 'list' }" @click="setActiveSubmenu('dataSource', 'list')">数据源列表</div>
-            <div class="submenu-item" :class="{ active: activeSubmenu.dataSource === 'new' }" @click="setActiveSubmenu('dataSource', 'new')">新增数据源</div>
-            <div class="submenu-item" :class="{ active: activeSubmenu.dataSource === 'permission' }" @click="setActiveSubmenu('dataSource', 'permission')">数据源权限</div>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'report' }" @click="toggleSubmenu('report')">
-            <i class="fas fa-file-alt"></i>
-            <span>报表</span>
-            <i class="fas fa-chevron-down" style="font-size: 12px;" :class="{ 'rotate-180': submenus.report }"></i>
-          </div>
-          <div class="submenu" :class="{ show: submenus.report }">
-            <div class="submenu-item" :class="{ active: activeSubmenu.report === 'my' }" @click="setActiveSubmenu('report', 'my')">我的报表</div>
-            <div class="submenu-item" :class="{ active: activeSubmenu.report === 'shared' }" @click="setActiveSubmenu('report', 'shared')">共享报表</div>
-            <div class="submenu-item" :class="{ active: activeSubmenu.report === 'favorite' }" @click="setActiveSubmenu('report', 'favorite')">收藏报表</div>
-            <div class="submenu-item" :class="{ active: activeSubmenu.report === 'recycle' }" @click="setActiveSubmenu('report', 'recycle')">回收站</div>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'dashboard' }" @click="setActiveMenu('dashboard')">
-            <i class="fas fa-chart-pie"></i>
-            <span>仪表盘</span>
-            <span class="menu-badge">5</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'dataset' }" @click="setActiveMenu('dataset')">
-            <i class="fas fa-cubes"></i>
-            <span>数据集</span>
-          </div>
-        </div>
-        
-        <div class="menu-section">
-          <div class="menu-section-title">系统管理</div>
-          <div class="menu-item" :class="{ active: activeMenu === 'user' }" @click="setActiveMenu('user')">
-            <i class="fas fa-users"></i>
-            <span>用户管理</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'role' }" @click="setActiveMenu('role')">
-            <i class="fas fa-user-shield"></i>
-            <span>角色权限</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'log' }" @click="setActiveMenu('log')">
-            <i class="fas fa-history"></i>
-            <span>操作日志</span>
-          </div>
-        </div>
-        
-        <div class="menu-section">
-          <div class="menu-section-title">帮助中心</div>
-          <div class="menu-item" :class="{ active: activeMenu === 'help' }" @click="setActiveMenu('help')">
-            <i class="fas fa-question-circle"></i>
-            <span>帮助文档</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'video' }" @click="setActiveMenu('video')">
-            <i class="fas fa-play-circle"></i>
-            <span>视频教程</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'contact' }" @click="setActiveMenu('contact')">
-            <i class="fas fa-comment-dots"></i>
-            <span>联系客服</span>
-          </div>
-        </div>
-      </aside>
+      <SidebarMenu 
+        :active-menu="activeMenu" 
+        :unread-count="unreadCount"
+        @menu-click="setActiveMenu"
+        @submenu-click="setActiveSubmenu"
+      />
       
       <!-- 右侧帮助文档区域 -->
       <main class="content-area">
         <div class="page-header">
           <div>
-            <h1 class="page-title">帮助文档</h1>
+            <h1 class="page-title text-align-left">帮助文档</h1>
             <p class="page-description">所有文档和资源均托管在GitHub上，点击链接查看详细内容</p>
           </div>
         </div>
@@ -110,10 +45,10 @@
         <div class="github-banner">
           <i class="fab fa-github"></i>
           <div class="github-banner-content">
-            <div class="github-banner-title">JQuick BI 文档库</div>
-            <div class="github-banner-desc">所有官方文档均托管在GitHub上，欢迎贡献和反馈</div>
+            <div class="github-banner-title text-align-left">JQuick BI 文档库</div>
+            <div class="github-banner-desc text-align-left">所有官方文档均托管在GitHub上，欢迎贡献和反馈</div>
           </div>
-          <a href="https://github.com" target="_blank" class="github-banner-link">
+          <a href="https://github.com/paohaijiao" target="_blank" class="github-banner-link">
             访问 GitHub 仓库 <i class="fas fa-external-link-alt"></i>
           </a>
         </div>
@@ -123,9 +58,9 @@
             <div class="doc-card-icon">
               <i class="fas fa-book"></i>
             </div>
-            <div class="doc-card-title">用户手册</div>
+            <div class="doc-card-title text-align-left">用户手册</div>
             <div class="doc-card-desc">详细介绍JQuick BI的各项功能和使用方法，适合新用户快速上手。</div>
-            <a href="https://github.com" target="_blank" class="doc-card-link">
+            <a href="https://github.com/paohaijiao" target="_blank" class="doc-card-link text-align-left">
               查看用户手册 <i class="fas fa-arrow-right"></i>
             </a>
           </div>
@@ -134,9 +69,9 @@
             <div class="doc-card-icon">
               <i class="fas fa-code"></i>
             </div>
-            <div class="doc-card-title">开发者指南</div>
+            <div class="doc-card-title text-align-left">开发者指南</div>
             <div class="doc-card-desc">包含API文档、集成指南和二次开发教程，帮助开发者扩展系统功能。</div>
-            <a href="https://github.com" target="_blank" class="doc-card-link">
+            <a href="https://github.com/paohaijiao" target="_blank" class="doc-card-link">
               查看开发者指南 <i class="fas fa-arrow-right"></i>
             </a>
           </div>
@@ -145,9 +80,9 @@
             <div class="doc-card-icon">
               <i class="fas fa-cogs"></i>
             </div>
-            <div class="doc-card-title">管理员手册</div>
+            <div class="doc-card-title text-align-left">管理员手册</div>
             <div class="doc-card-desc">系统部署、配置和维护的详细指南，适合系统管理员参考。</div>
-            <a href="https://github.com" target="_blank" class="doc-card-link">
+            <a href="https://github.com/paohaijiao" target="_blank" class="doc-card-link">
               查看管理员手册 <i class="fas fa-arrow-right"></i>
             </a>
           </div>
@@ -161,10 +96,10 @@
                 <el-icon><Files /></el-icon>
               </div>
               <div class="doc-item-content">
-                <div class="doc-item-title">JQuick BI 简介</div>
-                <div class="doc-item-desc">了解JQuick BI的核心功能、优势和适用场景。</div>
+                <div class="doc-item-title text-align-left">JQuick BI 简介</div>
+                <div class="doc-item-desc text-align-left">了解JQuick BI的核心功能、优势和适用场景。</div>
                 <div class="doc-item-links">
-                  <a href="https://github.com" target="_blank" class="doc-item-link">
+                  <a href="https://github.com/paohaijiao" target="_blank" class="doc-item-link">
                     <i class="fab fa-github"></i> 查看文档
                   </a>
                 </div>
@@ -176,10 +111,10 @@
                    <el-icon><User /></el-icon>
               </div>
               <div class="doc-item-content">
-                <div class="doc-item-title">注册与登录</div>
-                <div class="doc-item-desc">如何注册账号、登录系统以及找回密码的详细步骤。</div>
+                <div class="doc-item-title text-align-left">注册与登录</div>
+                <div class="doc-item-desc text-align-left">如何注册账号、登录系统以及找回密码的详细步骤。</div>
                 <div class="doc-item-links">
-                  <a href="https://github.com" target="_blank" class="doc-item-link">
+                  <a href="https://github.com/paohaijiao" target="_blank" class="doc-item-link">
                     <i class="fab fa-github"></i> 查看文档
                   </a>
                 </div>
@@ -191,13 +126,13 @@
                 <el-icon><PieChart /></el-icon>
               </div>
               <div class="doc-item-content">
-                <div class="doc-item-title">快速创建第一个报表</div>
-                <div class="doc-item-desc">从数据源连接到报表发布的完整流程演示。</div>
+                <div class="doc-item-title text-align-left">快速创建第一个报表</div>
+                <div class="doc-item-desc text-align-left">从数据源连接到报表发布的完整流程演示。</div>
                 <div class="doc-item-links">
-                  <a href="https://github.com" target="_blank" class="doc-item-link">
+                  <a href="https://github.com/paohaijiao" target="_blank" class="doc-item-link">
                     <i class="fab fa-github"></i> 查看文档
                   </a>
-                  <a href="https://github.com" target="_blank" class="doc-item-link">
+                  <a href="https://github.com/paohaijiao" target="_blank" class="doc-item-link">
                     <i class="fab fa-github"></i> 示例代码
                   </a>
                 </div>
@@ -207,23 +142,23 @@
         </div>
         
         <div class="doc-section">
-          <div class="doc-section-title">功能指南</div>
+          <div class="doc-section-title text-align-left">功能指南</div>
           <div class="doc-section-content">
             <div class="doc-item">
               <div class="doc-item-icon">
                 <i class="fas fa-database"></i>
               </div>
               <div class="doc-item-content">
-                <div class="doc-item-title">数据源管理</div>
-                <div class="doc-item-desc">连接、配置和管理各种类型的数据源。</div>
+                <div class="doc-item-title text-align-left">数据源管理</div>
+                <div class="doc-item-desc text-align-left">连接、配置和管理各种类型的数据源。</div>
                 <div class="doc-item-links">
-                  <a href="https://github.com" target="_blank" class="doc-item-link">
+                  <a href="https://github.com/paohaijiao" target="_blank" class="doc-item-link">
                     <i class="fab fa-github"></i> 关系型数据库
                   </a>
-                  <a href="https://github.com" target="_blank" class="doc-item-link">
+                  <a href="https://github.com/paohaijiao" target="_blank" class="doc-item-link">
                     <i class="fab fa-github"></i> 大数据平台
                   </a>
-                  <a href="https://github.com" target="_blank" class="doc-item-link">
+                  <a href="https://github.com/paohaijiao" target="_blank" class="doc-item-link">
                     <i class="fab fa-github"></i> API数据源
                   </a>
                 </div>
@@ -235,16 +170,16 @@
                 <i class="fas fa-chart-line"></i>
               </div>
               <div class="doc-item-content">
-                <div class="doc-item-title">报表设计</div>
-                <div class="doc-item-desc">使用报表设计器创建和编辑交互式报表。</div>
+                <div class="doc-item-title text-align-left">报表设计</div>
+                <div class="doc-item-desc text-align-left">使用报表设计器创建和编辑交互式报表。</div>
                 <div class="doc-item-links">
-                  <a href="https://github.com" target="_blank" class="doc-item-link">
+                  <a href="https://github.com/paohaijiaom" target="_blank" class="doc-item-link">
                     <i class="fab fa-github"></i> 基础操作
                   </a>
-                  <a href="https://github.com" target="_blank" class="doc-item-link">
+                  <a href="https://github.com/paohaijiao" target="_blank" class="doc-item-link">
                     <i class="fab fa-github"></i> 图表类型
                   </a>
-                  <a href="https://github.com" target="_blank" class="doc-item-link">
+                  <a href="https://github.com/paohaijiao" target="_blank" class="doc-item-link">
                     <i class="fab fa-github"></i> 交互设置
                   </a>
                 </div>
@@ -256,16 +191,16 @@
                 <i class="fas fa-users"></i>
               </div>
               <div class="doc-item-content">
-                <div class="doc-item-title">用户与权限管理</div>
-                <div class="doc-item-desc">管理用户账户、角色和资源访问权限。</div>
+                <div class="doc-item-title text-align-left">用户与权限管理</div>
+                <div class="doc-item-desc text-align-left">管理用户账户、角色和资源访问权限。</div>
                 <div class="doc-item-links">
-                  <a href="https://github.com" target="_blank" class="doc-item-link">
+                  <a href="https://github.com/paohaijiaom" target="_blank" class="doc-item-link">
                     <i class="fab fa-github"></i> 用户管理
                   </a>
-                  <a href="https://github.com" target="_blank" class="doc-item-link">
+                  <a href="https://github.com/paohaijiao" target="_blank" class="doc-item-link">
                     <i class="fab fa-github"></i> 角色配置
                   </a>
-                  <a href="https://github.com" target="_blank" class="doc-item-link">
+                  <a href="https://github.com/paohaijiao" target="_blank" class="doc-item-link">
                     <i class="fab fa-github"></i> 权限设置
                   </a>
                 </div>
@@ -277,42 +212,42 @@
         <div class="help-resources">
           <div class="resources-title">其他资源</div>
           <div class="resources-grid">
-            <a href="https://github.com" target="_blank" class="resource-item">
+            <a href="https://github.com/paohaijiao" target="_blank" class="resource-item">
               <div class="resource-icon">
                 <i class="fas fa-bug"></i>
               </div>
               <div class="resource-name">问题反馈</div>
             </a>
             
-            <a href="https://github.com" target="_blank" class="resource-item">
+            <a href="https://github.com/paohaijiao" target="_blank" class="resource-item">
               <div class="resource-icon">
                 <i class="fas fa-code-branch"></i>
               </div>
               <div class="resource-name">源码仓库</div>
             </a>
             
-            <a href="https://github.com" target="_blank" class="resource-item">
+            <a href="https://github.com/paohaijiao" target="_blank" class="resource-item">
               <div class="resource-icon">
                 <i class="fas fa-file-export"></i>
               </div>
               <div class="resource-name">下载中心</div>
             </a>
             
-            <a href="https://github.com" target="_blank" class="resource-item">
+            <a href="https://github.com/paohaijiao" target="_blank" class="resource-item">
               <div class="resource-icon">
                 <i class="fas fa-exchange-alt"></i>
               </div>
               <div class="resource-name">API文档</div>
             </a>
             
-            <a href="https://github.com" target="_blank" class="resource-item">
+            <a href="https://github.com/paohaijiao" target="_blank" class="resource-item">
               <div class="resource-icon">
                 <i class="fas fa-book-open"></i>
               </div>
               <div class="resource-name">知识库</div>
             </a>
             
-            <a href="https://github.com" target="_blank" class="resource-item">
+            <a href="https://github.com/paohaijiao" target="_blank" class="resource-item">
               <div class="resource-icon">
                 <i class="fas fa-lightbulb"></i>
               </div>
@@ -326,12 +261,12 @@
 </template>
 <script>
 export default {
-  name: 'HelpPage'
+  name: 'tutorialsPage'
 }
 </script>
 <script setup>
 import { ref } from 'vue';
-
+import SidebarMenu from '@/components/SidebarMenu.vue';
 // 菜单状态管理
 const activeMenu = ref('help'); // 默认激活帮助文档
 const submenus = ref({
@@ -343,11 +278,7 @@ const activeSubmenu = ref({
   report: ''
 });
 
-// 切换子菜单显示/隐藏
-const toggleSubmenu = (menu) => {
-  submenus.value[menu] = !submenus.value[menu];
-  activeMenu.value = menu;
-};
+
 
 // 设置激活的主菜单
 const setActiveMenu = (menu) => {
@@ -387,7 +318,9 @@ const toggleUserMenu = () => {
   --header-height: 60px;
   --github-color: #24292e;
 }
-
+.text-align-left{
+  text-align:left
+}
 * {
   margin: 0;
   padding: 0;
