@@ -92,6 +92,11 @@ const routes = [
     path: '/connector',
     name: 'connectorPage',
     component: () => import('../views/Connector.vue')
+  },
+  {
+    path: '/dataSet',
+    name: 'dataSetPage',
+    component: () => import('../views/DataSet.vue')
   }
 ]
 
