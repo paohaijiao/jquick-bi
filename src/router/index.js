@@ -87,6 +87,11 @@ const routes = [
     path: '/variable',
     name: 'variablePage',
     component: () => import('../views/Variable.vue')
+  },
+  {
+    path: '/connector',
+    name: 'connectorPage',
+    component: () => import('../views/Connector.vue')
   }
 ]
 
