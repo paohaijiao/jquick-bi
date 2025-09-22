@@ -1,0 +1,1479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据源列表 - JQuick BI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #ff8326;
+            --secondary-color: #fff5eb;
+            --border-color: #ffd5b8;
+            --text-color: #2d3e50;
+            --light-bg: #f9f9f9;
+            --card-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            --sidebar-width: 260px;
+            --header-height: 60px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            color: var(--text-color);
+            background-color: var(--light-bg);
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        /* 顶部导航栏 */
+        .header {
+            height: var(--header-height);
+            background-color: white;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            z-index: 10;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            color: var(--primary-color);
+            font-size: 22px;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            font-size: 26px;
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .search-box {
+            position: relative;
+            width: 280px;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 8px 12px 8px 36px;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(255, 131, 38, 0.2);
+        }
+        
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 20px;
+            transition: background-color 0.2s;
+        }
+        
+        .user-info:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .user-name {
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        
+        .notification-icon {
+            position: relative;
+            font-size: 18px;
+            color: #666;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .notification-icon:hover {
+            color: var(--primary-color);
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: #ff4d4f;
+            color: white;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* 主内容区 */
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        /* 左侧BI菜单 */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: white;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            height: calc(100vh - var(--header-height));
+        }
+        
+        .menu-section {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .menu-section-title {
+            padding: 0 20px;
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #666;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .menu-item:hover {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+        }
+        
+        .menu-item.active {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        .menu-item i {
+            width: 20px;
+            margin-right: 12px;
+            text-align: center;
+        }
+        
+        .menu-item .menu-badge {
+            margin-left: auto;
+            padding: 2px 8px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+        
+        .submenu {
+            background-color: #fff9f2;
+            padding: 0 0 0 52px;
+            display: none;
+        }
+        
+        .submenu.show {
+            display: block;
+        }
+        
+        .submenu-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            color: #666;
+            cursor: pointer;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+        
+        .submenu-item:hover {
+            color: var(--primary-color);
+        }
+        
+        .submenu-item.active {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        /* 右侧数据源列表区域 */
+        .content-area {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            background-color: var(--light-bg);
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        
+        .page-description {
+            font-size: 14px;
+            color: #666;
+            margin-top: 4px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, #ff8326, #ff6a00);
+            color: white;
+            box-shadow: 0 2px 5px rgba(255, 131, 38, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(to right, #ff6a00, #ff8326);
+            box-shadow: 0 4px 8px rgba(255, 131, 38, 0.4);
+            transform: translateY(-1px);
+        }
+        
+        .btn-outline {
+            background-color: white;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .btn i {
+            margin-right: 8px;
+        }
+        
+        /* 筛选和搜索区域 */
+        .filter-bar {
+            background-color: white;
+            border-radius: 12px;
+            padding: 16px 20px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .filter-group {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+        
+        .filter-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .filter-item label {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .filter-item select, .filter-item input {
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .search-filter {
+            position: relative;
+            width: 240px;
+        }
+        
+        .search-filter input {
+            width: 100%;
+            padding: 8px 12px 8px 36px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .search-filter i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+        
+        /* 数据源列表 */
+        .data-source-list {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+        }
+        
+        .table-header {
+            display: grid;
+            grid-template-columns: 3fr 1fr 1fr 1fr 120px;
+            padding: 16px 20px;
+            background-color: var(--light-bg);
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .table-row {
+            display: grid;
+            grid-template-columns: 3fr 1fr 1fr 1fr 120px;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+        
+        .table-row:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .table-row:last-child {
+            border-bottom: none;
+        }
+        
+        .data-source-name {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .data-source-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        
+        .data-source-icon.mysql {
+            background-color: #f6f6f6;
+            color: #0061a8;
+        }
+        
+        .data-source-icon.oracle {
+            background-color: #fef7e0;
+            color: #f80000;
+        }
+        
+        .data-source-icon.api {
+            background-color: #e6f7ff;
+            color: #1890ff;
+        }
+        
+        .data-source-icon.excel {
+            background-color: #e8f4e9;
+            color: #4caf50;
+        }
+        
+        .data-source-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .source-name {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .source-desc {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-online {
+            background-color: #f0f9eb;
+            color: #52c41a;
+        }
+        
+        .status-offline {
+            background-color: #fff2f0;
+            color: #ff4d4f;
+        }
+        
+        .operation-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+        
+        .operation-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .operation-btn:hover {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+        }
+        
+        /* 分页控件 */
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            font-size: 14px;
+        }
+        
+        .pagination-info {
+            color: #666;
+        }
+        
+        .pagination-controls {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .page-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            border: 1px solid var(--border-color);
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .page-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .page-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 模态框样式 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal {
+            width: 700px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal-close:hover {
+            color: var(--primary-color);
+        }
+
+        /* Tab 样式 */
+        .modal-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab-btn {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .tab-btn:hover:not(.active) {
+            color: var(--primary-color);
+            background-color: var(--secondary-color);
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(255, 131, 38, 0.2);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* 属性设置样式 */
+        .property-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+            align-items: center;
+        }
+
+        .property-item .form-control {
+            flex: 1;
+        }
+
+        .remove-property {
+            color: #ff4d4f;
+            background: none;
+            border: none;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .remove-property:hover {
+            background-color: #fff2f0;
+        }
+
+        .add-property {
+            color: var(--primary-color);
+            background-color: var(--secondary-color);
+            border: 1px dashed var(--primary-color);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .add-property:hover {
+            background-color: rgba(255, 131, 38, 0.15);
+        }
+
+        /* 模态框底部 */
+        .modal-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* 确认删除模态框 */
+        .confirm-modal {
+            width: 400px;
+        }
+
+        .confirm-content {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .confirm-icon {
+            font-size: 48px;
+            color: #faad14;
+            margin-bottom: 16px;
+        }
+
+        .confirm-message {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部导航栏 -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-chart-line"></i>
+                <span>JQuick BI</span>
+            </div>
+            <div class="header-actions">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="搜索报表、数据源或文档...">
+                </div>
+                <div class="notification-icon">
+                    <i class="far fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar">ZL</div>
+                    <span class="user-name">张磊</span>
+                    <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
+                </div>
+            </div>
+        </header>
+        
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <!-- 左侧BI菜单 -->
+            <aside class="sidebar">
+                <div class="menu-section">
+                    <div class="menu-section-title">主导航</div>
+                    <div class="menu-item">
+                        <i class="fas fa-home"></i>
+                        <span>首页</span>
+                    </div>
+                    <div class="menu-item active" id="dataSourceMenu">
+                        <i class="fas fa-database"></i>
+                        <span>数据源</span>
+                        <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
+                    </div>
+                    <div class="submenu show" id="dataSourceSubmenu">
+                        <div class="submenu-item active">数据源列表</div>
+                        <div class="submenu-item">新增数据源</div>
+                        <div class="submenu-item">数据源权限</div>
+                    </div>
+                    <div class="menu-item" id="reportMenu">
+                        <i class="fas fa-file-alt"></i>
+                        <span>报表</span>
+                        <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
+                    </div>
+                    <div class="submenu" id="reportSubmenu">
+                        <div class="submenu-item">我的报表</div>
+                        <div class="submenu-item">共享报表</div>
+                        <div class="submenu-item">收藏报表</div>
+                        <div class="submenu-item">回收站</div>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>仪表盘</span>
+                        <span class="menu-badge">5</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-cubes"></i>
+                        <span>数据集</span>
+                    </div>
+                </div>
+                
+                <div class="menu-section">
+                    <div class="menu-section-title">系统管理</div>
+                    <div class="menu-item">
+                        <i class="fas fa-users"></i>
+                        <span>用户管理</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-user-shield"></i>
+                        <span>角色权限</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-history"></i>
+                        <span>操作日志</span>
+                    </div>
+                </div>
+                
+                <div class="menu-section">
+                    <div class="menu-section-title">帮助中心</div>
+                    <div class="menu-item">
+                        <i class="fas fa-question-circle"></i>
+                        <span>帮助文档</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-play-circle"></i>
+                        <span>视频教程</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-comment-dots"></i>
+                        <span>联系客服</span>
+                    </div>
+                </div>
+            </aside>
+            
+            <!-- 右侧数据源列表区域 -->
+            <main class="content-area">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">数据源列表</h1>
+                        <p class="page-description">管理所有可用的数据源，包括数据库、API接口和文件等</p>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-outline">
+                            <i class="fas fa-download"></i>
+                            <span>导出</span>
+                        </button>
+                        <button class="btn btn-primary" id="addDataSourceBtn">
+                            <i class="fas fa-plus"></i>
+                            <span>新增数据源</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="filter-bar">
+                    <div class="filter-group">
+                        <div class="filter-item">
+                            <label>数据源类型:</label>
+                            <select>
+                                <option value="">全部</option>
+                                <option value="mysql">MySQL</option>
+                                <option value="oracle">Oracle</option>
+                                <option value="api">API接口</option>
+                                <option value="excel">Excel</option>
+                            </select>
+                        </div>
+                        <div class="filter-item">
+                            <label>状态:</label>
+                            <select>
+                                <option value="">全部</option>
+                                <option value="online">在线</option>
+                                <option value="offline">离线</option>
+                            </select>
+                        </div>
+                        <div class="filter-item">
+                            <label>创建时间:</label>
+                            <input type="date">
+                            <span>至</span>
+                            <input type="date">
+                        </div>
+                    </div>
+                    <div class="search-filter">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="搜索数据源名称...">
+                    </div>
+                </div>
+                
+                <div class="data-source-list">
+                    <div class="table-header">
+                        <div>数据源名称</div>
+                        <div>类型</div>
+                        <div>状态</div>
+                        <div>创建时间</div>
+                        <div>操作</div>
+                    </div>
+                    
+                    <div class="table-row" data-id="1">
+                        <div class="data-source-name">
+                            <div class="data-source-icon mysql">
+                                <i class="fas fa-database"></i>
+                            </div>
+                            <div class="data-source-info">
+                                <div class="source-name">销售订单数据库</div>
+                                <div class="source-desc">存储所有销售订单相关数据</div>
+                            </div>
+                        </div>
+                        <div>MySQL</div>
+                        <div><span class="status-badge status-online"><i class="fas fa-check-circle"></i> 在线</span></div>
+                        <div>2023-06-15</div>
+                        <div class="operation-buttons">
+                            <button class="operation-btn edit-btn" title="编辑">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="operation-btn delete-btn" title="删除">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="table-row" data-id="2">
+                        <div class="data-source-name">
+                            <div class="data-source-icon api">
+                                <i class="fas fa-plug"></i>
+                            </div>
+                            <div class="data-source-info">
+                                <div class="source-name">用户行为API</div>
+                                <div class="source-desc">获取用户行为分析数据的接口</div>
+                            </div>
+                        </div>
+                        <div>API接口</div>
+                        <div><span class="status-badge status-online"><i class="fas fa-check-circle"></i> 在线</span></div>
+                        <div>2023-05-28</div>
+                        <div class="operation-buttons">
+                            <button class="operation-btn edit-btn" title="编辑">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="operation-btn delete-btn" title="删除">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="table-row" data-id="3">
+                        <div class="data-source-name">
+                            <div class="data-source-icon excel">
+                                <i class="fas fa-file-excel"></i>
+                            </div>
+                            <div class="data-source-info">
+                                <div class="source-name">季度报表汇总</div>
+                                <div class="source-desc">各季度业务数据汇总表格</div>
+                            </div>
+                        </div>
+                        <div>Excel</div>
+                        <div><span class="status-badge status-offline"><i class="fas fa-exclamation-circle"></i> 离线</span></div>
+                        <div>2023-04-10</div>
+                        <div class="operation-buttons">
+                            <button class="operation-btn edit-btn" title="编辑">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="operation-btn delete-btn" title="删除">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="table-row" data-id="4">
+                        <div class="data-source-name">
+                            <div class="data-source-icon oracle">
+                                <i class="fas fa-database"></i>
+                            </div>
+                            <div class="data-source-info">
+                                <div class="source-name">客户信息库</div>
+                                <div class="source-desc">存储所有客户基本信息和交互记录</div>
+                            </div>
+                        </div>
+                        <div>Oracle</div>
+                        <div><span class="status-badge status-online"><i class="fas fa-check-circle"></i> 在线</span></div>
+                        <div>2023-03-05</div>
+                        <div class="operation-buttons">
+                            <button class="operation-btn edit-btn" title="编辑">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="operation-btn delete-btn" title="删除">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="pagination">
+                    <div class="pagination-info">显示 1-4 条，共 24 条</div>
+                    <div class="pagination-controls">
+                        <button class="page-btn" disabled>
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="page-btn active">1</button>
+                        <button class="page-btn">2</button>
+                        <button class="page-btn">3</button>
+                        <button class="page-btn">4</button>
+                        <button class="page-btn">5</button>
+                        <button class="page-btn">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- 新增/编辑数据源模态框 -->
+    <div class="modal-overlay" id="dataSourceModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">新增数据源</h3>
+                <button class="modal-close" id="modalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-tabs">
+                <button class="tab-btn active" data-tab="basic">基本信息</button>
+                <button class="tab-btn" data-tab="properties">属性设置</button>
+                <button class="tab-btn" data-tab="advanced">高级配置</button>
+            </div>
+            
+            <div class="modal-body">
+                <!-- 基本信息Tab -->
+                <div class="tab-content active" id="basic-tab">
+                    <input type="hidden" id="dataSourceId">
+                    <div class="form-group">
+                        <label>数据源名称 <span style="color: #ff4d4f;">*</span></label>
+                        <input type="text" class="form-control" id="sourceName" placeholder="请输入数据源名称">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>数据源类型 <span style="color: #ff4d4f;">*</span></label>
+                        <select class="form-control" id="sourceType">
+                            <option value="">请选择数据源类型</option>
+                            <option value="mysql">MySQL</option>
+                            <option value="oracle">Oracle</option>
+                            <option value="api">API接口</option>
+                            <option value="excel">Excel</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>描述信息</label>
+                        <textarea class="form-control" id="sourceDesc" rows="3" placeholder="请输入数据源描述信息"></textarea>
+                    </div>
+                    
+                    <div class="form-group" id="mysqlConfig" style="display: none;">
+                        <label>数据库配置</label>
+                        <div class="form-group">
+                            <label>主机地址</label>
+                            <input type="text" class="form-control" placeholder="数据库主机地址">
+                        </div>
+                        <div class="form-group">
+                            <label>端口</label>
+                            <input type="text" class="form-control" placeholder="数据库端口" value="3306">
+                        </div>
+                        <div class="form-group">
+                            <label>数据库名</label>
+                            <input type="text" class="form-control" placeholder="数据库名称">
+                        </div>
+                        <div class="form-group">
+                            <label>用户名</label>
+                            <input type="text" class="form-control" placeholder="数据库用户名">
+                        </div>
+                        <div class="form-group">
+                            <label>密码</label>
+                            <input type="password" class="form-control" placeholder="数据库密码">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" id="apiConfig" style="display: none;">
+                        <label>API配置</label>
+                        <div class="form-group">
+                            <label>接口URL</label>
+                            <input type="text" class="form-control" placeholder="API接口地址">
+                        </div>
+                        <div class="form-group">
+                            <label>请求方法</label>
+                            <select class="form-control">
+                                <option value="get">GET</option>
+                                <option value="post">POST</option>
+                                <option value="put">PUT</option>
+                                <option value="delete">DELETE</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>请求头</label>
+                            <textarea class="form-control" rows="3" placeholder="请输入请求头信息，JSON格式"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 属性设置Tab -->
+                <div class="tab-content" id="properties-tab">
+                    <div class="form-group">
+                        <label>数据源属性</label>
+                        <p style="font-size: 12px; color: #666; margin-bottom: 10px;">添加数据源的相关属性，可用于后续数据处理和分析</p>
+                        
+                        <div id="propertiesContainer">
+                            <div class="property-item">
+                                <input type="text" class="form-control" placeholder="属性名称" name="propName[]">
+                                <input type="text" class="form-control" placeholder="属性值" name="propValue[]">
+                                <button type="button" class="remove-property">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <button type="button" class="add-property" id="addPropertyBtn">
+                            <i class="fas fa-plus"></i>
+                            <span>添加属性</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 高级配置Tab -->
+                <div class="tab-content" id="advanced-tab">
+                    <div class="form-group">
+                        <label>连接超时时间（秒）</label>
+                        <input type="number" class="form-control" value="30" min="1" max="300">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>缓存时间（分钟）</label>
+                        <input type="number" class="form-control" value="10" min="0" max="1440">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>同步频率</label>
+                        <select class="form-control">
+                            <option value="manual">手动同步</option>
+                            <option value="hourly">每小时</option>
+                            <option value="daily">每天</option>
+                            <option value="weekly">每周</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>权限设置</label>
+                        <select class="form-control">
+                            <option value="private">仅自己可见</option>
+                            <option value="team">团队可见</option>
+                            <option value="public">全部可见</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelBtn">取消</button>
+                <button class="btn btn-primary" id="saveBtn">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 确认删除模态框 -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal confirm-modal">
+            <div class="modal-header">
+                <h3 class="modal-title">确认删除</h3>
+                <button class="modal-close" id="confirmClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="confirm-content">
+                <div class="confirm-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <p class="confirm-message">您确定要删除这个数据源吗？此操作不可撤销。</p>
+                <input type="hidden" id="deleteId">
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelDeleteBtn">取消</button>
+                <button class="btn btn-primary" style="background-color: #ff4d4f;" id="confirmDeleteBtn">确认删除</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 菜单展开/折叠功能
+        document.getElementById('dataSourceMenu').addEventListener('click', function() {
+            document.getElementById('dataSourceSubmenu').classList.toggle('show');
+        });
+        
+        document.getElementById('reportMenu').addEventListener('click', function() {
+            document.getElementById('reportSubmenu').classList.toggle('show');
+        });
+        
+        // Tab切换功能
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                // 移除所有active类
+                tabBtns.forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                // 给当前点击的按钮添加active类
+                this.classList.add('active');
+                
+                // 显示对应的内容
+                const tabId = this.getAttribute('data-tab');
+                document.getElementById(`${tabId}-tab`).classList.add('active');
+            });
+        });
+        
+        // 数据源类型切换显示不同配置项
+        const sourceTypeSelect = document.getElementById('sourceType');
+        sourceTypeSelect.addEventListener('change', function() {
+            const selectedValue = this.value;
+            
+            // 隐藏所有配置项
+            document.getElementById('mysqlConfig').style.display = 'none';
+            document.getElementById('apiConfig').style.display = 'none';
+            
+            // 显示选中的配置项
+            if (selectedValue === 'mysql' || selectedValue === 'oracle') {
+                document.getElementById('mysqlConfig').style.display = 'block';
+            } else if (selectedValue === 'api') {
+                document.getElementById('apiConfig').style.display = 'block';
+            }
+        });
+        
+        // 添加属性按钮功能
+        document.getElementById('addPropertyBtn').addEventListener('click', function() {
+            const propertiesContainer = document.getElementById('propertiesContainer');
+            
+            // 创建新的属性项
+            const newProperty = document.createElement('div');
+            newProperty.className = 'property-item';
+            newProperty.innerHTML = `
+                <input type="text" class="form-control" placeholder="属性名称" name="propName[]">
+                <input type="text" class="form-control" placeholder="属性值" name="propValue[]">
+                <button type="button" class="remove-property">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            // 添加到容器
+            propertiesContainer.appendChild(newProperty);
+            
+            // 给新添加的删除按钮绑定事件
+            newProperty.querySelector('.remove-property').addEventListener('click', function() {
+                propertiesContainer.removeChild(newProperty);
+            });
+        });
+        
+        // 初始属性项的删除按钮事件
+        document.querySelectorAll('.remove-property').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const propertyItem = this.closest('.property-item');
+                if (document.querySelectorAll('.property-item').length > 1) {
+                    document.getElementById('propertiesContainer').removeChild(propertyItem);
+                } else {
+                    // 至少保留一个属性项
+                    propertyItem.querySelector('[name="propName[]"]').value = '';
+                    propertyItem.querySelector('[name="propValue[]"]').value = '';
+                }
+            });
+        });
+        
+        // 模态框控制
+        const dataSourceModal = document.getElementById('dataSourceModal');
+        const confirmModal = document.getElementById('confirmModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const dataSourceId = document.getElementById('dataSourceId');
+        const sourceName = document.getElementById('sourceName');
+        const sourceType = document.getElementById('sourceType');
+        const sourceDesc = document.getElementById('sourceDesc');
+        
+        // 打开新增数据源模态框
+        document.getElementById('addDataSourceBtn').addEventListener('click', function() {
+            modalTitle.textContent = '新增数据源';
+            dataSourceId.value = '';
+            sourceName.value = '';
+            sourceType.value = '';
+            sourceDesc.value = '';
+            
+            // 重置属性列表
+            const propertiesContainer = document.getElementById('propertiesContainer');
+            propertiesContainer.innerHTML = `
+                <div class="property-item">
+                    <input type="text" class="form-control" placeholder="属性名称" name="propName[]">
+                    <input type="text" class="form-control" placeholder="属性值" name="propValue[]">
+                    <button type="button" class="remove-property">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            // 重新绑定删除事件
+            document.querySelectorAll('.remove-property').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const propertyItem = this.closest('.property-item');
+                    if (document.querySelectorAll('.property-item').length > 1) {
+                        propertiesContainer.removeChild(propertyItem);
+                    }
+                });
+            });
+            
+            // 隐藏所有配置项
+            document.getElementById('mysqlConfig').style.display = 'none';
+            document.getElementById('apiConfig').style.display = 'none';
+            
+            // 显示模态框
+            dataSourceModal.style.display = 'flex';
+        });
+        
+        // 打开编辑数据源模态框
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const row = this.closest('.table-row');
+                const id = row.getAttribute('data-id');
+                const name = row.querySelector('.source-name').textContent;
+                const type = row.children[1].textContent;
+                const desc = row.querySelector('.source-desc').textContent;
+                
+                // 填充表单数据
+                modalTitle.textContent = '编辑数据源';
+                dataSourceId.value = id;
+                sourceName.value = name;
+                sourceType.value = type.toLowerCase();
+                sourceDesc.value = desc;
+                
+                // 根据类型显示对应配置项
+                if (type === 'MySQL' || type === 'Oracle') {
+                    document.getElementById('mysqlConfig').style.display = 'block';
+                    document.getElementById('apiConfig').style.display = 'none';
+                } else if (type === 'API接口') {
+                    document.getElementById('mysqlConfig').style.display = 'none';
+                    document.getElementById('apiConfig').style.display = 'block';
+                } else {
+                    document.getElementById('mysqlConfig').style.display = 'none';
+                    document.getElementById('apiConfig').style.display = 'none';
+                }
+                
+                // 显示模态框
+                dataSourceModal.style.display = 'flex';
+            });
+        });
+        
+        // 打开删除确认模态框
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const row = this.closest('.table-row');
+                const id = row.getAttribute('data-id');
+                document.getElementById('deleteId').value = id;
+                confirmModal.style.display = 'flex';
+            });
+        });
+        
+        // 关闭模态框
+        document.getElementById('modalClose').addEventListener('click', function() {
+            dataSourceModal.style.display = 'none';
+        });
+        
+        document.getElementById('cancelBtn').addEventListener('click', function() {
+            dataSourceModal.style.display = 'none';
+        });
+        
+        document.getElementById('confirmClose').addEventListener('click', function() {
+            confirmModal.style.display = 'none';
+        });
+        
+        document.getElementById('cancelDeleteBtn').addEventListener('click', function() {
+            confirmModal.style.display = 'none';
+        });
+        
+        // 点击模态框外部关闭
+        dataSourceModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                dataSourceModal.style.display = 'none';
+            }
+        });
+        
+        confirmModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                confirmModal.style.display = 'none';
+            }
+        });
+        
+        // 保存数据源
+        document.getElementById('saveBtn').addEventListener('click', function() {
+            // 验证基本信息
+            if (!sourceName.value.trim()) {
+                alert('请输入数据源名称');
+                return;
+            }
+            
+            if (!sourceType.value) {
+                alert('请选择数据源类型');
+                return;
+            }
+            
+            // 收集属性数据
+            const properties = [];
+            document.querySelectorAll('.property-item').forEach(item => {
+                const name = item.querySelector('[name="propName[]"]').value.trim();
+                const value = item.querySelector('[name="propValue[]"]').value.trim();
+                if (name) {
+                    properties.push({ name, value });
+                }
+            });
+            
+            // 构建表单数据
+            const formData = {
+                id: dataSourceId.value,
+                name: sourceName.value.trim(),
+                type: sourceType.value,
+                desc: sourceDesc.value.trim(),
+                properties: properties
+            };
+            
+            // 模拟保存操作
+            console.log('保存数据源:', formData);
+            
+            // 显示成功消息
+            alert(dataSourceId.value ? '数据源更新成功' : '数据源创建成功');
+            
+            // 关闭模态框
+            dataSourceModal.style.display = 'none';
+            
+            // 这里可以添加刷新列表的逻辑
+        });
+        
+        // 确认删除
+        document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+            const id = document.getElementById('deleteId').value;
+            
+            // 模拟删除操作
+            console.log('删除数据源ID:', id);
+            
+            // 从DOM中移除对应行
+            document.querySelector(`.table-row[data-id="${id}"]`).remove();
+            
+            // 关闭模态框
+            confirmModal.style.display = 'none';
+            
+            // 显示成功消息
+            alert('数据源已删除');
+        });
+    </script>
+</body>
+</html>
