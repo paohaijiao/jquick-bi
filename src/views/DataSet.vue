@@ -96,7 +96,7 @@
       <main class="content-area">
         <div class="page-header">
           <div>
-            <h1 class="page-title text-align-left">数据集管理</h1>
+            <h1 class="page-title">数据集管理</h1>
             <p class="page-description">管理用户数据集、订单数据集及其关联关系</p>
           </div>
           <div class="action-buttons">
@@ -224,113 +224,17 @@
             </div>
           </div>
           
-          <!-- 用户数据集表头 -->
-          <div class="table-header users-header" v-if="activeTab === 'users'">
-            <div>id <span class="column-type">Integer</span></div>
-            <div>name <span class="column-type">String</span></div>
-            <div>age <span class="column-type">Integer</span></div>
-            <div>city <span class="column-type">String</span></div>
-            <div>salary <span class="column-type">Double</span></div>
-            <div>操作</div>
-          </div>
-          
-          <!-- 订单数据集表头 -->
-          <div class="table-header orders-header" v-if="activeTab === 'orders'">
-            <div>order_id <span class="column-type">Integer</span></div>
-            <div>user_id <span class="column-type">Integer</span></div>
-            <div>product <span class="column-type">String</span></div>
-            <div>quantity <span class="column-type">Integer</span></div>
-            <div>price <span class="column-type">Double</span></div>
-            <div>order_date <span class="column-type">String</span></div>
-            <div>操作</div>
-          </div>
-          
-          <!-- 关联结果集表头 -->
-          <div class="table-header joined-header" v-if="activeTab === 'joined'">
-            <div>id <span class="column-type">Integer</span></div>
-            <div>name <span class="column-type">String</span></div>
-            <div>age <span class="column-type">Integer</span></div>
-            <div>city <span class="column-type">String</span></div>
-            <div>salary <span class="column-type">Double</span></div>
-            <div>order_id <span class="column-type">Integer</span></div>
-            <div>product <span class="column-type">String</span></div>
-            <div>quantity <span class="column-type">Integer</span></div>
-            <div>price <span class="column-type">Double</span></div>
-            <div>order_date <span class="column-type">String</span></div>
-            <div>操作</div>
-          </div>
-          
-          <!-- 用户数据行 -->
-          <div 
-            class="table-row users-row" 
-            :data-id="user.id" 
-            v-for="user in users" 
-            :key="user.id"
-          >
-            <div>{{ user.id }}</div>
-            <div>{{ user.name }}</div>
-            <div>{{ user.age }}</div>
-            <div>{{ user.city }}</div>
-            <div>{{ user.salary }}</div>
-            <div class="operation-buttons">
-              <button class="operation-btn edit-btn" title="编辑" @click="editUser(user)">
-                <i class="fas fa-edit"></i>
-              </button>
-              <button class="operation-btn delete-btn" title="删除" @click="deleteUser(user.id)">
-                <i class="fas fa-trash"></i>
-              </button>
-            </div>
-          </div>
-          
-          <!-- 订单数据行 -->
-          <div 
-            class="table-row orders-row" 
-            :data-id="order.order_id" 
-            v-for="order in orders" 
-            :key="order.order_id"
-          >
-            <div>{{ order.order_id }}</div>
-            <div>{{ order.user_id }}</div>
-            <div>{{ order.product }}</div>
-            <div>{{ order.quantity }}</div>
-            <div>{{ order.price }}</div>
-            <div>{{ order.order_date }}</div>
-            <div class="operation-buttons">
-              <button class="operation-btn edit-btn" title="编辑" @click="editOrder(order)">
-                <i class="fas fa-edit"></i>
-              </button>
-              <button class="operation-btn delete-btn" title="删除" @click="deleteOrder(order.order_id)">
-                <i class="fas fa-trash"></i>
-              </button>
-            </div>
-          </div>
-          
-          <!-- 关联数据行 -->
-          <div 
-            class="table-row joined-row" 
-            :data-id="item.id + '-' + item.order_id" 
-            v-for="item in joinedData" 
-            :key="item.id + '-' + item.order_id"
-          >
-            <div>{{ item.id }}</div>
-            <div>{{ item.name }}</div>
-            <div>{{ item.age }}</div>
-            <div>{{ item.city }}</div>
-            <div>{{ item.salary }}</div>
-            <div>{{ item.order_id }}</div>
-            <div>{{ item.product }}</div>
-            <div>{{ item.quantity }}</div>
-            <div>{{ item.price }}</div>
-            <div>{{ item.order_date }}</div>
-            <div class="operation-buttons">
-              <button class="operation-btn edit-btn" title="编辑" @click="editJoinedItem(item)">
-                <i class="fas fa-edit"></i>
-              </button>
-              <button class="operation-btn delete-btn" title="删除" @click="deleteJoinedItem(item.id, item.order_id)">
-                <i class="fas fa-trash"></i>
-              </button>
-            </div>
-          </div>
+          <!-- 使用 DatasetTable 组件 -->
+          <DatasetTable
+            :data="getCurrentData()"
+            :columns="getCurrentColumns()"
+            :dataType="activeTab"
+            :showOperations="true"
+            :currentPage="currentPage"
+            :pageSize="pageSize"
+            @edit="handleTableEdit"
+            @delete="handleTableDelete"
+          />
         </div>
         
         <!-- 分页控件 -->
@@ -492,8 +396,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-
+import { ref,computed, onMounted } from 'vue';
+import DatasetTable from '@/components/DatasetTable.vue';
 // 状态管理
 const activeMenu = ref('dataset-list');
 const activeTab = ref('users');
@@ -526,6 +430,37 @@ const formData = ref({});
 const itemToDelete = ref(null);
 const deleteType = ref('');
 
+// 列定义
+const userColumns = [
+  { key: 'id', label: 'id', type: 'Integer' },
+  { key: 'name', label: 'name', type: 'String' },
+  { key: 'age', label: 'age', type: 'Integer' },
+  { key: 'city', label: 'city', type: 'String' },
+  { key: 'salary', label: 'salary', type: 'Double' }
+];
+
+const orderColumns = [
+  { key: 'order_id', label: 'order_id', type: 'Integer' },
+  { key: 'user_id', label: 'user_id', type: 'Integer' },
+  { key: 'product', label: 'product', type: 'String' },
+  { key: 'quantity', label: 'quantity', type: 'Integer' },
+  { key: 'price', label: 'price', type: 'Double' },
+  { key: 'order_date', label: 'order_date', type: 'String' }
+];
+
+const joinedColumns = [
+  { key: 'id', label: 'id', type: 'Integer' },
+  { key: 'name', label: 'name', type: 'String' },
+  { key: 'age', label: 'age', type: 'Integer' },
+  { key: 'city', label: 'city', type: 'String' },
+  { key: 'salary', label: 'salary', type: 'Double' },
+  { key: 'order_id', label: 'order_id', type: 'Integer' },
+  { key: 'product', label: 'product', type: 'String' },
+  { key: 'quantity', label: 'quantity', type: 'Integer' },
+  { key: 'price', label: 'price', type: 'Double' },
+  { key: 'order_date', label: 'order_date', type: 'String' }
+];
+
 // 计算属性
 const totalItems = computed(() => {
   if (activeTab.value === 'users') return users.value.length;
@@ -544,6 +479,42 @@ onMounted(() => {
 const switchTab = (tab) => {
   activeTab.value = tab;
   currentPage.value = 1;
+};
+
+// 获取当前数据
+const getCurrentData = () => {
+  if (activeTab.value === 'users') return users.value;
+  if (activeTab.value === 'orders') return orders.value;
+  return joinedData.value;
+};
+
+// 获取当前列配置
+const getCurrentColumns = () => {
+  if (activeTab.value === 'users') return userColumns;
+  if (activeTab.value === 'orders') return orderColumns;
+  return joinedColumns;
+};
+
+// 表格编辑事件处理
+const handleTableEdit = (item, dataType) => {
+  if (dataType === 'users') {
+    editUser(item);
+  } else if (dataType === 'orders') {
+    editOrder(item);
+  } else if (dataType === 'joined') {
+    editJoinedItem(item);
+  }
+};
+
+// 表格删除事件处理
+const handleTableDelete = (item, dataType) => {
+  if (dataType === 'users') {
+    deleteUser(item.id);
+  } else if (dataType === 'orders') {
+    deleteOrder(item.order_id);
+  } else if (dataType === 'joined') {
+    deleteJoinedItem(item.id, item.order_id);
+  }
 };
 
 const formatSql = () => {
@@ -1059,88 +1030,6 @@ body {
   background-color: var(--secondary-color);
 }
 
-.table-header {
-  display: grid;
-  padding: 16px 20px;
-  background-color: var(--light-bg);
-  border-bottom: 1px solid var(--border-color);
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.users-header {
-  grid-template-columns: 80px 120px 80px 120px 120px 100px;
-}
-
-.orders-header {
-  grid-template-columns: 80px 80px 180px 100px 100px 120px 100px;
-}
-
-.joined-header {
-  grid-template-columns: 80px 120px 80px 120px 120px 80px 180px 100px 100px 120px 100px;
-}
-
-.table-row {
-  display: grid;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--border-color);
-  align-items: center;
-  transition: background-color 0.2s;
-}
-
-.table-row:hover {
-  background-color: var(--secondary-color);
-}
-
-.table-row:last-child {
-  border-bottom: none;
-}
-
-.users-row {
-  grid-template-columns: 80px 120px 80px 120px 120px 100px;
-}
-
-.orders-row {
-  grid-template-columns: 80px 80px 180px 100px 100px 120px 100px;
-}
-
-.joined-row {
-  grid-template-columns: 80px 120px 80px 120px 120px 80px 180px 100px 100px 120px 100px;
-}
-
-.column-type {
-  font-size: 12px;
-  color: #666;
-  background-color: var(--secondary-color);
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-.operation-buttons {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
-}
-
-.operation-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #666;
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.operation-btn:hover {
-  background-color: var(--secondary-color);
-  color: var(--primary-color);
-}
-
 /* 数据集关系图 */
 .relationship-visualization {
   background-color: white;
@@ -1266,6 +1155,11 @@ body {
 
 .results-title i {
   color: var(--primary-color);
+}
+
+.results-info {
+  font-size: 13px;
+  color: #666;
 }
 
 .results-info {
