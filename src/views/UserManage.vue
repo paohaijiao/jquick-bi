@@ -104,8 +104,8 @@
                 {{ u.chineseName }}
               </div>
               <div class="user-details">
-                <div class="user-name text-align-left">{{ u.loginName}}</div>
-                <div class="user-email text-align-left">{{ u.userTypeName }}</div>
+                <div class="user-name text-align-center">{{ u.loginName}}</div>
+                <div class="user-email text-align-center">{{ u.userTypeName }}</div>
               </div>
             </div>
             <div><span class="role-badge role-analyst" >{{ u.phone }}</span></div>
@@ -274,7 +274,12 @@ body {
   height: 100vh;
   overflow: hidden;
 }
-
+.text-align-left {
+  text-align: left;
+}
+.text-align-center {
+  text-align: center;
+}
 .container {
   display: flex;
   flex-direction: column;
