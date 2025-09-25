@@ -96,7 +96,7 @@
       <main class="content-area">
         <div class="page-header">
           <div>
-            <h1 class="page-title">数据集管理</h1>
+            <h1 class="page-title text-align-left">数据集管理</h1>
             <p class="page-description">管理用户数据集、订单数据集及其关联关系</p>
           </div>
           <div class="action-buttons">

@@ -4,7 +4,7 @@ import { ElMessage } from 'element-plus'
 // 创建axios实例 - 移除环境变量引用
 const service = axios.create({
   baseURL: '', // 直接使用相对路径
-  timeout: 5000
+  timeout: 10000
 })
 
 // 请求拦截器

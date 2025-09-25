@@ -48,7 +48,7 @@
             <div class="github-banner-title text-align-left">JQuick BI 文档库</div>
             <div class="github-banner-desc text-align-left">所有官方文档均托管在GitHub上，欢迎贡献和反馈</div>
           </div>
-          <a href="https://github.com/paohaijiao" target="_blank" class="github-banner-link">
+          <a href="https://github.com/paohaijiao" target="_blank" class="github-banner-link text-align-left">
             访问 GitHub 仓库 <i class="fas fa-external-link-alt"></i>
           </a>
         </div>
@@ -58,9 +58,9 @@
             <div class="doc-card-icon">
               <i class="fas fa-book"></i>
             </div>
-            <div class="doc-card-title text-align-left">用户手册</div>
-            <div class="doc-card-desc">详细介绍JQuick BI的各项功能和使用方法，适合新用户快速上手。</div>
-            <a href="https://github.com/paohaijiao" target="_blank" class="doc-card-link text-align-left">
+            <div class="doc-card-title text-align-left">JQuick Curl</div>
+            <div class="doc-card-desc">详细介绍JQuick Curl的各项功能和使用方法，适合新用户快速上手。</div>
+            <a href="https://github.com/paohaijiao/jquick-curl" target="_blank" class="doc-card-link text-align-left">
               查看用户手册 <i class="fas fa-arrow-right"></i>
             </a>
           </div>
@@ -69,9 +69,9 @@
             <div class="doc-card-icon">
               <i class="fas fa-code"></i>
             </div>
-            <div class="doc-card-title text-align-left">开发者指南</div>
+            <div class="doc-card-title text-align-left">JQuick Lang开发者指南</div>
             <div class="doc-card-desc">包含API文档、集成指南和二次开发教程，帮助开发者扩展系统功能。</div>
-            <a href="https://github.com/paohaijiao" target="_blank" class="doc-card-link">
+            <a href="https://github.com/paohaijiao/jquick-lang" target="_blank" class="doc-card-link">
               查看开发者指南 <i class="fas fa-arrow-right"></i>
             </a>
           </div>
@@ -80,9 +80,9 @@
             <div class="doc-card-icon">
               <i class="fas fa-cogs"></i>
             </div>
-            <div class="doc-card-title text-align-left">管理员手册</div>
+            <div class="doc-card-title text-align-left">JQuick PDF管理员手册</div>
             <div class="doc-card-desc">系统部署、配置和维护的详细指南，适合系统管理员参考。</div>
-            <a href="https://github.com/paohaijiao" target="_blank" class="doc-card-link">
+            <a href="https://github.com/paohaijiao/jquick-pdf" target="_blank" class="doc-card-link">
               查看管理员手册 <i class="fas fa-arrow-right"></i>
             </a>
           </div>
@@ -96,10 +96,10 @@
                 <el-icon><Files /></el-icon>
               </div>
               <div class="doc-item-content">
-                <div class="doc-item-title text-align-left">JQuick BI 简介</div>
+                <div class="doc-item-title text-align-left">JQuick SQL 简介</div>
                 <div class="doc-item-desc text-align-left">了解JQuick BI的核心功能、优势和适用场景。</div>
                 <div class="doc-item-links">
-                  <a href="https://github.com/paohaijiao" target="_blank" class="doc-item-link">
+                  <a href="https://github.com/paohaijiao/jquick-sql" target="_blank" class="doc-item-link">
                     <i class="fab fa-github"></i> 查看文档
                   </a>
                 </div>
@@ -111,10 +111,10 @@
                    <el-icon><User /></el-icon>
               </div>
               <div class="doc-item-content">
-                <div class="doc-item-title text-align-left">注册与登录</div>
+                <div class="doc-item-title text-align-left">JQuick Path 介绍</div>
                 <div class="doc-item-desc text-align-left">如何注册账号、登录系统以及找回密码的详细步骤。</div>
                 <div class="doc-item-links">
-                  <a href="https://github.com/paohaijiao" target="_blank" class="doc-item-link">
+                  <a href="https://github.com/paohaijiao/jquick-path" target="_blank" class="doc-item-link">
                     <i class="fab fa-github"></i> 查看文档
                   </a>
                 </div>
@@ -126,13 +126,13 @@
                 <el-icon><PieChart /></el-icon>
               </div>
               <div class="doc-item-content">
-                <div class="doc-item-title text-align-left">快速创建第一个报表</div>
+                <div class="doc-item-title text-align-left">快速创建第一个Excel</div>
                 <div class="doc-item-desc text-align-left">从数据源连接到报表发布的完整流程演示。</div>
                 <div class="doc-item-links">
-                  <a href="https://github.com/paohaijiao" target="_blank" class="doc-item-link">
+                  <a href="https://github.com/paohaijiao/jquick-excel" target="_blank" class="doc-item-link">
                     <i class="fab fa-github"></i> 查看文档
                   </a>
-                  <a href="https://github.com/paohaijiao" target="_blank" class="doc-item-link">
+                  <a href="https://github.com/paohaijiao/jquick-excel" target="_blank" class="doc-item-link">
                     <i class="fab fa-github"></i> 示例代码
                   </a>
                 </div>
