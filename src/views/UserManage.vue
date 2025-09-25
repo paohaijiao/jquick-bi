@@ -25,84 +25,18 @@
     
     <!-- 主内容区 -->
     <div class="main-content">
-      <!-- 左侧BI菜单 -->
-      <aside class="sidebar">
-        <div class="menu-section">
-          <div class="menu-section-title">主导航</div>
-          <div class="menu-item" :class="{ active: activeMenu === 'home' }" @click="setActiveMenu('home')">
-            <i class="fas fa-home"></i>
-            <span>首页</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'dataSource' }" @click="toggleSubmenu('dataSource')">
-            <i class="fas fa-database"></i>
-            <span>数据源</span>
-            <i class="fas fa-chevron-down" style="font-size: 12px;" :class="{ 'rotate-180': submenus.dataSource }"></i>
-          </div>
-          <div class="submenu" :class="{ show: submenus.dataSource }">
-            <div class="submenu-item" :class="{ active: activeSubmenu.dataSource === 'list' }" @click="setActiveSubmenu('dataSource', 'list')">数据源列表</div>
-            <div class="submenu-item" :class="{ active: activeSubmenu.dataSource === 'add' }" @click="setActiveSubmenu('dataSource', 'add')">新增数据源</div>
-            <div class="submenu-item" :class="{ active: activeSubmenu.dataSource === 'permission' }" @click="setActiveSubmenu('dataSource', 'permission')">数据源权限</div>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'report' }" @click="toggleSubmenu('report')">
-            <i class="fas fa-file-alt"></i>
-            <span>报表</span>
-            <i class="fas fa-chevron-down" style="font-size: 12px;" :class="{ 'rotate-180': submenus.report }"></i>
-          </div>
-          <div class="submenu" :class="{ show: submenus.report }">
-            <div class="submenu-item" :class="{ active: activeSubmenu.report === 'my' }" @click="setActiveSubmenu('report', 'my')">我的报表</div>
-            <div class="submenu-item" :class="{ active: activeSubmenu.report === 'shared' }" @click="setActiveSubmenu('report', 'shared')">共享报表</div>
-            <div class="submenu-item" :class="{ active: activeSubmenu.report === 'favorite' }" @click="setActiveSubmenu('report', 'favorite')">收藏报表</div>
-            <div class="submenu-item" :class="{ active: activeSubmenu.report === 'recycle' }" @click="setActiveSubmenu('report', 'recycle')">回收站</div>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'dashboard' }" @click="setActiveMenu('dashboard')">
-            <i class="fas fa-chart-pie"></i>
-            <span>仪表盘</span>
-            <span class="menu-badge">5</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'dataset' }" @click="setActiveMenu('dataset')">
-            <i class="fas fa-cubes"></i>
-            <span>数据集</span>
-          </div>
-        </div>
-        
-        <div class="menu-section">
-          <div class="menu-section-title">系统管理</div>
-          <div class="menu-item" :class="{ active: activeMenu === 'user' }" @click="setActiveMenu('user')">
-            <i class="fas fa-users"></i>
-            <span>用户管理</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'role' }" @click="setActiveMenu('role')">
-            <i class="fas fa-user-shield"></i>
-            <span>角色权限</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'log' }" @click="setActiveMenu('log')">
-            <i class="fas fa-history"></i>
-            <span>操作日志</span>
-          </div>
-        </div>
-        
-        <div class="menu-section">
-          <div class="menu-section-title">帮助中心</div>
-          <div class="menu-item" :class="{ active: activeMenu === 'doc' }" @click="setActiveMenu('doc')">
-            <i class="fas fa-question-circle"></i>
-            <span>帮助文档</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'video' }" @click="setActiveMenu('video')">
-            <i class="fas fa-play-circle"></i>
-            <span>视频教程</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'service' }" @click="setActiveMenu('service')">
-            <i class="fas fa-comment-dots"></i>
-            <span>联系客服</span>
-          </div>
-        </div>
-      </aside>
+      <SidebarMenu 
+        :active-menu="activeMenu" 
+        :unread-count="unreadCount"
+        @menu-click="setActiveMenu"
+        @submenu-click="setActiveSubmenu"
+      />
       
       <!-- 右侧用户管理区域 -->
       <main class="content-area">
         <div class="page-header">
           <div>
-            <h1 class="page-title">用户管理</h1>
+            <h1 class="page-title text-align-left">用户管理</h1>
             <p class="page-description">管理系统内所有用户账户、角色及权限</p>
           </div>
           <div class="action-buttons">
@@ -121,10 +55,10 @@
         <div class="filter-bar">
           <div class="filter-group">
             <div class="filter-item">
-              <label>用户角色</label>
+              <label>用户类型</label>
               <select v-model="filterRole">
-                <option value="">全部角色</option>
-                <option value="admin">管理员</option>
+                <option value="">全部类型</option>
+                <option value="admin">租户管理员</option>
                 <option value="analyst">分析师</option>
                 <option value="viewer">查看者</option>
               </select>
@@ -156,26 +90,27 @@
         <!-- 用户列表 -->
         <div class="user-list">
           <div class="table-header">
-            <div>用户信息</div>
-            <div>角色</div>
+            <div >登录名</div>
+            <div>手机号</div>
+            <div>邮箱</div>
             <div>状态</div>
-            <div>最后登录时间</div>
+  
             <div>操作</div>
           </div>
           
-          <div class="table-row" v-for="user in filteredUsers" :key="user.id">
+          <div class="table-row"   v-for="(u) in users"   :key="u.id">
             <div class="user-info">
-              <div class="user-avatar-large" :class="user.role">
-                {{ user.initials }}
+              <div class="user-avatar-large admin" :class="u.userTypeIcon">
+                {{ u.chineseName }}
               </div>
               <div class="user-details">
-                <div class="user-name">{{ user.name }}</div>
-                <div class="user-email">{{ user.email }}</div>
+                <div class="user-name text-align-left">{{ u.loginName}}</div>
+                <div class="user-email text-align-left">{{ u.userTypeName }}</div>
               </div>
             </div>
-            <div><span class="role-badge" :class="'role-' + user.role">{{ user.roleText }}</span></div>
-            <div><span class="status-badge" :class="'status-' + user.status">{{ user.statusText }}</span></div>
-            <div>{{ user.lastLogin }}</div>
+            <div><span class="role-badge role-analyst" >{{ u.phone }}</span></div>
+            <div><span class="role-badge role-analyst" >{{ u.email }}</span></div>
+            <div><span class="status-badge " :class="'status-' + u.status">{{ u.status }}</span></div>
             <div class="operation-buttons">
               <button class="operation-btn" title="编辑" @click="editUser(user.id)">
                 <i class="fas fa-edit"></i>
@@ -215,8 +150,9 @@ export default {
 }
 </script>
 <script setup>
-import { ref, computed } from 'vue';
-
+import { ref, computed,onMounted } from 'vue';
+import SidebarMenu from '@/components/SidebarMenu.vue';
+import request from '../api/request';
 // 菜单状态管理
 const activeMenu = ref('user');
 const submenus = ref({
@@ -240,80 +176,8 @@ const pageSize = ref(5);
 const totalUsers = ref(32);
 
 // 用户数据
-const users = ref([
-  {
-    id: 1,
-    name: '张磊',
-    email: 'zhanglei@example.com',
-    role: 'admin',
-    roleText: '管理员',
-    status: 'active',
-    statusText: '已激活',
-    lastLogin: '2023-10-15 09:23',
-    initials: 'ZL'
-  },
-  {
-    id: 2,
-    name: '王鑫',
-    email: 'wangxin@example.com',
-    role: 'analyst',
-    roleText: '分析师',
-    status: 'active',
-    statusText: '已激活',
-    lastLogin: '2023-10-14 14:56',
-    initials: 'WX'
-  },
-  {
-    id: 3,
-    name: '陈丽',
-    email: 'chenli@example.com',
-    role: 'analyst',
-    roleText: '分析师',
-    status: 'active',
-    statusText: '已激活',
-    lastLogin: '2023-10-15 11:08',
-    initials: 'CL'
-  },
-  {
-    id: 4,
-    name: '赵华',
-    email: 'zhaohua@example.com',
-    role: 'viewer',
-    roleText: '查看者',
-    status: 'active',
-    statusText: '已激活',
-    lastLogin: '2023-10-13 16:42',
-    initials: 'ZH'
-  },
-  {
-    id: 5,
-    name: '李静',
-    email: 'lijing@example.com',
-    role: 'viewer',
-    roleText: '查看者',
-    status: 'inactive',
-    statusText: '未激活',
-    lastLogin: '从未登录',
-    initials: 'LJ'
-  }
-]);
+const users = ref([]);
 
-// 计算属性：筛选后的用户列表
-const filteredUsers = computed(() => {
-  return users.value.filter(user => {
-    // 角色筛选
-    if (filterRole.value && user.role !== filterRole.value) return false;
-    // 状态筛选
-    if (filterStatus.value && user.status !== filterStatus.value) return false;
-    // 搜索筛选
-    if (searchKeyword.value && 
-        !user.name.includes(searchKeyword.value) && 
-        !user.email.includes(searchKeyword.value)) {
-      return false;
-    }
-    return true;
-  });
-});
 
 // 计算属性：总页数
 const totalPages = computed(() => {
@@ -330,19 +194,8 @@ const pageNumbers = computed(() => {
   return pages;
 });
 
-// 菜单方法
-const setActiveMenu = (menu) => {
-  activeMenu.value = menu;
-  // 关闭所有子菜单
-  Object.keys(submenus.value).forEach(key => {
-    submenus.value[key] = false;
-  });
-};
 
-const toggleSubmenu = (menu) => {
-  activeMenu.value = menu;
-  submenus.value[menu] = !submenus.value[menu];
-};
+
 
 const setActiveSubmenu = (parent, submenu) => {
   activeSubmenu.value[parent] = submenu;
@@ -350,44 +203,50 @@ const setActiveSubmenu = (parent, submenu) => {
   submenus.value[parent] = true;
 };
 
-// 用户操作方法
+
 const exportUsers = () => {
-  console.log('导出用户');
-  // 实际项目中这里会调用导出接口
+
 };
 
 const addUser = () => {
-  console.log('新增用户');
-  // 实际项目中这里会打开新增用户对话框
 };
 
 const editUser = (id) => {
-  console.log('编辑用户:', id);
-  // 实际项目中这里会打开编辑用户对话框
 };
 
 const resetPassword = (id) => {
-  console.log('重置密码:', id);
-  // 实际项目中这里会处理重置密码逻辑
 };
 
 const moreActions = (id) => {
-  console.log('更多操作:', id);
-  // 实际项目中这里会显示更多操作选项
+
 };
 
 // 分页方法
 const changePage = (page) => {
   if (page < 1 || page > totalPages.value) return;
   currentPage.value = page;
-  // 实际项目中这里会调用接口加载对应页的数据
 };
+const initUser = () => {
+  let query=new Object();
+  query.pageNum=currentPage.value;
+  query.pageSize=pageSize.value;
+  request.post('/api/uaa-user/page',query)
+  .then(response => {
+    console.log(response)
+    if(response.code==200){
+      users.value=response.data.records;
+    }
+    
+  }
+)
+  .catch(error => {
+    console.error('获取行业失败:', error);
+  });
 
-// 用户菜单切换
-const toggleUserMenu = () => {
-  console.log('切换用户菜单');
-  // 实际项目中这里会处理用户菜单的显示/隐藏
 };
+onMounted(() => {
+  initUser();
+});
 </script>
 
 <style>
