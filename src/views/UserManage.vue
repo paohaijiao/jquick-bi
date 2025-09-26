@@ -56,19 +56,16 @@
           <div class="filter-group">
             <div class="filter-item">
               <label>用户类型</label>
-              <select v-model="filterRole">
+              <select v-model="filterUserType" @change="handleUserQuery()">
                 <option value="">全部类型</option>
-                <option value="admin">租户管理员</option>
-                <option value="analyst">分析师</option>
-                <option value="viewer">查看者</option>
+                <option  v-for="(t) in userType"  :key="t.code"    :value="t.code">{{t.name}}</option>
               </select>
             </div>
             <div class="filter-item">
               <label>用户状态</label>
-              <select v-model="filterStatus">
+              <select v-model="filterStatus"  @change="handleUserQuery()">
                 <option value="">全部状态</option>
-                <option value="active">已激活</option>
-                <option value="inactive">未激活</option>
+                <option  v-for="(t) in userStatus"  :key="t.code"    :value="t.code">{{t.name}}</option>
               </select>
             </div>
             <div class="filter-item">
@@ -83,7 +80,7 @@
           </div>
           <div class="search-filter">
             <el-icon><Search /></el-icon>
-            <input type="text" placeholder="搜索用户名或邮箱..." v-model="searchKeyword">
+            <input type="text" placeholder="搜索用户名或邮箱..." v-model="searchKeyword" @click="handleUserQuery()">
           </div>
         </div>
         
@@ -110,7 +107,7 @@
             </div>
             <div><span class="role-badge role-analyst" >{{ u.phone }}</span></div>
             <div><span class="role-badge role-analyst" >{{ u.email }}</span></div>
-            <div><span class="status-badge " :class="'status-' + u.status">{{ u.status }}</span></div>
+            <div><span class="status-badge " :class="'status-' + u.status">{{ u.statusName }}</span></div>
             <div class="operation-buttons">
               <button class="operation-btn" title="编辑" @click="editUser(user.id)">
                 <i class="fas fa-edit"></i>
@@ -165,7 +162,7 @@ const activeSubmenu = ref({
 });
 
 // 筛选条件
-const filterRole = ref('');
+const filterUserType = ref('');
 const filterStatus = ref('');
 const filterTime = ref('');
 const searchKeyword = ref('');
@@ -177,7 +174,8 @@ const totalUsers = ref(32);
 
 // 用户数据
 const users = ref([]);
-
+const userStatus = ref([]);
+const userType = ref([]);
 
 // 计算属性：总页数
 const totalPages = computed(() => {
@@ -226,10 +224,43 @@ const changePage = (page) => {
   if (page < 1 || page > totalPages.value) return;
   currentPage.value = page;
 };
-const initUser = () => {
+const initStatus= () => {
+  request.get('/api/uaa-user/getUserStatus')
+  .then(response => {
+    if(response.code==200){
+      userStatus.value=response.data;
+    }
+    
+  }
+)
+  .catch(error => {
+    console.error('获取行业失败:', error);
+  });
+
+};
+const initUserType= () => {
+  request.get('/api/uaa-user/getUserType')
+  .then(response => {
+    if(response.code==200){
+      userType.value=response.data;
+    }
+    
+  }
+)
+  .catch(error => {
+    console.error('获取行业失败:', error);
+  });
+
+};
+
+
+const handleUserQuery = () => {
   let query=new Object();
   query.pageNum=currentPage.value;
   query.pageSize=pageSize.value;
+  query.userType=filterUserType.value;
+  query.status=filterStatus.value;
+  query.nameOrLoginName=searchKeyword.value;
   request.post('/api/uaa-user/page',query)
   .then(response => {
     console.log(response)
@@ -245,7 +276,9 @@ const initUser = () => {
 
 };
 onMounted(() => {
-  initUser();
+  initStatus();
+  initUserType();
+  handleUserQuery();
 });
 </script>
 

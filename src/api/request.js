@@ -24,7 +24,10 @@ service.interceptors.request.use(
     return config
   },
   error => {
-    console.log('请求错误:', error)
+    ElMessage.error({
+      message: '请求错误:',
+      duration: 3000 
+    })
     return Promise.reject(error)
   }
 )
@@ -35,8 +38,7 @@ service.interceptors.response.use(
     return response.data // 直接返回数据，让组件处理业务逻辑
   },
   error => {
-    console.log('响应错误:', error)
-    
+    debugger;
     let message = '请求失败'
     if (error.response) {
       message = error.response.data?.message || `错误码: ${error.response.status}`
