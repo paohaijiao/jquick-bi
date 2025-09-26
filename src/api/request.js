@@ -6,13 +6,20 @@ const service = axios.create({
   baseURL: '', // 直接使用相对路径
   timeout: 10000
 })
-
+const whiteList = [
+  '/api/pub/captcha/image' // 获取验证码接口
+  // 可以根据实际需求添加其他不需要token的接口
+]
 // 请求拦截器
 service.interceptors.request.use(
   config => {
     const token = localStorage.getItem('token')
+    debugger;
     if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`
+     const isInWhiteList = whiteList.some(path => config.url.startsWith(path))
+      if (!isInWhiteList) {
+        config.headers['Authorization'] = `Bearer ${token}`
+      }
     }
     return config
   },
