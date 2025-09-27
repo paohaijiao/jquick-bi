@@ -109,13 +109,13 @@
             <div><span class="role-badge role-analyst" >{{ u.email }}</span></div>
             <div><span class="status-badge " :class="'status-' + u.status">{{ u.statusName }}</span></div>
             <div class="operation-buttons">
-              <button class="operation-btn" title="编辑" @click="editUser(user.id)">
+              <button class="operation-btn" title="编辑" @click="editUser(u.id)">
                 <i class="fas fa-edit"></i>
               </button>
-              <button class="operation-btn" title="重置密码" @click="resetPassword(user.id)">
+              <button class="operation-btn" title="重置密码" @click="resetPassword(u.id)">
                 <i class="fas fa-key"></i>
               </button>
-              <button class="operation-btn" title="更多" @click="moreActions(user.id)">
+              <button class="operation-btn" title="更多" @click="moreActions(u.id)">
                 <i class="fas fa-ellipsis-v"></i>
               </button>
             </div>
@@ -137,6 +137,22 @@
             </div>
           </div>
         </div>
+        <el-dialog 
+          title="编辑用户" 
+          v-model="editDialogVisible" 
+          width="500px"
+          @close="() => { editDialogVisible = false; currentEditUserId = null; }"
+        >
+          <UserForm 
+            :visible="editDialogVisible"
+            :is-edit="edit" 
+            :user-id="currentEditUserId"  
+            :user-type="userType" 
+            :user-status="userStatus"  
+            @update:visible="editDialogVisible = $event"  
+            @success="handleEditSuccess"  
+          />
+        </el-dialog>
       </main>
     </div>
   </div>
@@ -148,10 +164,16 @@ export default {
 </script>
 <script setup>
 import { ref, computed,onMounted } from 'vue';
+import {ElDialog} from 'element-plus';
 import SidebarMenu from '@/components/SidebarMenu.vue';
+import UserForm from '@/components/UserForm.vue';  
 import request from '../api/request';
 // 菜单状态管理
 const activeMenu = ref('user');
+const edit = ref(true);
+
+const editDialogVisible = ref (false);
+const currentEditUserId = ref (null);
 const submenus = ref({
   dataSource: false,
   report: false
@@ -207,9 +229,14 @@ const exportUsers = () => {
 };
 
 const addUser = () => {
+     edit.value=false;
+     editDialogVisible.value = true; 
 };
 
 const editUser = (id) => {
+   edit.value=true;
+   currentEditUserId.value = id; 
+   editDialogVisible.value = true; 
 };
 
 const resetPassword = (id) => {

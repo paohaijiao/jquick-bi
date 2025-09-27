@@ -14,7 +14,6 @@ const whiteList = [
 service.interceptors.request.use(
   config => {
     const token = localStorage.getItem('token')
-    debugger;
     if (token) {
      const isInWhiteList = whiteList.some(path => config.url.startsWith(path))
       if (!isInWhiteList) {
@@ -38,7 +37,6 @@ service.interceptors.response.use(
     return response.data // 直接返回数据，让组件处理业务逻辑
   },
   error => {
-    debugger;
     let message = '请求失败'
     if (error.response) {
       message = error.response.data?.message || `错误码: ${error.response.status}`

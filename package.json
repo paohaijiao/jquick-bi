@@ -25,6 +25,8 @@
     "@vue/cli-service": "~5.0.0",
     "eslint": "^7.32.0",
     "eslint-plugin-vue": "^8.0.3",
+    "sass": "^1.93.2",
+    "sass-loader": "^16.0.5",
     "unplugin-auto-import": "^20.1.0",
     "unplugin-vue-components": "^29.0.0"
   },
@@ -41,7 +43,7 @@
       "parser": "@babel/eslint-parser"
     },
     "rules": {
-      "no-debugger": "off",  
+      "no-debugger": "off",
       "no-console": "off"
     }
   },
