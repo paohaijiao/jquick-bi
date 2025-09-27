@@ -285,7 +285,6 @@ const handleUserQuery = () => {
     }
   }
 )
-
 };
 onMounted(() => {
   initStatus();
