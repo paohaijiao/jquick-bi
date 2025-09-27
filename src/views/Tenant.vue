@@ -26,97 +26,24 @@
     <!-- 主内容区 -->
     <div class="main-content">
       <!-- 左侧菜单 -->
-      <aside class="sidebar">
-        <div class="menu-section">
-          <div class="menu-section-title">主导航</div>
-          <div class="menu-item" :class="{ active: activeMenu === 'home' }" @click="setActiveMenu('home')">
-            <i class="fas fa-home"></i>
-            <span>首页</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'dataSource' }" @click="toggleSubmenu('dataSource')">
-            <i class="fas fa-database"></i>
-            <span>数据源</span>
-            <i class="fas fa-chevron-down" style="font-size: 12px;" :class="{ 'rotate-180': submenus.dataSource }"></i>
-          </div>
-          <div class="submenu" id="dataSourceSubmenu" :class="{ show: submenus.dataSource }">
-            <div class="submenu-item" :class="{ active: activeSubMenu.dataSource === 'list' }" @click="setActiveSubMenu('dataSource', 'list')">数据源列表</div>
-            <div class="submenu-item" :class="{ active: activeSubMenu.dataSource === 'add' }" @click="setActiveSubMenu('dataSource', 'add')">新增数据源</div>
-            <div class="submenu-item" :class="{ active: activeSubMenu.dataSource === 'permission' }" @click="setActiveSubMenu('dataSource', 'permission')">数据源权限</div>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'report' }" @click="toggleSubmenu('report')">
-            <i class="fas fa-file-alt"></i>
-            <span>报表</span>
-            <i class="fas fa-chevron-down" style="font-size: 12px;" :class="{ 'rotate-180': submenus.report }"></i>
-          </div>
-          <div class="submenu" id="reportSubmenu" :class="{ show: submenus.report }">
-            <div class="submenu-item" :class="{ active: activeSubMenu.report === 'my' }" @click="setActiveSubMenu('report', 'my')">我的报表</div>
-            <div class="submenu-item" :class="{ active: activeSubMenu.report === 'shared' }" @click="setActiveSubMenu('report', 'shared')">共享报表</div>
-            <div class="submenu-item" :class="{ active: activeSubMenu.report === 'favorite' }" @click="setActiveSubMenu('report', 'favorite')">收藏报表</div>
-            <div class="submenu-item" :class="{ active: activeSubMenu.report === 'recycle' }" @click="setActiveSubMenu('report', 'recycle')">回收站</div>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'dashboard' }" @click="setActiveMenu('dashboard')">
-            <i class="fas fa-chart-pie"></i>
-            <span>仪表盘</span>
-            <span class="menu-badge">5</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'dataset' }" @click="setActiveMenu('dataset')">
-            <i class="fas fa-cubes"></i>
-            <span>数据集</span>
-          </div>
-        </div>
-        
-        <div class="menu-section">
-          <div class="menu-section-title">系统管理</div>
-          <div class="menu-item" :class="{ active: activeMenu === 'user' }" @click="setActiveMenu('user')">
-            <i class="fas fa-users"></i>
-            <span>用户管理</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'tenant' }" @click="setActiveMenu('tenant')">
-            <i class="fas fa-building"></i>
-            <span>租户管理</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'role' }" @click="setActiveMenu('role')">
-            <i class="fas fa-user-shield"></i>
-            <span>角色权限</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'log' }" @click="setActiveMenu('log')">
-            <i class="fas fa-history"></i>
-            <span>操作日志</span>
-          </div>
-        </div>
-        
-        <div class="menu-section">
-          <div class="menu-section-title">帮助中心</div>
-          <div class="menu-item" :class="{ active: activeMenu === 'help' }" @click="setActiveMenu('help')">
-            <i class="fas fa-question-circle"></i>
-            <span>帮助文档</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'video' }" @click="setActiveMenu('video')">
-            <i class="fas fa-play-circle"></i>
-            <span>视频教程</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'contact' }" @click="setActiveMenu('contact')">
-            <i class="fas fa-comment-dots"></i>
-            <span>联系客服</span>
-          </div>
-        </div>
-      </aside>
+      <SidebarMenu 
+        :active-menu="activeMenu" 
+        :unread-count="unreadCount"
+        @menu-click="setActiveMenu"
+        @submenu-click="setActiveSubmenu"
+      />
       
       <!-- 右侧租户管理区域 -->
       <main class="content-area">
         <div class="page-header">
           <div>
-            <h1 class="page-title">租户管理</h1>
+            <h1 class="page-title text-align-left">租户管理</h1>
             <p class="page-description">管理系统内所有租户信息、配置及权限</p>
           </div>
           <div class="action-buttons">
             <button class="btn btn-outline" @click="exportTenants">
               <i class="fas fa-download"></i>
               导出租户
-            </button>
-            <button class="btn btn-primary" id="addTenantBtn" @click="showAddTenantModal = true">
-              <i class="fas fa-plus"></i>
-              新增租户
             </button>
           </div>
         </div>
@@ -152,37 +79,35 @@
             </div>
           </div>
           <div class="search-filter">
-              <el-icon><Search /></el-icon>
+            <el-icon><Search /></el-icon>
             <input type="text" placeholder="搜索租户名称或域名..." v-model="searchKeyword">
           </div>
         </div>
-        
-        <!-- 租户列表 - 卡片式布局 -->
         <div class="tenant-list">
           <div class="tenant-card" v-for="tenant in filteredTenants" :key="tenant.id">
             <div class="tenant-header">
-              <div class="tenant-logo">{{ tenant.logoText }}</div>
+              <div class="tenant-logo">{{ tenant.enName }}</div>
               <span class="tenant-status" :class="tenant.status === 'enabled' ? 'status-enabled' : 'status-disabled'">
                 {{ tenant.status === 'enabled' ? '已启用' : '已禁用' }}
               </span>
             </div>
             <div class="tenant-info">
-              <div class="tenant-name">{{ tenant.name }}</div>
+              <div class="tenant-name text-align-left">{{ tenant.name }}</div>
               <div class="tenant-domain">
                 <i class="fas fa-globe" style="font-size: 12px;"></i>
-                {{ tenant.domain }}
+                {{ tenant.code }}
               </div>
               <div class="tenant-description">
-                {{ tenant.description }}
+                {{ tenant.remark }}
               </div>
             </div>
             <div class="tenant-metrics">
               <div class="metric-item">
-                <div class="metric-value">{{ tenant.userCount }}</div>
+                <div class="metric-value">{{ tenant.maxUsers }}</div>
                 <div class="metric-label">用户数</div>
               </div>
               <div class="metric-item">
-                <div class="metric-value">{{ tenant.reportCount }}</div>
+                <div class="metric-value">{{ tenant.maxReports }}</div>
                 <div class="metric-label">报表数</div>
               </div>
               <div class="metric-item">
@@ -209,10 +134,6 @@
                 <i class="fas fa-cog" style="font-size: 12px;"></i>
                 配置
               </button>
-              <button class="action-btn action-btn-primary user-management-btn" :data-tenant="tenant.name" @click="handleUserManagement(tenant.id)">
-                <i class="fas fa-users" style="font-size: 12px;"></i>
-                用户管理
-              </button>
             </div>
           </div>
         </div>
@@ -236,66 +157,7 @@
         </div>
       </main>
     </div>
-    
-    <!-- 新增租户模态框 -->
-    <div class="modal-overlay" :class="{ show: showAddTenantModal }" @click="closeAddTenantModal">
-      <div class="modal" @click.stop>
-        <div class="modal-header">
-          <h3 class="modal-title">新增租户</h3>
-          <button class="modal-close" @click="closeAddTenantModal">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-        <div class="modal-body">
-          <div class="form-group">
-            <label class="form-label">租户名称 <span style="color: red;">*</span></label>
-            <input type="text" class="form-control" v-model="newTenant.name" placeholder="请输入租户名称">
-            <span class="form-hint">租户的显示名称，将在系统中多处展示</span>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">租户域名 <span style="color: red;">*</span></label>
-              <input type="text" class="form-control" v-model="newTenant.domain" placeholder="例如：company.quickbi.com">
-              <span class="form-hint">租户访问系统的域名前缀</span>
-            </div>
-            <div class="form-group">
-              <label class="form-label">租户类型 <span style="color: red;">*</span></label>
-              <select class="form-control" v-model="newTenant.type">
-                <option value="enterprise">企业版</option>
-                <option value="professional">专业版</option>
-                <option value="standard">标准版</option>
-              </select>
-              <span class="form-hint">不同版本拥有不同的功能权限</span>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">租户描述</label>
-            <textarea class="form-control" v-model="newTenant.description" placeholder="请输入租户描述信息"></textarea>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">管理员姓名 <span style="color: red;">*</span></label>
-              <input type="text" class="form-control" v-model="newTenant.admin" placeholder="请输入管理员姓名">
-            </div>
-            <div class="form-group">
-              <label class="form-label">管理员邮箱 <span style="color: red;">*</span></label>
-              <input type="email" class="form-control" v-model="newTenant.adminEmail" placeholder="请输入管理员邮箱">
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">租户状态</label>
-            <select class="form-control" v-model="newTenant.status">
-              <option value="enabled">已启用</option>
-              <option value="disabled">已禁用</option>
-            </select>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-outline" @click="closeAddTenantModal">取消</button>
-          <button class="btn btn-primary" @click="createTenant">确定</button>
-        </div>
-      </div>
-    </div>
+  
     
     <!-- 配置租户模态框 -->
     <div class="modal-overlay" :class="{ show: showConfigModal }" @click="closeConfigModal">
@@ -308,31 +170,31 @@
         </div>
         <div class="modal-body">
           <div class="form-group">
-            <label class="form-label">租户名称</label>
+            <label class="form-label text-align-left">租户名称</label>
             <input type="text" class="form-control" v-model="currentTenant.name">
           </div>
           <div class="form-group">
-            <label class="form-label">租户域名</label>
-            <input type="text" class="form-control" v-model="currentTenant.domain">
+            <label class="form-label text-align-left">租户编码</label>
+            <input type="text" class="form-control" v-model="currentTenant.code" disabled>
           </div>
           <div class="form-group">
-            <label class="form-label">租户描述</label>
-            <textarea class="form-control" v-model="currentTenant.description"></textarea>
+            <label class="form-label text-align-left">租户描述</label>
+            <textarea class="form-control" v-model="currentTenant.remark"></textarea>
           </div>
           <div class="form-group">
-            <label class="form-label">租户类型</label>
-            <select class="form-control" v-model="currentTenant.type">
+            <label class="form-label text-align-left">租户类型</label>
+            <select class="form-control" v-model="currentTenant.planType">
               <option value="enterprise">企业版</option>
               <option value="professional">专业版</option>
               <option value="standard">标准版</option>
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">管理员姓名</label>
+            <label class="form-label text-align-left">管理员姓名</label>
             <input type="text" class="form-control" v-model="currentTenant.admin">
           </div>
           <div class="form-group">
-            <label class="form-label">租户状态</label>
+            <label class="form-label text-align-left">租户状态</label>
             <select class="form-control" v-model="currentTenant.status">
               <option value="enabled">已启用</option>
               <option value="disabled">已禁用</option>
@@ -345,66 +207,6 @@
         </div>
       </div>
     </div>
-    
-    <!-- 用户管理模态框 -->
-    <div class="modal-overlay" :class="{ show: showUserManagementModal }" @click="closeUserManagementModal">
-      <div class="modal" @click.stop>
-        <div class="modal-header">
-          <h3 class="modal-title">{{ currentTenant.name }} - 用户管理</h3>
-          <button class="modal-close" @click="closeUserManagementModal">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-        <div class="modal-body">
-          <div class="action-buttons" style="margin-bottom: 16px;">
-            <button class="btn btn-primary">
-              <i class="fas fa-plus"></i>
-              新增用户
-            </button>
-          </div>
-          
-          <div class="filter-bar" style="margin-bottom: 16px;">
-            <div class="search-filter">
-              <i class="fas fa-search"></i>
-              <input type="text" placeholder="搜索用户名或邮箱...">
-            </div>
-          </div>
-          
-          <div style="border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;">
-            <table style="width: 100%; border-collapse: collapse;">
-              <thead>
-                <tr style="background-color: var(--light-bg);">
-                  <th style="padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border-color); font-weight: 600;">用户名</th>
-                  <th style="padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border-color); font-weight: 600;">邮箱</th>
-                  <th style="padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border-color); font-weight: 600;">角色</th>
-                  <th style="padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border-color); font-weight: 600;">状态</th>
-                  <th style="padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border-color); font-weight: 600;">操作</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(user, index) in tenantUsers" :key="index">
-                  <td style="padding: 12px 16px; border-bottom: 1px solid var(--border-color);">{{ user.name }}</td>
-                  <td style="padding: 12px 16px; border-bottom: 1px solid var(--border-color);">{{ user.email }}</td>
-                  <td style="padding: 12px 16px; border-bottom: 1px solid var(--border-color);">{{ user.role }}</td>
-                  <td style="padding: 12px 16px; border-bottom: 1px solid var(--border-color);">
-                    <span :class="user.status === 'active' ? 'status-enabled' : 'status-disabled'" class="tenant-status">{{ user.status === 'active' ? '活跃' : '禁用' }}</span>
-                  </td>
-                  <td style="padding: 12px 16px; border-bottom: 1px solid var(--border-color);">
-                    <button class="action-btn action-btn-outline" style="padding: 4px 8px;">
-                      <i class="fas fa-edit" style="font-size: 12px;"></i>
-                      编辑
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-outline" @click="closeUserManagementModal">关闭</button>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 <script>
@@ -413,88 +215,13 @@ export default {
 }
 </script>
 <script setup>
-import { ref, computed } from 'vue';
-
-// 菜单状态管理
-const activeMenu = ref('tenant');
-const submenus = ref({
-  dataSource: false,
-  report: false
-});
-const activeSubMenu = ref({
-  dataSource: '',
-  report: ''
-});
-
-const setActiveMenu = (menu) => {
-  activeMenu.value = menu;
-  // 关闭所有子菜单
-  Object.keys(submenus.value).forEach(key => {
-    submenus.value[key] = false;
-  });
-};
-
-const toggleSubmenu = (menu) => {
-  activeMenu.value = menu;
-  submenus.value[menu] = !submenus.value[menu];
-};
-
-const setActiveSubMenu = (parentMenu, subMenu) => {
-  activeMenu.value = parentMenu;
-  activeSubMenu.value[parentMenu] = subMenu;
-  submenus.value[parentMenu] = true;
-};
-
-// 用户菜单切换
-const toggleUserMenu = () => {
-  // 实际项目中这里会处理用户菜单的显示/隐藏
-  console.log('用户菜单被点击');
-};
-
+import { ref, computed,onMounted } from 'vue';
+import SidebarMenu from '@/components/SidebarMenu.vue';
+import request from '../api/request';
+import { ElMessage } from 'element-plus';
 // 租户数据
 const tenants = ref([
-  {
-    id: 1,
-    name: '京东科技',
-    logoText: 'JD',
-    domain: 'jd.quickbi.com',
-    description: '京东科技是中国领先的金融科技公司，提供全方位的金融科技服务和解决方案。',
-    userCount: 128,
-    reportCount: 36,
-    dataSourceCount: 8,
-    admin: '李明',
-    createTime: '2023-05-12',
-    type: 'enterprise',
-    status: 'enabled'
-  },
-  {
-    id: 2,
-    name: '阿里巴巴',
-    logoText: 'AL',
-    domain: 'alibaba.quickbi.com',
-    description: '阿里巴巴集团是全球领先的电子商务和科技公司，业务涵盖电商、云计算、数字媒体等多个领域。',
-    userCount: 256,
-    reportCount: 78,
-    dataSourceCount: 15,
-    admin: '张伟',
-    createTime: '2023-03-28',
-    type: 'enterprise',
-    status: 'enabled'
-  },
-  {
-    id: 3,
-    name: '腾讯控股',
-    logoText: 'TX',
-    domain: 'tencent.quickbi.com',
-    description: '腾讯是中国领先的互联网增值服务提供商，提供社交、游戏、金融科技等多元化服务。',
-    userCount: 189,
-    reportCount: 52,
-    dataSourceCount: 12,
-    admin: '王芳',
-    createTime: '2023-04-15',
-    type: 'enterprise',
-    status: 'enabled'
-  }
+ 
 ]);
 
 // 筛选条件
@@ -550,59 +277,6 @@ const changePage = (page) => {
 // 导出租户
 const exportTenants = () => {
   console.log('导出所有租户数据');
-  // 实际项目中这里会处理导出逻辑
-};
-
-// 新增租户模态框
-const showAddTenantModal = ref(false);
-const newTenant = ref({
-  name: '',
-  domain: '',
-  type: 'enterprise',
-  description: '',
-  admin: '',
-  adminEmail: '',
-  status: 'enabled'
-});
-
-const closeAddTenantModal = () => {
-  showAddTenantModal.value = false;
-  // 重置表单
-  newTenant.value = {
-    name: '',
-    domain: '',
-    type: 'enterprise',
-    description: '',
-    admin: '',
-    adminEmail: '',
-    status: 'enabled'
-  };
-};
-
-const createTenant = () => {
-  // 简单验证
-  if (!newTenant.value.name || !newTenant.value.domain || !newTenant.value.admin || !newTenant.value.adminEmail) {
-    alert('请填写必填字段');
-    return;
-  }
-  
-  // 生成logo文本（取名称前两个字符）
-  const logoText = newTenant.value.name.substring(0, 2);
-  
-  // 添加新租户
-  tenants.value.push({
-    id: tenants.value.length + 1,
-    ...newTenant.value,
-    logoText,
-    userCount: 0,
-    reportCount: 0,
-    dataSourceCount: 0,
-    createTime: new Date().toISOString().split('T')[0]
-  });
-  
-  // 关闭模态框
-  closeAddTenantModal();
-  alert('租户创建成功');
 };
 
 // 配置租户相关
@@ -631,27 +305,25 @@ const saveTenantConfig = () => {
     alert('配置保存成功');
   }
 };
-
-// 用户管理相关
-const showUserManagementModal = ref(false);
-const tenantUsers = ref([
-  { name: '李明', email: 'liming@jd.com', role: '管理员', status: 'active' },
-  { name: '张华', email: 'zhanghua@jd.com', role: '分析师', status: 'active' },
-  { name: '王强', email: 'wangqiang@jd.com', role: '查看者', status: 'disabled' }
-]);
-
-const handleUserManagement = (tenantId) => {
-  const tenant = tenants.value.find(t => t.id === tenantId);
-  if (tenant) {
-    currentTenant.value = { ...tenant };
-    // 实际项目中这里应该根据租户ID加载对应的用户列表
-    showUserManagementModal.value = true;
+const handleUserQuery = () => {
+  let query=new Object();
+  query.pageNum=currentPage.value;
+  query.pageSize=pageSize.value;
+  query.status=filterStatus.value;
+  request.post('/api/uaa-tenants/page',query)
+  .then(response => {
+    if(response.code==200){
+      tenants.value=response.data.records;
+    }else{
+      ElMessage.error(`查询租户失败`);
+    }
   }
-};
+)
 
-const closeUserManagementModal = () => {
-  showUserManagementModal.value = false;
 };
+onMounted(() => {
+  handleUserQuery();
+});
 </script>
 
 <style>

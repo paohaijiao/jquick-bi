@@ -280,11 +280,9 @@ const handleUserQuery = () => {
   query.nameOrLoginName=searchKeyword.value;
   request.post('/api/uaa-user/page',query)
   .then(response => {
-    console.log(response)
     if(response.code==200){
       users.value=response.data.records;
     }
-    
   }
 )
 
