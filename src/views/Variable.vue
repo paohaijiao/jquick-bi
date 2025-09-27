@@ -26,74 +26,12 @@
     <!-- 主内容区 -->
     <div class="main-content">
       <!-- 左侧菜单 -->
-      <aside class="sidebar">
-        <div class="menu-section">
-          <div class="menu-section-title">主导航</div>
-          <div class="menu-item" :class="{ active: activeMenu === 'home' }" @click="setActiveMenu('home')">
-            <i class="fas fa-home"></i>
-            <span>首页</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'datasource' }" @click="toggleSubmenu('datasource')">
-            <i class="fas fa-database"></i>
-            <span>数据源</span>
-            <i class="fas fa-chevron-down" style="font-size: 12px;" :class="{ 'rotate-180': submenus.datasource }"></i>
-          </div>
-          <div class="submenu" :class="{ show: submenus.datasource }">
-            <div class="submenu-item" :class="{ active: activeSubMenu === 'datasource-list' }" @click="setActiveSubMenu('datasource-list')">数据源列表</div>
-            <div class="submenu-item" :class="{ active: activeSubMenu === 'datasource-add' }" @click="setActiveSubMenu('datasource-add')">新增数据源</div>
-            <div class="submenu-item" :class="{ active: activeSubMenu === 'datasource-perm' }" @click="setActiveSubMenu('datasource-perm')">数据源权限</div>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'report' }" @click="setActiveMenu('report')">
-            <i class="fas fa-file-alt"></i>
-            <span>报表</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'dashboard' }" @click="setActiveMenu('dashboard')">
-            <i class="fas fa-chart-pie"></i>
-            <span>仪表盘</span>
-            <span class="menu-badge">5</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'dataset' }" @click="setActiveMenu('dataset')">
-            <i class="fas fa-cubes"></i>
-            <span>数据集</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'variable' }" @click="setActiveMenu('variable')">
-            <i class="fas fa-code"></i>
-            <span>变量管理</span>
-          </div>
-        </div>
-        
-        <div class="menu-section">
-          <div class="menu-section-title">系统管理</div>
-          <div class="menu-item" :class="{ active: activeMenu === 'user' }" @click="setActiveMenu('user')">
-            <i class="fas fa-users"></i>
-            <span>用户管理</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'role' }" @click="setActiveMenu('role')">
-            <i class="fas fa-user-shield"></i>
-            <span>角色权限</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'log' }" @click="setActiveMenu('log')">
-            <i class="fas fa-history"></i>
-            <span>操作日志</span>
-          </div>
-        </div>
-        
-        <div class="menu-section">
-          <div class="menu-section-title">帮助中心</div>
-          <div class="menu-item" :class="{ active: activeMenu === 'help' }" @click="setActiveMenu('help')">
-            <i class="fas fa-question-circle"></i>
-            <span>帮助文档</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'video' }" @click="setActiveMenu('video')">
-            <i class="fas fa-play-circle"></i>
-            <span>视频教程</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'service' }" @click="setActiveMenu('service')">
-            <i class="fas fa-comment-dots"></i>
-            <span>联系客服</span>
-          </div>
-        </div>
-      </aside>
+      <SidebarMenu 
+        :active-menu="activeMenu" 
+        :unread-count="unreadCount"
+        @menu-click="setActiveMenu"
+        @submenu-click="setActiveSubmenu"
+      />
       
       <!-- 右侧变量管理区域 -->
       <main class="content-area">
@@ -161,7 +99,7 @@
             <div>操作</div>
           </div>
           
-          <div class="table-row" v-for="variable in filteredVariables" :key="variable.id" :data-id="variable.id">
+          <div class="table-row" v-for="variable in variables" :key="variable.id" :data-id="variable.id">
             <div class="variable-name">
               <div class="variable-icon" :class="variable.type">
                 <i class="fas" :class="getTypeIcon(variable.type)"></i>
@@ -173,7 +111,7 @@
             </div>
             <div>{{ getTypeName(variable.type) }}</div>
             <div><span class="status-badge" :class="'status-' + variable.status">{{ variable.status === 'active' ? '已启用' : '已禁用' }}</span></div>
-            <div>{{ variable.modifiedTime }}</div>
+            <div>{{ variable.createdTime }}</div>
             <div class="operation-buttons">
               <button class="operation-btn edit" title="编辑" @click="openEditModal(variable.id)">
                 <i class="fas fa-edit"></i>
@@ -287,8 +225,9 @@ export default {
 }
 </script>
 <script setup>
-import { ref, computed } from 'vue';
-
+import { ref, computed,onMounted } from 'vue';
+import SidebarMenu from '@/components/SidebarMenu.vue';
+import request from '../api/request';
 // 菜单状态管理
 const activeMenu = ref('variable');
 const activeSubMenu = ref('');
@@ -324,200 +263,8 @@ const formData = ref({
 });
 
 // 变量数据
-const variables = ref([
-  {
-    id: 1,
-    name: '系统名称',
-    key: 'SYSTEM_NAME',
-    type: 'string',
-    value: 'JQuick BI',
-    desc: '系统显示的名称标识',
-    status: 'active',
-    modifiedTime: '2023-10-15 09:30'
-  },
-  {
-    id: 2,
-    name: '默认分页大小',
-    key: 'DEFAULT_PAGE_SIZE',
-    type: 'number',
-    value: '10',
-    desc: '表格默认显示的记录条数',
-    status: 'active',
-    modifiedTime: '2023-10-14 14:20'
-  },
-  {
-    id: 3,
-    name: '允许匿名访问',
-    key: 'ALLOW_ANONYMOUS',
-    type: 'boolean',
-    value: 'false',
-    desc: '是否允许未登录用户访问公开报表',
-    status: 'inactive',
-    modifiedTime: '2023-10-12 11:45'
-  },
-  {
-    id: 4,
-    name: '数据保留期限',
-    key: 'DATA_RETENTION_PERIOD',
-    type: 'date',
-    value: '2023-12-31',
-    desc: '系统数据自动清理的保留时间',
-    status: 'active',
-    modifiedTime: '2023-10-10 16:10'
-  },
-  {
-    id: 5,
-    name: '主题颜色',
-    key: 'THEME_COLOR',
-    type: 'string',
-    value: '#ff8326',
-    desc: '系统默认主题颜色配置',
-    status: 'active',
-    modifiedTime: '2023-10-09 10:50'
-  },
-  {
-    id: 6,
-    name: '缓存时间',
-    key: 'CACHE_TIME',
-    type: 'number',
-    value: '300',
-    desc: '数据缓存时间(秒)',
-    status: 'active',
-    modifiedTime: '2023-10-08 15:20'
-  },
-  {
-    id: 7,
-    name: '是否开启日志',
-    key: 'ENABLE_LOG',
-    type: 'boolean',
-    value: 'true',
-    desc: '是否记录系统操作日志',
-    status: 'active',
-    modifiedTime: '2023-10-07 09:10'
-  },
-  {
-    id: 8,
-    name: '首页地址',
-    key: 'HOME_PAGE_URL',
-    type: 'string',
-    value: '/dashboard',
-    desc: '系统默认首页地址',
-    status: 'active',
-    modifiedTime: '2023-10-06 11:30'
-  },
-  {
-    id: 9,
-    name: '超时时间',
-    key: 'TIMEOUT',
-    type: 'number',
-    value: '3600',
-    desc: '用户登录超时时间(秒)',
-    status: 'active',
-    modifiedTime: '2023-10-05 14:40'
-  },
-  {
-    id: 10,
-    name: '维护时间',
-    key: 'MAINTENANCE_TIME',
-    type: 'date',
-    value: '2023-11-01',
-    desc: '系统定期维护时间',
-    status: 'inactive',
-    modifiedTime: '2023-10-04 16:50'
-  },
-  {
-    id: 11,
-    name: '最大上传大小',
-    key: 'MAX_UPLOAD_SIZE',
-    type: 'number',
-    value: '10',
-    desc: '文件最大上传大小(MB)',
-    status: 'active',
-    modifiedTime: '2023-10-03 10:20'
-  },
-  {
-    id: 12,
-    name: '是否允许注册',
-    key: 'ALLOW_REGISTRATION',
-    type: 'boolean',
-    value: 'false',
-    desc: '是否允许用户自行注册',
-    status: 'inactive',
-    modifiedTime: '2023-10-02 13:10'
-  },
-  {
-    id: 13,
-    name: '版权信息',
-    key: 'COPYRIGHT_INFO',
-    type: 'string',
-    value: '© 2023 JQuick BI. All rights reserved.',
-    desc: '系统底部显示的版权信息',
-    status: 'active',
-    modifiedTime: '2023-10-01 15:30'
-  },
-  {
-    id: 14,
-    name: '更新日期',
-    key: 'UPDATE_DATE',
-    type: 'date',
-    value: '2023-09-30',
-    desc: '系统最后更新日期',
-    status: 'active',
-    modifiedTime: '2023-09-30 17:40'
-  },
-  {
-    id: 15,
-    name: '默认语言',
-    key: 'DEFAULT_LANGUAGE',
-    type: 'string',
-    value: 'zh-CN',
-    desc: '系统默认显示语言',
-    status: 'active',
-    modifiedTime: '2023-09-29 09:50'
-  },
-  {
-    id: 16,
-    name: '重试次数',
-    key: 'RETRY_COUNT',
-    type: 'number',
-    value: '3',
-    desc: '接口调用失败重试次数',
-    status: 'active',
-    modifiedTime: '2023-09-28 11:10'
-  },
-  {
-    id: 17,
-    name: '是否开启SSL',
-    key: 'ENABLE_SSL',
-    type: 'boolean',
-    value: 'true',
-    desc: '是否启用SSL加密',
-    status: 'active',
-    modifiedTime: '2023-09-27 14:20'
-  },
-  {
-    id: 18,
-    name: '备份日期',
-    key: 'BACKUP_DATE',
-    type: 'date',
-    value: '2023-09-26',
-    desc: '系统数据最后备份日期',
-    status: 'active',
-    modifiedTime: '2023-09-26 16:30'
-  }
-]);
+const variables = ref([]);
 
-// 计算属性 - 筛选后的变量
-const filteredVariables = computed(() => {
-  return variables.value
-    .filter(variable => {
-      if (typeFilter.value && variable.type !== typeFilter.value) return false;
-      if (statusFilter.value && variable.status !== statusFilter.value) return false;
-      if (searchKeyword.value && !variable.name.includes(searchKeyword.value)) return false;
-      return true;
-    })
-    .slice((currentPage.value - 1) * pageSize.value, currentPage.value * pageSize.value);
-});
 
 // 计算属性 - 总记录数
 const totalItems = computed(() => {
@@ -544,14 +291,6 @@ const setActiveMenu = (menu) => {
   });
 };
 
-const toggleSubmenu = (menu) => {
-  activeMenu.value = menu;
-  submenus.value[menu] = !submenus.value[menu];
-};
-
-const setActiveSubMenu = (subMenu) => {
-  activeSubMenu.value = subMenu;
-};
 
 const toggleUserMenu = () => {
   // 这里可以实现用户菜单的展开/收起逻辑
@@ -674,6 +413,21 @@ const getTypeIcon = (type) => {
   };
   return iconMap[type] || 'fa-question';
 };
+const handleVariableQuery = () => {
+  let query=new Object();
+  query.pageNum=currentPage.value;
+  query.pageSize=pageSize.value;
+  request.post('/api/variable/page',query)
+  .then(response => {
+    if(response.code==200){
+      variables.value=response.data.records;
+    }
+  }
+)
+};
+onMounted(() => {
+  handleVariableQuery();
+});
 </script>
 
 <style>

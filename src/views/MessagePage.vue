@@ -36,7 +36,7 @@
       <main class="content-area">
         <div class="page-header">
           <div>
-            <h1 class="page-title">站内消息</h1>
+            <h1 class="page-title text-align-left">站内消息</h1>
             <p class="page-description">查看和管理所有系统消息、通知和个人消息</p>
           </div>
           <div class="action-buttons">
@@ -58,17 +58,15 @@
               <label>消息类型</label>
               <select v-model="filter.type">
                 <option value="">全部类型</option>
-                <option value="system">系统消息</option>
-                <option value="notice">通知公告</option>
-                <option value="personal">个人消息</option>
+                <option  v-for="(t) in type"  :key="t.code"    :value="t.code">{{t.name}}</option>
               </select>
             </div>
             <div class="filter-item">
               <label>消息状态</label>
               <select v-model="filter.status">
                 <option value="">全部状态</option>
-                <option value="unread">未读</option>
-                <option value="read">已读</option>
+                <option  v-for="(t) in status"  :key="t.code"    :value="t.code">{{t.name}}</option>
+      
               </select>
             </div>
             <div class="filter-item">
@@ -99,32 +97,32 @@
           <div 
             class="message-row" 
             :class="{ unread: message.unread }"
-            v-for="message in filteredMessages" 
+            v-for="message in messages" 
             :key="message.id"
             @click="handleMessageClick(message)"
           >
             <div class="message-content">
-              <div class="sender-avatar" :class="message.senderType">
-                <i v-if="message.senderType === 'system'" class="fas fa-robot"></i>
-                <i v-else-if="message.senderType === 'admin'" class="fas fa-user-shield"></i>
-                <span v-else>{{ message.senderInitials }}</span>
+              <div class="sender-avatar" :class="message.messageType">
+                <i v-if="message.messageType === 'system'" class="fas fa-robot"></i>
+                <i v-else-if="message.messageType === 'notice'" class="fas fa-user-shield"></i>
+                <span v-else>{{ message.userName }}</span>
               </div>
               <div class="message-info">
                 <div class="message-header">
                   <span class="sender-name">
-                    {{ message.senderName }}
+                    {{ message.title }}
                     <span class="unread-dot" v-if="message.unread"></span>
                   </span>
                 </div>
-                <div class="message-text">{{ message.content }}</div>
+                <div class="message-text text-align-left">{{ message.content }}</div>
               </div>
             </div>
             <div>
-              <span class="message-type" :class="'type-' + message.type">
-                {{ message.type === 'system' ? '系统消息' : message.type === 'notice' ? '通知公告' : '个人消息' }}
+              <span class="message-type" :class="'type-' + message.messageType">
+                {{ message.messageType === 'system' ? '系统消息' : message.messageType === 'notice' ? '通知公告' : '个人消息' }}
               </span>
             </div>
-            <div>{{ message.time }}</div>
+            <div>{{ message.createdTime }}</div>
             <div class="operation-buttons">
               <button 
                 class="operation-btn" 
@@ -137,7 +135,7 @@
               <button 
                 class="operation-btn" 
                 title="回复" 
-                v-if="message.type === 'personal'"
+                v-if="message.messageType === 'personal'"
                 @click.stop="replyMessage(message)"
               >
                 <i class="fas fa-reply"></i>
@@ -180,8 +178,9 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed ,onMounted} from 'vue';
 import SidebarMenu from '@/components/SidebarMenu.vue';
+import request from '../api/request';
 // 用户信息
 const userName = ref('张磊');
 const userNameInitials = computed(() => {
@@ -195,91 +194,9 @@ const activeSubmenu = ref({
   report: ''
 });
 
-// 消息数据
-const messages = ref([
-  {
-    id: 1,
-    senderName: '系统通知',
-    senderType: 'system',
-    senderInitials: '',
-    content: '您创建的"季度销售分析"报表已成功生成，点击查看详情。',
-    type: 'system',
-    time: '2023-10-15 14:30',
-    unread: true
-  },
-  {
-    id: 2,
-    senderName: '管理员',
-    senderType: 'admin',
-    senderInitials: '',
-    content: '系统将于10月20日进行维护升级，预计持续2小时，期间可能无法访问。',
-    type: 'notice',
-    time: '2023-10-15 10:15',
-    unread: true
-  },
-  {
-    id: 3,
-    senderName: '李娜',
-    senderType: 'user',
-    senderInitials: 'L',
-    content: '你分享的"区域销售对比"报表我已查看，能否帮忙调整一下数据维度？',
-    type: 'personal',
-    time: '2023-10-14 16:45',
-    unread: true
-  },
-  {
-    id: 4,
-    senderName: '系统通知',
-    senderType: 'system',
-    senderInitials: '',
-    content: '数据源"MySQL销售数据库"连接成功，已自动同步最新数据。',
-    type: 'system',
-    time: '2023-10-14 09:20',
-    unread: false
-  },
-  {
-    id: 5,
-    senderName: '管理员',
-    senderType: 'admin',
-    senderInitials: '',
-    content: '新功能"数据预警"已上线，可在报表设置中配置关键指标预警规则。',
-    type: 'notice',
-    time: '2023-10-13 15:30',
-    unread: false
-  },
-  {
-    id: 6,
-    senderName: '王强',
-    senderType: 'user',
-    senderInitials: 'W',
-    content: '关于上周的销售数据报表，我有几个疑问想和你讨论一下。',
-    type: 'personal',
-    time: '2023-10-12 11:20',
-    unread: false
-  },
-  {
-    id: 7,
-    senderName: '系统通知',
-    senderType: 'system',
-    senderInitials: '',
-    content: '您的报表"年度财务总结"已超过30天未更新，建议检查数据时效性。',
-    type: 'system',
-    time: '2023-10-11 16:40',
-    unread: true
-  },
-  {
-    id: 8,
-    senderName: '管理员',
-    senderType: 'admin',
-    senderInitials: '',
-    content: '本周六将举办新功能培训，点击查看详情并报名。',
-    type: 'notice',
-    time: '2023-10-10 09:15',
-    unread: false
-  }
-]);
-
-// 筛选条件
+const messages = ref([]);
+const type = ref([]);
+const status = ref([]);
 const filter = ref({
   type: '',
   status: '',
@@ -287,7 +204,6 @@ const filter = ref({
   searchText: ''
 });
 
-// 分页相关
 const currentPage = ref(1);
 const pageSize = ref(5);
 
@@ -395,8 +311,42 @@ const clearReadMessages = () => {
 
 const replyMessage = (message) => {
   alert(`回复 ${message.senderName} 的消息: ${message.content}`);
-  // 实际应用中这里会打开回复对话框
 };
+const handleMsgType = () => {
+  request.get('/api/message/getMessageType')
+  .then(response => {
+    if(response.code==200){
+      type.value=response.data;
+    }
+  }
+)
+};
+const handleMsgStatus= () => {
+  request.get('/api/message/getMessageStatus')
+  .then(response => {
+    if(response.code==200){
+      status.value=response.data;
+    }
+  }
+)
+};
+const handleMsg = () => {
+  let query=new Object();
+  query.pageNum=currentPage.value;
+  query.pageSize=pageSize.value;
+  request.post('/api/message/page',query)
+  .then(response => {
+    if(response.code==200){
+      messages.value=response.data.records;
+    }
+  }
+)
+};
+onMounted(() => {
+  handleMsgType();
+  handleMsgStatus();
+  handleMsg();
+});
 </script>
 
 <style>

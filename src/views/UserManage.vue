@@ -284,10 +284,8 @@ const handleUserQuery = () => {
     if(response.code==200){
       users.value=response.data.records;
     }
-    
   }
 )
-
 };
 onMounted(() => {
   initStatus();
