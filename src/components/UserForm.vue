@@ -10,7 +10,7 @@
       </div>
       
       <div class="modal-body">
-        <form class="form-container">
+        <form class="form-container" ref="form">
           <div class="form-group">
             <label class="text-align-left">登录名 <span class="required">*</span></label>
             <input 
@@ -18,15 +18,17 @@
               v-model="formData.loginName" 
               :disabled="isEdit"
               class="form-control"
-            >
+              required
+             >
           </div>
           
           <div class="form-group">
             <label class="text-align-left">姓名 <span class="required">*</span></label>
             <input 
               type="text" 
-              v-model="formData.chineseName" 
+              v-model="formData.realName" 
               class="form-control"
+              required
             >
           </div>
           
@@ -36,6 +38,7 @@
               type="text" 
               v-model="formData.phone" 
               class="form-control"
+              required
             >
           </div>
           
@@ -45,6 +48,7 @@
               type="email" 
               v-model="formData.email" 
               class="form-control"
+              required
             >
           </div>
           
@@ -72,7 +76,7 @@
             <label class="text-align-left">初始密码 <span class="required">*</span></label>
             <input 
               type="password" 
-              v-model="formData.password" 
+              v-model="formData.passwd" 
               class="form-control"
             >
           </div>
@@ -88,7 +92,7 @@
 </template>
 
 <script setup>
-import {  reactive, watch,defineProps,defineEmits } from 'vue';
+import {  reactive, watch,defineProps,defineEmits, ref } from 'vue';
 import request from '../api/request';
 import { ElMessage } from 'element-plus';
 const props = defineProps({
@@ -117,27 +121,26 @@ const props = defineProps({
 const emit = defineEmits(['update:visible', 'success']);
 const formData = reactive({
   loginName: '',
-  chineseName: '',
+  realName: '',
   phone: '',
   email: '',
   userType: '',
   status: '',
-  password: ''
+  passwd: ''
 });
+const form = ref(null);
 const resetForm = () => {
   Object.keys(formData).forEach(key => {
     formData[key] = '';
   });
 };
 const loadUserInfo = (id) => {
-  debugger;
   request.get(`/api/uaa-user/${id}`).then(res => {
+    debugger;
     if (res.code === 200) {
       Object.assign(formData, res.data);
     }
-  }).catch(err => {
-    console.error('加载用户信息失败:', err);
-  });
+  })
 };
 watch(() => props.userId, (newVal) => {
   if (props.isEdit && newVal) {
@@ -148,27 +151,32 @@ watch(() => props.userId, (newVal) => {
 }, { immediate: true });
 
 const handleSubmit = () => {
-  // 简单验证
-  if (!formData.loginName || !formData.chineseName) {
-    alert('请填写必填字段');
+  if (!form.value.checkValidity()) {
+    form.value.reportValidity();
     return;
   }
-
-  if (props.isEdit) {
-    request.post('/api/uaa-user/saveOrUpdate', formData).then(res => {
-      if (res.code === 200) {
-        emit('success');
-        emit('update:visible', false);
-      }
-    });
-  } else {
-    request.post('/api/uaa-user', formData).then(res => {
-      if (res.code === 200) {
-        emit('success');
-        emit('update:visible', false);
-      }
-    });
+  if (!formData.loginName ) {
+    ElMessage.success(`登录名非空`);
+    return;
   }
+    let param=new Object();
+    param.id=props.userId;
+    param.loginName=formData.loginName;
+    param.realName=formData.realName;
+    param.phone=formData.phone;
+    param.email=formData.email;
+    param.userType=formData.userType;
+    param.status=formData.status;
+    param.passwd=formData.passwd;
+    request.post('/api/uaa-user/saveOrUpdate', param).then(res => {
+      if (res.code === 200) {
+        ElMessage.success(`保存成功`);
+        emit('success');
+        emit('update:visible', false);
+      }else{
+       ElMessage.error(res.message);
+      }
+    });
 };
 
 // 关闭弹窗

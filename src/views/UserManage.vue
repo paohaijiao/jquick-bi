@@ -250,20 +250,15 @@ const moreActions = (id) => {
 const changePage = (page) => {
   if (page < 1 || page > totalPages.value) return;
   currentPage.value = page;
+  handleUserQuery();
 };
 const initStatus= () => {
   request.get('/api/uaa-user/getUserStatus')
   .then(response => {
     if(response.code==200){
       userStatus.value=response.data;
-    }
-    
-  }
-)
-  .catch(error => {
-    console.error('获取行业失败:', error);
-  });
-
+    } 
+  })
 };
 const initUserType= () => {
   request.get('/api/uaa-user/getUserType')
@@ -272,12 +267,7 @@ const initUserType= () => {
       userType.value=response.data;
     }
     
-  }
-)
-  .catch(error => {
-    console.error('获取行业失败:', error);
-  });
-
+  })
 };
 
 
@@ -297,9 +287,6 @@ const handleUserQuery = () => {
     
   }
 )
-  .catch(error => {
-    console.error('获取行业失败:', error);
-  });
 
 };
 onMounted(() => {
