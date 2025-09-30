@@ -99,16 +99,16 @@
             </div>
             
             <div class="social-login">
-              <a href="#" class="social-btn">
+              <a href="#" class="social-btn social-btn-disabled" disabled>
                 <i class="fab fa-weixin"></i>
               </a>
-              <a href="#" class="social-btn">
+              <a href="#" class="social-btn social-btn-disabled" disabled>
                 <i class="fab fa-qq"></i>
               </a>
-              <a href="#" class="social-btn">
+              <a href="#" class="social-btn social-btn-disabled" disabled>
                 <i class="fab fa-weibo"></i>
               </a>
-              <a href="#" class="social-btn">
+              <a href="#" class="social-btn social-btn-disabled" disabled>
                 <i class="fab fa-github"></i>
               </a>
             </div>
@@ -212,6 +212,11 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.social-btn-disabled {
+  filter: grayscale(100%);
+  opacity: 0.6;
+  cursor: not-allowed; 
+}
 body {
   overflow-y: hidden; /* 隐藏垂直滚动条 */
 }
