@@ -192,16 +192,13 @@ const config = {
     'Content-Type': 'application/x-www-form-urlencoded'
   }
 };
-  request.post('/api/oauth/token',  params.toString(), config)
+request.post('/api/oauth/token',  params.toString(), config)
   .then(response => {
     ElMessage.success('登录成功');
     localStorage.setItem('tokenInfo', JSON.stringify(response));
     localStorage.setItem('token', response.access_token);
     router.push('/index');
   })
-  .catch(error => {
-    console.error('获取用户token失败:', error);
-  });
 
 }
 

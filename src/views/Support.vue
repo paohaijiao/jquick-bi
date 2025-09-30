@@ -183,7 +183,7 @@ const faqs = reactive([
 
 // 处理用户信息点击
 const handleUserClick = () => {
-  console.log('点击用户信息');
+
 };
 
 // 处理文件上传

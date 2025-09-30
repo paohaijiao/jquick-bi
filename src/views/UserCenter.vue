@@ -24,105 +24,19 @@
     </header>
     
     <!-- 主内容区 -->
-    <div class="main-content">
-      <!-- 左侧菜单 -->
-      <aside class="sidebar">
-        <div class="menu-section">
-          <div class="menu-section-title">主导航</div>
-          <div class="menu-item" :class="{ active: activeMenu === 'home' }" @click="setActiveMenu('home')">
-            <i class="fas fa-home"></i>
-            <span>首页</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'dataSource' }" @click="toggleSubmenu('dataSource')">
-            <i class="fas fa-database"></i>
-            <span>数据源</span>
-            <i class="fas fa-chevron-down" style="font-size: 12px;" :class="{ 'rotate-180': submenus.dataSource }"></i>
-          </div>
-          <div class="submenu" id="dataSourceSubmenu" :class="{ show: submenus.dataSource }">
-            <div class="submenu-item" :class="{ active: activeSubmenu.dataSource === 'list' }" @click="setActiveSubmenu('dataSource', 'list')">数据源列表</div>
-            <div class="submenu-item" :class="{ active: activeSubmenu.dataSource === 'add' }" @click="setActiveSubmenu('dataSource', 'add')">新增数据源</div>
-            <div class="submenu-item" :class="{ active: activeSubmenu.dataSource === 'permission' }" @click="setActiveSubmenu('dataSource', 'permission')">数据源权限</div>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'report' }" @click="toggleSubmenu('report')">
-            <i class="fas fa-file-alt"></i>
-            <span>报表</span>
-            <i class="fas fa-chevron-down" style="font-size: 12px;" :class="{ 'rotate-180': submenus.report }"></i>
-          </div>
-          <div class="submenu" id="reportSubmenu" :class="{ show: submenus.report }">
-            <div class="submenu-item" :class="{ active: activeSubmenu.report === 'my' }" @click="setActiveSubmenu('report', 'my')">我的报表</div>
-            <div class="submenu-item" :class="{ active: activeSubmenu.report === 'shared' }" @click="setActiveSubmenu('report', 'shared')">共享报表</div>
-            <div class="submenu-item" :class="{ active: activeSubmenu.report === 'favorite' }" @click="setActiveSubmenu('report', 'favorite')">收藏报表</div>
-            <div class="submenu-item" :class="{ active: activeSubmenu.report === 'recycle' }" @click="setActiveSubmenu('report', 'recycle')">回收站</div>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'dashboard' }" @click="setActiveMenu('dashboard')">
-            <i class="fas fa-chart-pie"></i>
-            <span>仪表盘</span>
-            <span class="menu-badge">5</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'dataset' }" @click="setActiveMenu('dataset')">
-            <i class="fas fa-cubes"></i>
-            <span>数据集</span>
-          </div>
-        </div>
-        
-        <div class="menu-section">
-          <div class="menu-section-title">系统管理</div>
-          <div class="menu-item" :class="{ active: activeMenu === 'userManage' }" @click="setActiveMenu('userManage')">
-            <i class="fas fa-users"></i>
-            <span>用户管理</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'rolePermission' }" @click="setActiveMenu('rolePermission')">
-            <i class="fas fa-user-shield"></i>
-            <span>角色权限</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'operationLog' }" @click="setActiveMenu('operationLog')">
-            <i class="fas fa-history"></i>
-            <span>操作日志</span>
-          </div>
-        </div>
-        
-        <div class="menu-section">
-          <div class="menu-section-title">个人中心</div>
-          <div class="menu-item" :class="{ active: activeMenu === 'personalInfo' }" @click="setActiveMenu('personalInfo')">
-            <i class="fas fa-user-circle"></i>
-            <span>个人信息</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'security' }" @click="setActiveMenu('security')">
-            <i class="fas fa-lock"></i>
-            <span>安全设置</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'preference' }" @click="setActiveMenu('preference')">
-            <i class="fas fa-cog"></i>
-            <span>偏好配置</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'logout' }" @click="setActiveMenu('logout')">
-            <i class="fas fa-sign-out-alt"></i>
-            <span>退出登录</span>
-          </div>
-        </div>
-        
-        <div class="menu-section">
-          <div class="menu-section-title">帮助中心</div>
-          <div class="menu-item" :class="{ active: activeMenu === 'helpDoc' }" @click="setActiveMenu('helpDoc')">
-            <i class="fas fa-question-circle"></i>
-            <span>帮助文档</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'videoTutorial' }" @click="setActiveMenu('videoTutorial')">
-            <i class="fas fa-play-circle"></i>
-            <span>视频教程</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'contactService' }" @click="setActiveMenu('contactService')">
-            <i class="fas fa-comment-dots"></i>
-            <span>联系客服</span>
-          </div>
-        </div>
-      </aside>
+      <div class="main-content">
+         <SidebarMenu 
+        :active-menu="activeMenu" 
+        :unread-count="unreadCount"
+        @menu-click="setActiveMenu"
+        @submenu-click="setActiveSubmenu"
+      />
       
       <!-- 右侧个人中心区域 -->
       <main class="content-area">
         <div class="page-header">
           <div>
-            <h1 class="page-title">个人中心</h1>
+            <h1 class="page-title text-align-left">个人中心</h1>
             <p class="page-description">管理您的个人信息、安全设置和偏好配置</p>
           </div>
         </div>
@@ -130,15 +44,15 @@
         <!-- 个人信息卡片 -->
         <div class="profile-card">
           <div class="profile-avatar">
-            ZL
+            {{userInfo.chineseName}}
             <div class="avatar-upload-btn" title="更换头像" @click="openAvatarUpload">
               <i class="fas fa-camera"></i>
             </div>
           </div>
           <div class="profile-info">
-            <div class="profile-name">{{ userInfo.fullName }}</div>
+            <div class="profile-name text-align-left">{{ userInfo.realName }}</div>
             <div class="profile-role">
-              <span>{{ userInfo.role }}</span>
+              <span>{{ userInfo.userTypeName }}</span>
               <span class="profile-role-badge">{{ userInfo.version }}</span>
             </div>
             <div class="profile-contact">
@@ -152,11 +66,11 @@
               </div>
               <div class="contact-item">
                 <i class="fas fa-building"></i>
-                <span>{{ userInfo.company }}</span>
+                <span>{{ userInfo.tenantName }}</span>
               </div>
               <div class="contact-item">
                 <i class="fas fa-calendar-check"></i>
-                <span>加入时间: {{ userInfo.joinDate }}</span>
+                <span>加入时间: {{ userInfo.createdTime }}</span>
               </div>
             </div>
           </div>
@@ -178,46 +92,46 @@
         
         <!-- 基本信息表单 -->
         <div class="form-container" id="basic-info-tab" v-if="activeTab === 'basic-info'">
-          <div class="form-title">基本信息</div>
+          <div class="form-title text-align-left">基本信息</div>
           <form id="basicInfoForm" @submit.prevent="saveBasicInfo">
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label" for="fullName">姓名 <span style="color: #ff4d4f;">*</span></label>
-                <input type="text" class="form-control" id="fullName" v-model="formData.fullName" required>
+                <label class="form-label text-align-left" for="fullName">姓名 <span style="color: #ff4d4f;">*</span></label>
+                <input type="text" class="form-control" id="fullName" v-model="userInfo.realName" required>
               </div>
               <div class="form-group">
-                <label class="form-label" for="nickName">昵称</label>
-                <input type="text" class="form-control" id="nickName" v-model="formData.nickName">
-                <span class="form-hint">显示在系统内的个性化名称</span>
+                <label class="form-label text-align-left" for="nickName">昵称<span style="color: #ff4d4f;">*</span></label>
+                <input type="text" class="form-control" id="nickName" v-model="userInfo.nickName" required>
+                <span class="form-hint text-align-left">显示在系统内的个性化名称</span>
               </div>
             </div>
             
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label" for="email">电子邮箱 <span style="color: #ff4d4f;">*</span></label>
-                <input type="email" class="form-control" id="email" v-model="formData.email" required>
-                <span class="form-hint">用于登录和接收系统通知</span>
+                <label class="form-label text-align-left" for="email">电子邮箱 <span style="color: #ff4d4f;">*</span></label>
+                <input type="email" class="form-control" id="email" v-model="userInfo.email" required>
+                <span class="form-hint text-align-left">用于登录和接收系统通知</span>
               </div>
               <div class="form-group">
-                <label class="form-label" for="phone">手机号码</label>
-                <input type="tel" class="form-control" id="phone" v-model="formData.phone">
-                <span class="form-hint">用于账号安全验证</span>
+                <label class="form-label text-align-left" for="phone"><span style="color: #ff4d4f;">*</span>手机号码</label>
+                <input type="tel" class="form-control" id="phone" v-model="userInfo.phone" required>
+                <span class="form-hint text-align-left">用于账号安全验证</span>
               </div>
             </div>
             
             <div class="form-group">
-              <label class="form-label" for="department">所属部门</label>
-              <input type="text" class="form-control" id="department" v-model="formData.department">
+              <label class="form-label text-align-left" for="department"><span style="color: #ff4d4f;">*</span>所属部门</label>
+              <input type="text" class="form-control" id="department" v-model="userInfo.dept" required>
             </div>
             
             <div class="form-group">
-              <label class="form-label" for="jobTitle">职位</label>
-              <input type="text" class="form-control" id="jobTitle" v-model="formData.jobTitle">
+              <label class="form-label text-align-left" for="jobTitle"><span style="color: #ff4d4f;">*</span>职位</label>
+              <input type="text" class="form-control" id="jobTitle" v-model="userInfo.position" required>
             </div>
             
             <div class="form-group">
-              <label class="form-label" for="signature">个人签名</label>
-              <textarea class="form-control" id="signature" placeholder="输入个人签名，将显示在个人主页" v-model="formData.signature"></textarea>
+              <label class="form-label text-align-left" for="signature"><span style="color: #ff4d4f;">*</span>个人签名</label>
+              <textarea class="form-control" id="signature" placeholder="输入个人签名，将显示在个人主页" v-model="userInfo.signature" required></textarea>
             </div>
             
             <div class="form-footer">
@@ -227,14 +141,14 @@
           </form>
         </div>
         
-        <!-- 安全设置表单 -->
+
         <div class="form-container" id="security-setting-tab" v-if="activeTab === 'security-setting'">
-          <div class="form-title">安全设置</div>
+          <div class="form-title text-align-left">安全设置</div>
           
           <div class="security-item">
             <div class="security-info">
-              <div class="security-title">修改密码</div>
-              <div class="security-desc">定期修改密码可提高账号安全性，建议包含字母、数字和特殊字符</div>
+              <div class="security-title text-align-left">修改密码</div>
+              <div class="security-desc text-align-left">定期修改密码可提高账号安全性，建议包含字母、数字和特殊字符</div>
             </div>
             <button class="btn btn-outline" id="changePwdBtn" @click="openChangePasswordModal">
               <i class="fas fa-key"></i>
@@ -244,8 +158,8 @@
           
           <div class="security-item">
             <div class="security-info">
-              <div class="security-title">手机验证</div>
-              <div class="security-desc">开启后，敏感操作需通过手机验证码验证身份</div>
+              <div class="security-title text-align-left">手机验证</div>
+              <div class="security-desc text-align-left">开启后，敏感操作需通过手机验证码验证身份</div>
             </div>
             <div class="security-status">
               <span class="status-enabled" v-if="securitySettings.phoneVerify">
@@ -264,7 +178,7 @@
           
           <div class="security-item">
             <div class="security-info">
-              <div class="security-title">邮箱验证</div>
+              <div class="security-title text-align-left">邮箱验证</div>
               <div class="security-desc">开启后，登录异常时需通过邮箱验证码验证身份</div>
             </div>
             <div class="security-status">
@@ -284,8 +198,8 @@
           
           <div class="security-item">
             <div class="security-info">
-              <div class="security-title">登录保护</div>
-              <div class="security-desc">开启后，陌生设备登录需验证身份</div>
+              <div class="security-title text-align-left">登录保护</div>
+              <div class="security-desc text-align-left">开启后，陌生设备登录需验证身份</div>
             </div>
             <div class="security-status">
               <span class="status-enabled" v-if="securitySettings.loginProtect">
@@ -304,8 +218,8 @@
           
           <div class="security-item">
             <div class="security-info">
-              <div class="security-title">登录日志</div>
-              <div class="security-desc">查看最近登录记录，检测异常登录行为</div>
+              <div class="security-title text-align-left">登录日志</div>
+              <div class="security-desc text-align-left">查看最近登录记录，检测异常登录行为</div>
             </div>
             <button class="btn btn-outline" id="viewLoginLogBtn" @click="openLoginLogModal">
               <i class="fas fa-history"></i>
@@ -314,15 +228,13 @@
           </div>
         </div>
         
-        <!-- 偏好配置表单 -->
         <div class="form-container" id="preference-tab" v-if="activeTab === 'preference'">
-          <div class="form-title">偏好配置</div>
+          <div class="form-title text-align-left">偏好配置</div>
           
           <div class="preference-group">
-            <div class="preference-group-title">界面设置</div>
-            
+            <div class="preference-group-title text-align-left">界面设置</div>
             <div class="preference-item">
-              <label>
+              <label class="text-align-left">
                 主题风格
                 <select class="form-control" v-model="preferences.theme">
                   <option value="light">浅色主题</option>
@@ -335,8 +247,8 @@
             <div class="preference-item">
               <input type="checkbox" id="sidebarCollapse" v-model="preferences.sidebarCollapse">
               <label for="sidebarCollapse">
-                侧边栏默认折叠
-                <div class="preference-desc">登录时默认折叠侧边栏，节省页面空间</div>
+                <span class="text-align-left">侧边栏默认折叠</span>
+                <div class="preference-desc text-align-left">登录时默认折叠侧边栏，节省页面空间</div>
               </label>
             </div>
             
@@ -467,37 +379,13 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
-
-// 状态管理
-const activeMenu = ref('personalInfo');
-const submenus = ref({
-  dataSource: false,
-  report: false
-});
-const activeSubmenu = ref({
-  dataSource: '',
-  report: ''
-});
+import SidebarMenu from '@/components/SidebarMenu.vue';
+import request from '../api/request';
+import { ElMessage } from 'element-plus';
 const activeTab = ref('basic-info');
 
-// 用户信息
-const userInfo = reactive({
-  fullName: '张磊',
-  nickName: '磊哥',
-  role: '系统管理员',
-  version: '企业版',
-  email: 'zhanglei@example.com',
-  phone: '138****1234',
-  company: '京东科技',
-  joinDate: '2023-01-15',
-  department: '技术部',
-  jobTitle: '技术架构师',
-  signature: '专注数据可视化与BI系统建设'
-});
+const userInfo = reactive({});
 
-// 表单数据
-const formData = reactive({ ...userInfo });
-const originalFormData = { ...userInfo };
 
 // 安全设置
 const securitySettings = reactive({
@@ -517,12 +405,7 @@ const preferences = reactive({
 });
 const originalPreferences = { ...preferences };
 
-// 密码修改表单
-const passwordForm = reactive({
-  oldPassword: '',
-  newPassword: '',
-  confirmPassword: ''
-});
+const passwordForm = reactive({});
 
 // 模态框状态
 const showChangePasswordModal = ref(false);
@@ -557,7 +440,6 @@ const activities = ref([
   }
 ]);
 
-// 登录日志
 const loginLogs = ref([
   {
     device: 'Chrome 浏览器 (Windows 10)',
@@ -579,43 +461,43 @@ const loginLogs = ref([
   }
 ]);
 
-// 方法
-const setActiveMenu = (menu) => {
-  activeMenu.value = menu;
-  // 关闭所有子菜单
-  Object.keys(submenus.value).forEach(key => {
-    submenus.value[key] = false;
-  });
-};
 
-const toggleSubmenu = (menu) => {
-  activeMenu.value = menu;
-  submenus.value[menu] = !submenus.value[menu];
-};
 
-const setActiveSubmenu = (parent, submenu) => {
-  activeSubmenu.value[parent] = submenu;
-};
+
+
+
 
 const switchTab = (tab) => {
   activeTab.value = tab;
 };
 
 const saveBasicInfo = () => {
-  // 保存表单数据到用户信息
-  Object.assign(userInfo, formData);
-  // 这里可以添加保存到服务器的逻辑
-  alert('个人信息保存成功');
+  let param=new Object();
+  param.realName=userInfo.realName;
+  param.chineseName=userInfo.chineseName;
+  param.email=userInfo.email;
+  param.phone=userInfo.phone;
+  param.tenantName=userInfo.tenantName;
+  param.nickName=userInfo.nickName;      
+  param.dept=userInfo.dept;      
+  param.position=userInfo.position;
+  param.signature=userInfo.signature;
+  request.post('/api/uaa-user/updateProfile',param).then(response => {
+    if(200==response.code){
+      ElMessage.success(`修改成功`);
+    }else{
+      ElMessage.success(`加载数据出错`);
+    }
+  }
+)
 };
 
 const resetForm = () => {
-  // 重置表单数据
-  Object.assign(formData, originalFormData);
+  alert('个人信息保存成功');
 };
 
 const toggleSecuritySetting = (setting) => {
   securitySettings[setting] = !securitySettings[setting];
-  // 这里可以添加保存到服务器的逻辑
 };
 
 const openChangePasswordModal = () => {
@@ -632,17 +514,25 @@ const closeChangePasswordModal = () => {
 
 const changePassword = () => {
   if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-    alert('两次输入的新密码不一致');
+    ElMessage.success('两次输入的新密码不一致');
     return;
   }
-  
   if (passwordForm.newPassword.length < 8) {
-    alert('密码长度至少8位');
+    ElMessage.success('密码长度至少8位');
     return;
   }
-  
-  // 这里可以添加密码修改逻辑
-  alert('密码修改成功');
+  let param=new Object();
+  param.oldPasswd=passwordForm.oldPassword;
+  param.newPasswd=passwordForm.newPassword;
+  debugger;
+  request.post('/api/uaa-user/updatePasswd',param).then(response => {
+    if(200==response.code){
+       ElMessage.success(`修改成功`);
+    }else{
+      ElMessage.error(response.message);
+    }
+  }
+)
   closeChangePasswordModal();
 };
 
@@ -655,33 +545,47 @@ const closeLoginLogModal = () => {
 };
 
 const savePreferences = () => {
-  // 这里可以添加保存到服务器的逻辑
   Object.assign(originalPreferences, preferences);
-  alert('偏好设置保存成功');
+  ElMessage.success('偏好设置保存成功');
 };
 
 const resetPreferences = () => {
-  // 重置偏好设置
   Object.assign(preferences, originalPreferences);
 };
 
 const openAvatarUpload = () => {
-  alert('打开头像上传对话框');
-  // 这里可以添加头像上传逻辑
+  ElMessage.success('打开头像上传对话框');
 };
 
-const toggleUserMenu = () => {
-  // 这里可以添加用户菜单切换逻辑
-  console.log('用户菜单被点击');
-};
+const handleMyInfo = () => {
+request.get('/api/uaa-user/getCurrentUserInfo').then(response => {
+    if(200==response.code){
+      userInfo.realName=response.data.realName;
+      userInfo.chineseName=response.data.chineseName;
+      userInfo.email=response.data.email;
+      userInfo.phone=response.data.phone;
+      userInfo.tenantName=response.data.tenantName;
+      userInfo.createdTime=response.data.createdTime;
+      userInfo.nickName=response.data.nickName;      
+      userInfo.dept=response.data.dept;      
+      userInfo.position=response.data.position;
+      userInfo.signature=response.data.signature;
+    }else{
+      ElMessage.success(`加载数据出错`);
+    }
+  }
+)
+}
 
 onMounted(() => {
-  // 初始化逻辑
-  console.log('组件挂载完成');
+    handleMyInfo();
 });
 </script>
 
 <style>
+#app{
+  text-align: left !important;
+}
 :root {
   --primary-color: #ff8326;
   --secondary-color: #fff5eb;
@@ -1088,7 +992,6 @@ body {
   margin-right: 8px;
 }
 
-/* 个人中心内容区域 - 选项卡样式 */
 .profile-tabs {
   display: flex;
   gap: 2px;
