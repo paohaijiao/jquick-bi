@@ -158,11 +158,11 @@
           
           <div class="security-item">
             <div class="security-info">
-              <div class="security-title text-align-left">手机验证</div>
+              <div class="security-title text-align-left">短信通知</div>
               <div class="security-desc text-align-left">开启后，敏感操作需通过手机验证码验证身份</div>
             </div>
             <div class="security-status">
-              <span class="status-enabled" v-if="securitySettings.phoneVerify">
+              <span class="status-enabled" v-if="securitySettings.smsNotificationEnabled">
                 <i class="fas fa-check-circle"></i>
                 已开启
               </span>
@@ -170,19 +170,19 @@
                 <i class="fas fa-times-circle"></i>
                 未开启
               </span>
-              <button class="btn btn-outline" id="togglePhoneVerify" @click="toggleSecuritySetting('phoneVerify')">
-                {{ securitySettings.phoneVerify ? '关闭' : '开启' }}
+              <button class="btn btn-outline" id="togglePhoneVerify" @click="toggleSecuritySetting('smsNotificationEnabled')">
+                {{ securitySettings.smsNotificationEnabled ? '关闭' : '开启' }}
               </button>
             </div>
           </div>
           
           <div class="security-item">
             <div class="security-info">
-              <div class="security-title text-align-left">邮箱验证</div>
+              <div class="security-title text-align-left">邮箱通知</div>
               <div class="security-desc">开启后，登录异常时需通过邮箱验证码验证身份</div>
             </div>
             <div class="security-status">
-              <span class="status-enabled" v-if="securitySettings.emailVerify">
+              <span class="status-enabled" v-if="securitySettings.emailNotificationEnabled">
                 <i class="fas fa-check-circle"></i>
                 已开启
               </span>
@@ -190,8 +190,8 @@
                 <i class="fas fa-times-circle"></i>
                 未开启
               </span>
-              <button class="btn btn-outline" id="toggleEmailVerify" @click="toggleSecuritySetting('emailVerify')">
-                {{ securitySettings.emailVerify ? '关闭' : '开启' }}
+              <button class="btn btn-outline" id="toggleEmailVerify" @click="toggleSecuritySetting('emailNotificationEnabled')">
+                {{ securitySettings.emailNotificationEnabled ? '关闭' : '开启' }}
               </button>
             </div>
           </div>
@@ -202,7 +202,7 @@
               <div class="security-desc text-align-left">开启后，陌生设备登录需验证身份</div>
             </div>
             <div class="security-status">
-              <span class="status-enabled" v-if="securitySettings.loginProtect">
+              <span class="status-enabled" v-if="securitySettings.notificationEnabled">
                 <i class="fas fa-check-circle"></i>
                 已开启
               </span>
@@ -210,42 +210,31 @@
                 <i class="fas fa-times-circle"></i>
                 未开启
               </span>
-              <button class="btn btn-outline" id="toggleLoginProtect" @click="toggleSecuritySetting('loginProtect')">
-                {{ securitySettings.loginProtect ? '关闭' : '开启' }}
+              <button class="btn btn-outline" id="toggleLoginProtect" @click="toggleSecuritySetting('notificationEnabled')">
+                {{ securitySettings.notificationEnabled ? '关闭' : '开启' }}
               </button>
             </div>
           </div>
-          
-          <div class="security-item">
-            <div class="security-info">
-              <div class="security-title text-align-left">登录日志</div>
-              <div class="security-desc text-align-left">查看最近登录记录，检测异常登录行为</div>
-            </div>
-            <button class="btn btn-outline" id="viewLoginLogBtn" @click="openLoginLogModal">
-              <i class="fas fa-history"></i>
-              查看
-            </button>
+            <div class="form-footer">
+            <button type="button" class="btn btn-outline" @click="resetSecurity">取消</button>
+            <button type="button" class="btn btn-primary" @click="saveSecurity">保存设置</button>
           </div>
         </div>
         
         <div class="form-container" id="preference-tab" v-if="activeTab === 'preference'">
           <div class="form-title text-align-left">偏好配置</div>
-          
           <div class="preference-group">
             <div class="preference-group-title text-align-left">界面设置</div>
             <div class="preference-item">
               <label class="text-align-left">
-                主题风格
-                <select class="form-control" v-model="preferences.theme">
-                  <option value="light">浅色主题</option>
-                  <option value="dark">深色主题</option>
-                  <option value="auto">跟随系统</option>
+                <select class="form-control" v-model="preferences.themeStyle">
+                  <option :value="t.code" v-for="(t, index) in theme" :key="index">{{t.name}}</option>
                 </select>
               </label>
             </div>
             
             <div class="preference-item">
-              <input type="checkbox" id="sidebarCollapse" v-model="preferences.sidebarCollapse">
+              <input type="checkbox" id="sidebarCollapse" v-model="preferences.sidebarFoldEnabled">
               <label for="sidebarCollapse">
                 <span class="text-align-left">侧边栏默认折叠</span>
                 <div class="preference-desc text-align-left">登录时默认折叠侧边栏，节省页面空间</div>
@@ -253,7 +242,7 @@
             </div>
             
             <div class="preference-item">
-              <input type="checkbox" id="showBreadcrumb" v-model="preferences.showBreadcrumb">
+              <input type="checkbox" id="showBreadcrumb" v-model="preferences.breadcrumbNavigationEnabled">
               <label for="showBreadcrumb">
                 显示面包屑导航
                 <div class="preference-desc">在页面顶部显示当前位置导航</div>
@@ -263,9 +252,8 @@
           
           <div class="preference-group">
             <div class="preference-group-title">通知设置</div>
-            
             <div class="preference-item">
-              <input type="checkbox" id="notifyReportShare" v-model="preferences.notifyReportShare">
+              <input type="checkbox" id="notifyReportShare" v-model="preferences.reportShareNotificationEnabled">
               <label for="notifyReportShare">
                 报表共享通知
                 <div class="preference-desc">当有报表共享给我时接收通知</div>
@@ -273,7 +261,7 @@
             </div>
             
             <div class="preference-item">
-              <input type="checkbox" id="notifyDataChange" v-model="preferences.notifyDataChange">
+              <input type="checkbox" id="notifyDataChange" v-model="preferences.dataUpdateNotificationEnabled">
               <label for="notifyDataChange">
                 数据更新通知
                 <div class="preference-desc">关注的数据源发生更新时接收通知</div>
@@ -281,7 +269,7 @@
             </div>
             
             <div class="preference-item">
-              <input type="checkbox" id="notifySystem" v-model="preferences.notifySystem">
+              <input type="checkbox" id="notifySystem" v-model="preferences.systemNotificationEnabled">
               <label for="notifySystem">
                 系统公告通知
                 <div class="preference-desc">接收系统更新和公告信息</div>
@@ -345,35 +333,6 @@
       </div>
     </div>
     
-    <!-- 登录日志模态框 -->
-    <div class="modal-overlay" :class="{ show: showLoginLogModal }" @click="closeLoginLogModal">
-      <div class="modal" @click.stop>
-        <div class="modal-header">
-          <div class="modal-title">登录日志</div>
-          <button class="modal-close" @click="closeLoginLogModal">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-        <div class="modal-body">
-          <div class="activity-list" style="padding: 0;">
-            <div class="activity-item" v-for="(log, index) in loginLogs" :key="index">
-              <div class="activity-icon">
-                <i class="fas fa-sign-in-alt"></i>
-              </div>
-              <div class="activity-content">
-                <div class="activity-action">
-                  在 {{ log.device }} 上登录，IP: {{ log.ip }}，地点: {{ log.location }}
-                </div>
-                <div class="activity-time">{{ log.time }}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-primary" @click="closeLoginLogModal">关闭</button>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -383,33 +342,20 @@ import SidebarMenu from '@/components/SidebarMenu.vue';
 import request from '../api/request';
 import { ElMessage } from 'element-plus';
 const activeTab = ref('basic-info');
-
+const theme = ref([]);
 const userInfo = reactive({});
 
 
-// 安全设置
-const securitySettings = reactive({
-  phoneVerify: true,
-  emailVerify: true,
-  loginProtect: false
-});
+const securitySettings = reactive({});
 
 // 偏好设置
-const preferences = reactive({
-  theme: 'light',
-  sidebarCollapse: false,
-  showBreadcrumb: true,
-  notifyReportShare: true,
-  notifyDataChange: false,
-  notifySystem: true
-});
+const preferences = reactive({});
 const originalPreferences = { ...preferences };
 
 const passwordForm = reactive({});
 
 // 模态框状态
 const showChangePasswordModal = ref(false);
-const showLoginLogModal = ref(false);
 
 // 活动记录
 const activities = ref([
@@ -440,35 +386,11 @@ const activities = ref([
   }
 ]);
 
-const loginLogs = ref([
-  {
-    device: 'Chrome 浏览器 (Windows 10)',
-    ip: '192.168.1.100',
-    location: '北京市',
-    time: '今天 08:30'
-  },
-  {
-    device: 'Safari 浏览器 (macOS)',
-    ip: '192.168.1.101',
-    location: '北京市',
-    time: '昨天 19:45'
-  },
-  {
-    device: '微信小程序',
-    ip: '203.0.113.5',
-    location: '上海市',
-    time: '2023-10-15 16:20'
-  }
-]);
-
-
-
-
-
-
-
 const switchTab = (tab) => {
   activeTab.value = tab;
+  if(tab==='security-setting'||tab==='preference'){
+    handleMyPreference();
+  }
 };
 
 const saveBasicInfo = () => {
@@ -499,10 +421,23 @@ const resetForm = () => {
 const toggleSecuritySetting = (setting) => {
   securitySettings[setting] = !securitySettings[setting];
 };
-
+const saveSecurity = () => {
+  let param=new Object();
+  param.notificationEnabled= securitySettings.notificationEnabled;
+  param.emailNotificationEnabled=securitySettings.emailNotificationEnabled;
+  param.smsNotificationEnabled=securitySettings.smsNotificationEnabled;
+   request.post('/api/user/preference/saveOrUpdateSecurity',param).then(response => {
+        if(200==response.code){
+            ElMessage.success(`更新成功`);
+            handleMyPreference();
+        }else{
+          ElMessage.success(`加载数据出错`);
+        }
+      }
+    )
+}
 const openChangePasswordModal = () => {
   showChangePasswordModal.value = true;
-  // 重置密码表单
   passwordForm.oldPassword = '';
   passwordForm.newPassword = '';
   passwordForm.confirmPassword = '';
@@ -535,18 +470,23 @@ const changePassword = () => {
 )
   closeChangePasswordModal();
 };
-
-const openLoginLogModal = () => {
-  showLoginLogModal.value = true;
-};
-
-const closeLoginLogModal = () => {
-  showLoginLogModal.value = false;
-};
-
 const savePreferences = () => {
-  Object.assign(originalPreferences, preferences);
-  ElMessage.success('偏好设置保存成功');
+   let param=new Object();
+  param.themeStyle= preferences.themeStyle;
+  param.sidebarFoldEnabled=preferences.sidebarFoldEnabled;
+  param.breadcrumbNavigationEnabled=preferences.breadcrumbNavigationEnabled;
+  param.reportShareNotificationEnabled=preferences.reportShareNotificationEnabled;
+  param.dataUpdateNotificationEnabled=preferences.dataUpdateNotificationEnabled;
+  param.systemNotificationEnabled=preferences.systemNotificationEnabled;
+   request.post('/api/user/preference/saveOrUpdatePreference',param).then(response => {
+        if(200==response.code){
+            ElMessage.success(`更新成功`);
+            handleMyPreference();
+        }else{
+          ElMessage.success(`加载数据出错`);
+        }
+      }
+    )
 };
 
 const resetPreferences = () => {
@@ -556,7 +496,27 @@ const resetPreferences = () => {
 const openAvatarUpload = () => {
   ElMessage.success('打开头像上传对话框');
 };
+const handleMyPreference = () => {
+    request.get('/api/user/preference/getPreference').then(response => {
+        if(200==response.code){
+          securitySettings.notificationEnabled=response.data.notificationEnabled;
+          securitySettings.emailNotificationEnabled=response.data.emailNotificationEnabled;
+          securitySettings.smsNotificationEnabled=response.data.smsNotificationEnabled;
 
+          preferences.themeStyle=response.data.themeStyle;
+          preferences.sidebarFoldEnabled=response.data.sidebarFoldEnabled;
+          preferences.breadcrumbNavigationEnabled=response.data.breadcrumbNavigationEnabled;
+          preferences.reportShareNotificationEnabled=response.data.reportShareNotificationEnabled;
+          preferences.dataUpdateNotificationEnabled=response.data.dataUpdateNotificationEnabled;
+          preferences.systemNotificationEnabled=response.data.systemNotificationEnabled;
+          
+          
+        }else{
+          ElMessage.success(`加载数据出错`);
+        }
+      }
+    )
+}
 const handleMyInfo = () => {
 request.get('/api/uaa-user/getCurrentUserInfo').then(response => {
     if(200==response.code){
@@ -576,9 +536,19 @@ request.get('/api/uaa-user/getCurrentUserInfo').then(response => {
   }
 )
 }
-
+const handleThemeType=()=>{
+  request.get('/api/user/preference/getThemeType').then(response => {
+    if(200==response.code){
+      theme.value=response.data;
+    }else{
+      ElMessage.success(`加载数据出错`);
+    }
+  }
+)
+}
 onMounted(() => {
     handleMyInfo();
+    handleThemeType();
 });
 </script>
 
