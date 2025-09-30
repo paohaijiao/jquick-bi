@@ -135,9 +135,9 @@
           <div class="faq-item" v-for="(faq, index) in faqs" :key="index">
             <div class="faq-question" @click="toggleFaq(index)">
               <i class="fas" :class="faq.open ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
-              <span>{{ faq.question }}</span>
+              <span >{{ faq.question }}</span>
             </div>
-            <div class="faq-answer" v-if="faq.open">
+            <div class="faq-answer text-align-left" v-if="faq.open">
               {{ faq.answer }}
             </div>
           </div>
@@ -155,16 +155,14 @@ export default {
 import {  reactive } from 'vue';
 import SidebarMenu from '@/components/SidebarMenu.vue';
 
-// 表单数据
 const formData = reactive({
   subject: '',
-  from: 'zhanglei@example.com',
+  from: '',
   category: '',
   message: '',
   attachments: []
 });
 
-// 常见问题数据
 const faqs = reactive([
   {
     question: '如何重置我的密码？',
