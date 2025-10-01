@@ -26,100 +26,18 @@
     <!-- 主内容区 -->
     <div class="main-content">
       <!-- 左侧菜单 -->
-      <aside class="sidebar">
-        <div class="menu-section">
-          <div class="menu-section-title">主导航</div>
-          <div class="menu-item" :class="{ active: activeMenu === 'home' }" @click="setActiveMenu('home')">
-            <i class="fas fa-home"></i>
-            <span>首页</span>
-          </div>
-          <div class="menu-item" 
-               :class="{ active: activeMenu === 'dataSource' }" 
-               @click="toggleSubmenu('dataSource')">
-            <i class="fas fa-database"></i>
-            <span>数据源</span>
-            <i class="fas fa-chevron-down" style="font-size: 12px;" 
-               :class="{ 'rotate-180': submenus.dataSource }"></i>
-          </div>
-          <div class="submenu" :class="{ show: submenus.dataSource }" id="dataSourceSubmenu">
-            <div class="submenu-item" :class="{ active: activeSubMenu.dataSource === 'list' }" 
-                 @click="setActiveSubMenu('dataSource', 'list')">数据源列表</div>
-            <div class="submenu-item" :class="{ active: activeSubMenu.dataSource === 'add' }" 
-                 @click="setActiveSubMenu('dataSource', 'add')">新增数据源</div>
-            <div class="submenu-item" :class="{ active: activeSubMenu.dataSource === 'permission' }" 
-                 @click="setActiveSubMenu('dataSource', 'permission')">数据源权限</div>
-          </div>
-          <div class="menu-item" 
-               :class="{ active: activeMenu === 'report' }" 
-               @click="toggleSubmenu('report')">
-            <i class="fas fa-file-alt"></i>
-            <span>报表</span>
-            <i class="fas fa-chevron-down" style="font-size: 12px;" 
-               :class="{ 'rotate-180': submenus.report }"></i>
-          </div>
-          <div class="submenu" :class="{ show: submenus.report }" id="reportSubmenu">
-            <div class="submenu-item" :class="{ active: activeSubMenu.report === 'my' }" 
-                 @click="setActiveSubMenu('report', 'my')">我的报表</div>
-            <div class="submenu-item" :class="{ active: activeSubMenu.report === 'shared' }" 
-                 @click="setActiveSubMenu('report', 'shared')">共享报表</div>
-            <div class="submenu-item" :class="{ active: activeSubMenu.report === 'favorite' }" 
-                 @click="setActiveSubMenu('report', 'favorite')">收藏报表</div>
-            <div class="submenu-item" :class="{ active: activeSubMenu.report === 'recycle' }" 
-                 @click="setActiveSubMenu('report', 'recycle')">回收站</div>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'dashboard' }" @click="setActiveMenu('dashboard')">
-            <i class="fas fa-chart-pie"></i>
-            <span>仪表盘</span>
-            <span class="menu-badge">5</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'dataset' }" @click="setActiveMenu('dataset')">
-            <i class="fas fa-cubes"></i>
-            <span>数据集</span>
-          </div>
-        </div>
-        
-        <div class="menu-section">
-          <div class="menu-section-title">系统管理</div>
-          <div class="menu-item" :class="{ active: activeMenu === 'user' }" @click="setActiveMenu('user')">
-            <i class="fas fa-users"></i>
-            <span>用户管理</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'tenant' }" @click="setActiveMenu('tenant')">
-            <i class="fas fa-building"></i>
-            <span>租户管理</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'role' }" @click="setActiveMenu('role')">
-            <i class="fas fa-user-shield"></i>
-            <span>角色权限</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'log' }" @click="setActiveMenu('log')">
-            <i class="fas fa-history"></i>
-            <span>操作日志</span>
-          </div>
-        </div>
-        
-        <div class="menu-section">
-          <div class="menu-section-title">帮助中心</div>
-          <div class="menu-item" :class="{ active: activeMenu === 'help' }" @click="setActiveMenu('help')">
-            <i class="fas fa-question-circle"></i>
-            <span>帮助文档</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'video' }" @click="setActiveMenu('video')">
-            <i class="fas fa-play-circle"></i>
-            <span>视频教程</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMenu === 'contact' }" @click="setActiveMenu('contact')">
-            <i class="fas fa-comment-dots"></i>
-            <span>联系客服</span>
-          </div>
-        </div>
-      </aside>
+      <SidebarMenu 
+        :active-menu="activeMenu" 
+        :unread-count="unreadCount"
+        @menu-click="setActiveMenu"
+        @submenu-click="setActiveSubmenu"
+      />
       
       <!-- 右侧角色权限管理区域 -->
       <main class="content-area">
         <div class="page-header">
           <div>
-            <h1 class="page-title">角色权限管理</h1>
+            <h1 class="page-title text-align-left">角色权限管理</h1>
             <p class="page-description">管理系统角色及对应的权限配置</p>
           </div>
           <div class="action-buttons">
@@ -139,18 +57,16 @@
           <div class="filter-group">
             <div class="filter-item">
               <label>角色状态</label>
-              <select v-model="statusFilter">
+              <select v-model="roleStatus" @change="handleRole()">
                 <option value="">全部状态</option>
-                <option value="active">已启用</option>
-                <option value="inactive">已禁用</option>
+                <option :value="c.code" v-for="(c) in status" :key="c.code">{{c.name}}</option>
               </select>
             </div>
             <div class="filter-item">
               <label>角色类型</label>
-              <select v-model="typeFilter">
+              <select v-model="roleType" @change="handleRole()">
                 <option value="">全部类型</option>
-                <option value="system">系统角色</option>
-                <option value="custom">自定义角色</option>
+                <option :value="c.code" v-for="(c) in type" :key="c.code">{{c.name}}</option>
               </select>
             </div>
           </div>
@@ -164,22 +80,22 @@
         <div class="role-list">
           <div class="table-header">
             <div>角色信息</div>
-            <div>用户数量</div>
+            <div>角色编码</div>
             <div>状态</div>
             <div>操作</div>
           </div>
           
-          <div class="table-row" v-for="role in filteredRoles" :key="role.id">
+          <div class="table-row" v-for="role in roles" :key="role.id">
             <div class="role-info">
               <div class="role-icon">
                 <i :class="role.icon"></i>
               </div>
               <div class="role-details">
-                <div class="role-name">{{ role.name }}</div>
-                <div class="role-desc">{{ role.description }}</div>
+                <div class="role-name text-align-left">{{ role.roleName }}</div>
+                <div class="role-desc text-align-left">{{ role.remark }}</div>
               </div>
             </div>
-            <div class="role-count">{{ role.userCount }}人</div>
+            <div class="role-count">{{ role.roleCode }}</div>
             <div>
               <span class="role-status" :class="role.status === 'active' ? 'status-active' : 'status-inactive'">
                 {{ role.status === 'active' ? '已启用' : '已禁用' }}
@@ -195,11 +111,6 @@
                       :data-role="role.name" :data-type="role.type"
                       @click="configurePermission(role)">
                 <i class="fas fa-lock"></i>
-              </button>
-              <button class="operation-btn" title="用户列表" 
-                      :data-role="role.name"
-                      @click="viewUsers(role)">
-                <i class="fas fa-users"></i>
               </button>
             </div>
           </div>
@@ -228,41 +139,50 @@
       <div class="modal" @click.stop>
         <div class="modal-header">
           <h3 class="modal-title">{{ currentRole.id ? '编辑角色' : '新增角色' }}</h3>
-          <button class="modal-close" @click="closeModal('isAddRoleModalVisible')">
+          <button class="modal-close" @click="closeModal('isAddRoleModalVisible')" required>
             <i class="fas fa-times"></i>
           </button>
         </div>
         <div class="modal-body">
           <div class="form-group">
-            <label class="form-label">角色名称</label>
-            <input type="text" class="form-control" v-model="currentRole.name" placeholder="请输入角色名称">
-            <span class="form-hint">角色名称应清晰反映角色职责，不超过20个字符</span>
+            <label class="form-label text-align-left">角色名称</label>
+            <input type="text" class="form-control" v-model="currentRole.roleName" placeholder="请输入角色名称" required>
+            <span class="form-hint text-align-left">角色名称应清晰反映角色职责，不超过20个字符</span>
           </div>
           <div class="form-group">
-            <label class="form-label">角色描述</label>
-            <textarea class="form-control" v-model="currentRole.description" placeholder="请输入角色描述"></textarea>
-            <span class="form-hint">简要描述该角色的职责和权限范围</span>
+            <label class="form-label text-align-left">角色代码</label>
+            <input class="form-control" v-model="currentRole.roleCode" placeholder="请输入角色代码" required :disabled="currentRole.id">
+            <span class="form-hint text-align-left"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label text-align-left">角色图标</label>
+            <input class="form-control" v-model="currentRole.icon" placeholder="请输入角色图标" required>
+            <span class="form-hint text-align-left"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label text-align-left">角色描述</label>
+            <textarea class="form-control" v-model="currentRole.remark" placeholder="请输入角色描述" required></textarea>
+            <span class="form-hint text-align-left">简要描述该角色的职责和权限范围</span>
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label">角色状态</label>
-              <select class="form-control" v-model="currentRole.status">
-                <option value="active">已启用</option>
-                <option value="inactive">已禁用</option>
+              <label class="form-label text-align-left">角色状态</label>
+              <select class="form-control" v-model="currentRole.status" required>
+                <option :value="c.code" v-for="(c) in status" :key="c.code">{{c.name}}</option>
               </select>
             </div>
             <div class="form-group" v-if="!currentRole.id">
-              <label class="form-label">角色类型</label>
-              <select class="form-control" v-model="currentRole.type">
+              <label class="form-label text-align-left">角色类型</label>
+              <select class="form-control" v-model="currentRole.type" required>
                 <option value="custom">自定义角色</option>
               </select>
-              <span class="form-hint">系统角色由系统预设，自定义角色可灵活配置</span>
+              <span class="form-hint text-align-left">系统角色由系统预设，自定义角色可灵活配置</span>
             </div>
           </div>
         </div>
         <div class="modal-footer">
           <button class="btn btn-outline" @click="closeModal('isAddRoleModalVisible')">取消</button>
-          <button class="btn btn-primary" @click="saveRole">保存</button>
+          <button class="btn btn-primary" @click="saveOrUpdateRole">保存</button>
         </div>
       </div>
     </div>
@@ -364,24 +284,16 @@ export default {
 }
 </script>
 <script setup>
-import { ref, computed } from 'vue';
-
-// 菜单状态管理
-const activeMenu = ref('role');
-const submenus = ref({
-  dataSource: false,
-  report: false
-});
-const activeSubMenu = ref({
-  dataSource: '',
-  report: ''
-});
-
+import { ref, computed ,onMounted} from 'vue';
+import SidebarMenu from '@/components/SidebarMenu.vue';
+import { ElMessage } from 'element-plus';
+import request from '../api/request';
 // 筛选条件
 const statusFilter = ref('');
 const typeFilter = ref('');
 const searchKeyword = ref('');
-
+const status = ref([]);
+const type = ref([]);
 // 分页控制
 const currentPage = ref(1);
 const pageSize = ref(5);
@@ -389,68 +301,12 @@ const pageSize = ref(5);
 // 模态框状态
 const isAddRoleModalVisible = ref(false);
 const isPermissionModalVisible = ref(false);
-
-// 当前操作的角色
-const currentRole = ref({
-  id: '',
-  name: '',
-  description: '',
-  status: 'active',
-  type: 'custom',
-  icon: 'fas fa-user-shield'
-});
+const currentRole = ref({});
 
 // 权限标签页
 const activePermissionTab = ref('system');
 
-// 角色列表数据
-const roles = ref([
-  {
-    id: 1,
-    name: '系统管理员',
-    description: '拥有系统全部权限，可管理所有资源',
-    userCount: 3,
-    status: 'active',
-    type: 'system',
-    icon: 'fas fa-user-shield'
-  },
-  {
-    id: 2,
-    name: '分析师',
-    description: '可创建和编辑报表，查看数据源，无管理权限',
-    userCount: 28,
-    status: 'active',
-    type: 'system',
-    icon: 'fas fa-chart-line'
-  },
-  {
-    id: 3,
-    name: '查看者',
-    description: '仅可查看已授权的报表和数据，无编辑权限',
-    userCount: 156,
-    status: 'active',
-    type: 'system',
-    icon: 'fas fa-eye'
-  },
-  {
-    id: 4,
-    name: '数据导出专员',
-    description: '可查看报表并导出数据，无编辑权限',
-    userCount: 12,
-    status: 'active',
-    type: 'custom',
-    icon: 'fas fa-file-export'
-  },
-  {
-    id: 5,
-    name: '租户管理员',
-    description: '管理租户内资源和用户，无系统管理权限',
-    userCount: 8,
-    status: 'inactive',
-    type: 'custom',
-    icon: 'fas fa-shield-alt'
-  }
-]);
+const roles = ref([]);
 
 // 权限数据
 const systemPermissionGroups = ref([
@@ -547,30 +403,11 @@ const totalRoles = computed(() => filteredRoles.value.length);
 // 计算属性 - 总页数
 const totalPages = computed(() => Math.ceil(totalRoles.value / pageSize.value));
 
-// 菜单切换方法
-const setActiveMenu = (menu) => {
-  activeMenu.value = menu;
-  // 关闭所有子菜单
-  Object.keys(submenus.value).forEach(key => {
-    submenus.value[key] = false;
-  });
-};
 
-const toggleSubmenu = (menu) => {
-  activeMenu.value = menu;
-  submenus.value[menu] = !submenus.value[menu];
-};
 
-const setActiveSubMenu = (parentMenu, subMenu) => {
-  activeMenu.value = parentMenu;
-  activeSubMenu.value[parentMenu] = subMenu;
-  submenus.value[parentMenu] = true;
-};
 
-const toggleUserMenu = () => {
-  // 这里可以实现用户菜单的展开/折叠逻辑
-  console.log('用户菜单点击');
-};
+
+
 
 // 角色操作方法
 const showAddRoleModal = () => {
@@ -591,28 +428,25 @@ const editRole = (role) => {
   currentRole.value = { ...role };
   isAddRoleModalVisible.value = true;
 };
-
-const saveRole = () => {
-  if (!currentRole.value.name) {
-    alert('请输入角色名称');
-    return;
-  }
-  
-  if (currentRole.value.id) {
-    // 编辑现有角色
-    const index = roles.value.findIndex(r => r.id === currentRole.value.id);
-    if (index !== -1) {
-      roles.value[index] = { ...currentRole.value };
+const saveOrUpdateRole = () => {
+  let param=new Object();
+  param.id=currentRole.value.id;
+  param.roleName=currentRole.value.roleName;
+  param.roleCode=currentRole.value.roleCode;
+  param.remark=currentRole.value.remark;
+  param.uaaRoleType=currentRole.value.uaaRoleType;
+  param.icon=currentRole.value.icon;
+  param.status=currentRole.value.status;
+  debugger;
+request.post('/api/role/saveOrUpdate',param)
+  .then(response => {
+    if(200==response.code){
+      ElMessage.success(`保存成功`);
+    }else{
+      ElMessage.success(`加载数据出错`);
     }
-  } else {
-    // 新增角色
-    const newId = Math.max(...roles.value.map(r => r.id), 0) + 1;
-    roles.value.push({
-      ...currentRole.value,
-      id: newId,
-      userCount: 0
-    });
   }
+)
   
   isAddRoleModalVisible.value = false;
 };
@@ -626,11 +460,6 @@ const configurePermission = (role) => {
   currentRole.value = { ...role };
   // 这里可以根据角色ID加载对应的权限配置
   isPermissionModalVisible.value = true;
-};
-
-const viewUsers = (role) => {
-  console.log(`查看角色 ${role.name} 的用户列表`);
-  alert(`查看角色 ${role.name} 的用户列表`);
 };
 
 // 权限操作方法
@@ -683,7 +512,7 @@ const updatePermissionGroupCheckStatus = (groupId, tabType) => {
 };
 
 const savePermissions = () => {
-  console.log(`保存角色 ${currentRole.value.name} 的权限配置`);
+
   alert(`角色 ${currentRole.value.name} 的权限配置已保存`);
   isPermissionModalVisible.value = false;
 };
@@ -702,6 +531,45 @@ const closeModal = (modalName) => {
     isPermissionModalVisible.value = false;
   }
 };
+const handleRoleType = () => {
+request.get('/api/role/getRoleType')
+  .then(response => {
+    if(200==response.code){
+      type.value=response.data;
+    }else{
+      ElMessage.success(`加载数据出错`);
+    }
+  }
+)}
+const handleRoleStatus = () => {
+request.get('/api/role/getRoleStatus')
+  .then(response => {
+    if(200==response.code){
+      status.value=response.data;
+    }else{
+      ElMessage.success(`加载数据出错`);
+    }
+  }
+)
+}
+const handleRole = () => {
+let param=new Object();
+param.pageNum=currentPage.value;
+param.pageSize=pageSize.value;
+request.post('/api/role/page',param)
+  .then(response => {
+    if(200==response.code){
+      roles.value=response.data.records;
+    }else{
+      ElMessage.success(`加载数据出错`);
+    }
+  }
+)}
+onMounted(() => {
+  handleRole();
+  handleRoleType();
+  handleRoleStatus();
+});
 </script>
 
 <style>

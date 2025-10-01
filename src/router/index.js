@@ -33,9 +33,9 @@ const routes = [
     component: () => import('../views/myReport.vue')
   },
   {
-    path: '/permission',
-    name: 'permissionPage',
-    component: () => import('../views/permission.vue')
+    path: '/role',
+    name: 'rolenPage',
+    component: () => import('../views/Role.vue')
   },
   {
     path: '/tenant',
