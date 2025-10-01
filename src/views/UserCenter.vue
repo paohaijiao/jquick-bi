@@ -292,8 +292,8 @@
               <i :class="activity.icon"></i>
             </div>
             <div class="activity-content">
-              <div class="activity-action">{{ activity.action }}</div>
-              <div class="activity-time">{{ activity.time }}</div>
+              <div class="activity-action">{{ activity.content }}</div>
+              <div class="activity-time">{{ activity.createdTime }}</div>
             </div>
           </div>
         </div>
@@ -357,42 +357,27 @@ const passwordForm = reactive({});
 // 模态框状态
 const showChangePasswordModal = ref(false);
 
-// 活动记录
-const activities = ref([
-  {
-    icon: 'fas fa-file-export',
-    action: '导出了报表 "2023年销售数据分析"',
-    time: '今天 09:45'
-  },
-  {
-    icon: 'fas fa-share-alt',
-    action: '将报表 "用户活跃度分析" 共享给了 王小明',
-    time: '昨天 16:20'
-  },
-  {
-    icon: 'fas fa-database',
-    action: '新增了数据源 "MySQL - 订单数据库"',
-    time: '2023-10-15 10:12'
-  },
-  {
-    icon: 'fas fa-chart-pie',
-    action: '创建了仪表盘 "产品运营总览"',
-    time: '2023-10-12 14:30'
-  },
-  {
-    icon: 'fas fa-user-circle',
-    action: '更新了个人信息',
-    time: '2023-10-10 09:15'
-  }
-]);
+const activities = ref([]);
 
 const switchTab = (tab) => {
   activeTab.value = tab;
   if(tab==='security-setting'||tab==='preference'){
     handleMyPreference();
   }
+  if(tab==='activity'){
+    handleACtivity();
+  }
 };
-
+const handleACtivity= () =>{
+  request.get('/api/business/activity/recent?limit=5').then(response => {
+    if(200==response.code){
+      activities.value=response.data;
+    }else{
+      ElMessage.success(`加载数据出错`);
+    }
+  }
+)
+}
 const saveBasicInfo = () => {
   let param=new Object();
   param.realName=userInfo.realName;
