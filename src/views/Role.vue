@@ -191,88 +191,32 @@
     <div class="modal-overlay permission-config-modal" :class="{ show: isPermissionModalVisible }" @click="closeModal('isPermissionModalVisible')">
       <div class="modal" @click.stop>
         <div class="modal-header">
-          <h3 class="modal-title">{{ currentRole.name }} - 权限配置</h3>
+          <h3 class="modal-title">{{ currentRole.roleName }} - 权限配置</h3>
           <button class="modal-close" @click="closeModal('isPermissionModalVisible')">
             <i class="fas fa-times"></i>
           </button>
         </div>
         <div class="modal-body">
           <div class="config-header">
-            <div class="config-title">为 {{ currentRole.name }} 分配权限</div>
+            <div class="config-title">为 {{ currentRole.roleName }} 分配权限</div>
           </div>
-          <div class="permission-tabs">
-            <div class="permission-tab" :class="{ active: activePermissionTab === 'system' }" @click="activePermissionTab = 'system'">系统权限</div>
-            <div class="permission-tab" :class="{ active: activePermissionTab === 'data' }" @click="activePermissionTab = 'data'">数据权限</div>
-            <div class="permission-tab" :class="{ active: activePermissionTab === 'report' }" @click="activePermissionTab = 'report'">报表权限</div>
-          </div>
-          <div class="permission-groups-container">
-            <div class="permission-groups" v-if="activePermissionTab === 'system'">
-              <div class="permission-group" v-for="group in systemPermissionGroups" :key="group.id">
-                <div class="permission-group-header">
-                  <span>{{ group.name }}</span>
-                  <label>
-                    <input type="checkbox" v-model="group.checked" @change="togglePermissionGroup(group.id, 'system')">
-                  </label>
-                </div>
-                <div class="permission-group-body">
-                  <div class="permission-item" v-for="permission in group.permissions" :key="permission.id">
-                    <input type="checkbox" v-model="permission.checked" :id="permission.id" 
-                           @change="updatePermissionGroupCheckStatus(group.id, 'system')">
-                    <label :for="permission.id">
-                      {{ permission.name }}
-                      <div class="permission-desc">{{ permission.description }}</div>
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div class="permission-groups" v-if="activePermissionTab === 'data'">
-              <div class="permission-group" v-for="group in dataPermissionGroups" :key="group.id">
-                <div class="permission-group-header">
-                  <span>{{ group.name }}</span>
-                  <label>
-                    <input type="checkbox" v-model="group.checked" @change="togglePermissionGroup(group.id, 'data')">
-                  </label>
-                </div>
-                <div class="permission-group-body">
-                  <div class="permission-item" v-for="permission in group.permissions" :key="permission.id">
-                    <input type="checkbox" v-model="permission.checked" :id="permission.id"
-                           @change="updatePermissionGroupCheckStatus(group.id, 'data')">
-                    <label :for="permission.id">
-                      {{ permission.name }}
-                      <div class="permission-desc">{{ permission.description }}</div>
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div class="permission-groups" v-if="activePermissionTab === 'report'">
-              <div class="permission-group" v-for="group in reportPermissionGroups" :key="group.id">
-                <div class="permission-group-header">
-                  <span>{{ group.name }}</span>
-                  <label>
-                    <input type="checkbox" v-model="group.checked" @change="togglePermissionGroup(group.id, 'report')">
-                  </label>
-                </div>
-                <div class="permission-group-body">
-                  <div class="permission-item" v-for="permission in group.permissions" :key="permission.id">
-                    <input type="checkbox" v-model="permission.checked" :id="permission.id"
-                           @change="updatePermissionGroupCheckStatus(group.id, 'report')">
-                    <label :for="permission.id">
-                      {{ permission.name }}
-                      <div class="permission-desc">{{ permission.description }}</div>
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </div>
+         
+          <div class="permission-tree-container">
+            <!-- 系统权限树形结构 -->
+            <el-tree 
+                :data="treeData" 
+                :props="defaultProps" 
+                @node-click="handleNodeClick"
+                show-checkbox
+                node-key="id"
+                :default-checked-keys="defaultCheckedKeys"
+                ref="tree"
+              ></el-tree>
           </div>
         </div>
         <div class="modal-footer">
           <button class="btn btn-outline" @click="closeModal('isPermissionModalVisible')">取消</button>
-          <button class="btn btn-primary" @click="savePermissions">保存权限</button>
+          <button class="btn btn-primary" @click="saveRoleMenus">保存权限</button>
         </div>
       </div>
     </div>
@@ -280,20 +224,22 @@
 </template>
 <script>
 export default {
-  name: 'permissionPage'
+  name: 'rolePage'
 }
 </script>
 <script setup>
-import { ref, computed ,onMounted} from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import SidebarMenu from '@/components/SidebarMenu.vue';
 import { ElMessage } from 'element-plus';
 import request from '../api/request';
+
 // 筛选条件
-const statusFilter = ref('');
-const typeFilter = ref('');
+const roleStatus = ref('');
+const roleType = ref('');
 const searchKeyword = ref('');
 const status = ref([]);
 const type = ref([]);
+
 // 分页控制
 const currentPage = ref(1);
 const pageSize = ref(5);
@@ -303,95 +249,24 @@ const isAddRoleModalVisible = ref(false);
 const isPermissionModalVisible = ref(false);
 const currentRole = ref({});
 
-// 权限标签页
-const activePermissionTab = ref('system');
 
+// 角色列表
 const roles = ref([]);
+const defaultProps = ref({
+  children: 'children',
+  label: 'title'        
+});
+const treeData = ref([]);
+const defaultCheckedKeys = ref([]);
 
-// 权限数据
-const systemPermissionGroups = ref([
-  {
-    id: 'sys1',
-    name: '用户管理',
-    checked: false,
-    permissions: [
-      { id: 'sys1-1', name: '查看用户', description: '查看系统中的用户列表', checked: false },
-      { id: 'sys1-2', name: '创建用户', description: '创建新用户', checked: false },
-      { id: 'sys1-3', name: '编辑用户', description: '编辑现有用户信息', checked: false },
-      { id: 'sys1-4', name: '删除用户', description: '从系统中删除用户', checked: false }
-    ]
-  },
-  {
-    id: 'sys2',
-    name: '角色管理',
-    checked: false,
-    permissions: [
-      { id: 'sys2-1', name: '查看角色', description: '查看系统中的角色列表', checked: false },
-      { id: 'sys2-2', name: '创建角色', description: '创建新角色', checked: false },
-      { id: 'sys2-3', name: '编辑角色', description: '编辑现有角色信息', checked: false },
-      { id: 'sys2-4', name: '删除角色', description: '从系统中删除角色', checked: false }
-    ]
-  }
-]);
 
-const dataPermissionGroups = ref([
-  {
-    id: 'data1',
-    name: '数据源管理',
-    checked: false,
-    permissions: [
-      { id: 'data1-1', name: '查看数据源', description: '查看系统中的数据源', checked: false },
-      { id: 'data1-2', name: '创建数据源', description: '新增数据源连接', checked: false },
-      { id: 'data1-3', name: '编辑数据源', description: '修改数据源配置', checked: false },
-      { id: 'data1-4', name: '删除数据源', description: '删除数据源连接', checked: false }
-    ]
-  },
-  {
-    id: 'data2',
-    name: '数据集管理',
-    checked: false,
-    permissions: [
-      { id: 'data2-1', name: '查看数据集', description: '查看系统中的数据集', checked: false },
-      { id: 'data2-2', name: '创建数据集', description: '基于数据源创建数据集', checked: false },
-      { id: 'data2-3', name: '编辑数据集', description: '修改数据集配置', checked: false },
-      { id: 'data2-4', name: '删除数据集', description: '删除数据集', checked: false }
-    ]
-  }
-]);
 
-const reportPermissionGroups = ref([
-  {
-    id: 'report1',
-    name: '报表管理',
-    checked: false,
-    permissions: [
-      { id: 'report1-1', name: '查看报表', description: '查看有权限的报表', checked: false },
-      { id: 'report1-2', name: '创建报表', description: '创建新报表', checked: false },
-      { id: 'report1-3', name: '编辑报表', description: '编辑有权限的报表', checked: false },
-      { id: 'report1-4', name: '删除报表', description: '删除有权限的报表', checked: false },
-      { id: 'report1-5', name: '导出报表', description: '将报表导出为文件', checked: false }
-    ]
-  },
-  {
-    id: 'report2',
-    name: '仪表盘管理',
-    checked: false,
-    permissions: [
-      { id: 'report2-1', name: '查看仪表盘', description: '查看有权限的仪表盘', checked: false },
-      { id: 'report2-2', name: '创建仪表盘', description: '创建新仪表盘', checked: false },
-      { id: 'report2-3', name: '编辑仪表盘', description: '编辑有权限的仪表盘', checked: false },
-      { id: 'report2-4', name: '删除仪表盘', description: '删除有权限的仪表盘', checked: false }
-    ]
-  }
-]);
-
-// 计算属性 - 筛选后的角色列表
 const filteredRoles = computed(() => {
   return roles.value.filter(role => {
-    const matchesStatus = statusFilter.value ? role.status === statusFilter.value : true;
-    const matchesType = typeFilter.value ? role.type === typeFilter.value : true;
+    const matchesStatus = roleStatus.value ? role.status === roleStatus.value : true;
+    const matchesType = roleType.value ? role.type === roleType.value : true;
     const matchesSearch = searchKeyword.value 
-      ? role.name.includes(searchKeyword.value) || role.description.includes(searchKeyword.value)
+      ? role.roleName.includes(searchKeyword.value) || role.remark.includes(searchKeyword.value)
       : true;
     return matchesStatus && matchesType && matchesSearch;
   });
@@ -403,19 +278,18 @@ const totalRoles = computed(() => filteredRoles.value.length);
 // 计算属性 - 总页数
 const totalPages = computed(() => Math.ceil(totalRoles.value / pageSize.value));
 
-
-
-
-
-
+// 左侧菜单相关
+const activeMenu = ref('role');
+const unreadCount = ref(5);
 
 // 角色操作方法
 const showAddRoleModal = () => {
   // 重置当前角色对象
   currentRole.value = {
     id: '',
-    name: '',
-    description: '',
+    roleName: '',
+    roleCode: '',
+    remark: '',
     status: 'active',
     type: 'custom',
     icon: 'fas fa-user-shield'
@@ -424,29 +298,32 @@ const showAddRoleModal = () => {
 };
 
 const editRole = (role) => {
-  // 复制角色信息到当前角色对象
   currentRole.value = { ...role };
   isAddRoleModalVisible.value = true;
 };
+
 const saveOrUpdateRole = () => {
-  let param=new Object();
-  param.id=currentRole.value.id;
-  param.roleName=currentRole.value.roleName;
-  param.roleCode=currentRole.value.roleCode;
-  param.remark=currentRole.value.remark;
-  param.uaaRoleType=currentRole.value.uaaRoleType;
-  param.icon=currentRole.value.icon;
-  param.status=currentRole.value.status;
-  debugger;
-request.post('/api/role/saveOrUpdate',param)
-  .then(response => {
-    if(200==response.code){
-      ElMessage.success(`保存成功`);
-    }else{
-      ElMessage.success(`加载数据出错`);
-    }
-  }
-)
+  let param = new Object();
+  param.id = currentRole.value.id;
+  param.roleName = currentRole.value.roleName;
+  param.roleCode = currentRole.value.roleCode;
+  param.remark = currentRole.value.remark;
+  param.uaaRoleType = currentRole.value.uaaRoleType;
+  param.icon = currentRole.value.icon;
+  param.status = currentRole.value.status;
+  
+  request.post('/api/role/saveOrUpdate', param)
+    .then(response => {
+      if (200 === response.code) {
+        ElMessage.success(`保存成功`);
+        handleRole(); // 重新加载角色列表
+      } else {
+        ElMessage.error(`加载数据出错: ${response.message}`);
+      }
+    })
+    .catch(error => {
+      ElMessage.error(`请求失败: ${error.message}`);
+    });
   
   isAddRoleModalVisible.value = false;
 };
@@ -458,69 +335,31 @@ const exportRoles = () => {
 
 const configurePermission = (role) => {
   currentRole.value = { ...role };
-  // 这里可以根据角色ID加载对应的权限配置
   isPermissionModalVisible.value = true;
+  handleRoleMenu(role.id);
 };
 
-// 权限操作方法
-const togglePermissionGroup = (groupId, tabType) => {
-  let groups;
-  switch(tabType) {
-    case 'system':
-      groups = systemPermissionGroups.value;
-      break;
-    case 'data':
-      groups = dataPermissionGroups.value;
-      break;
-    case 'report':
-      groups = reportPermissionGroups.value;
-      break;
-    default:
-      return;
-  }
-  
-  const group = groups.find(g => g.id === groupId);
-  if (group) {
-    group.permissions.forEach(perm => {
-      perm.checked = group.checked;
-    });
-  }
-};
-
-const updatePermissionGroupCheckStatus = (groupId, tabType) => {
-  let groups;
-  switch(tabType) {
-    case 'system':
-      groups = systemPermissionGroups.value;
-      break;
-    case 'data':
-      groups = dataPermissionGroups.value;
-      break;
-    case 'report':
-      groups = reportPermissionGroups.value;
-      break;
-    default:
-      return;
-  }
-  
-  const group = groups.find(g => g.id === groupId);
-  if (group) {
-    const allChecked = group.permissions.every(perm => perm.checked);
-    const noneChecked = group.permissions.every(perm => !perm.checked);
-    group.checked = allChecked && !noneChecked;
-  }
-};
-
-const savePermissions = () => {
-
-  alert(`角色 ${currentRole.value.name} 的权限配置已保存`);
-  isPermissionModalVisible.value = false;
+const saveRoleMenus = () => {
+  let param=new Object();
+  param.roleId=currentRole.value.id;
+  param.menus=defaultCheckedKeys.value;
+  request.post('/api/roleMenu/save', param).then(response => {
+    if (response.code === 200) {
+      ElMessage.success('权限配置已保存');
+      isPermissionModalVisible.value = false;
+    } else {
+      ElMessage.error(`保存失败: ${response.message}`);
+    }
+  }).catch(error => {
+    ElMessage.error(`请求失败: ${error.message}`);
+  });
 };
 
 // 分页方法
 const changePage = (page) => {
   if (page < 1 || page > totalPages.value) return;
   currentPage.value = page;
+  handleRole(); // 切换页码时重新加载数据
 };
 
 // 关闭模态框
@@ -531,40 +370,89 @@ const closeModal = (modalName) => {
     isPermissionModalVisible.value = false;
   }
 };
-const handleRoleType = () => {
-request.get('/api/role/getRoleType')
-  .then(response => {
-    if(200==response.code){
-      type.value=response.data;
-    }else{
-      ElMessage.success(`加载数据出错`);
+const handleNodeClick=(data, node, component) => {
+  const idsToAdd = [];
+  let currentNode = node;
+  while (currentNode) {
+    if (currentNode.data?.id && !idsToAdd.includes(currentNode.data.id)) {
+      idsToAdd.push(currentNode.data.id);
     }
+    currentNode = currentNode.parent;
   }
-)}
-const handleRoleStatus = () => {
-request.get('/api/role/getRoleStatus')
-  .then(response => {
-    if(200==response.code){
-      status.value=response.data;
-    }else{
-      ElMessage.success(`加载数据出错`);
-    }
-  }
-)
+  const newCheckedKeys = [...new Set([...defaultCheckedKeys.value, ...idsToAdd])];
+  defaultCheckedKeys.value = newCheckedKeys;
+
 }
+const handleRoleMenu = (roleId) => {
+  request.get('/api/roleMenu/roleTreeByRoleId?roleId='+roleId)
+    .then(response => {
+      if (200 === response.code) {
+        treeData.value = response.data.tree;
+        defaultCheckedKeys.value=response.data.selected;
+      } else {
+        ElMessage.error(`加载角色类型出错: ${response.message}`);
+      }
+    })
+    .catch(error => {
+      ElMessage.error(`请求失败: ${error.message}`);
+    });
+};
+
+
+
+// 加载角色类型
+const handleRoleType = () => {
+  request.get('/api/role/getRoleType')
+    .then(response => {
+      if (200 === response.code) {
+        type.value = response.data;
+      } else {
+        ElMessage.error(`加载角色类型出错: ${response.message}`);
+      }
+    })
+    .catch(error => {
+      ElMessage.error(`请求失败: ${error.message}`);
+    });
+};
+
+// 加载角色状态
+const handleRoleStatus = () => {
+  request.get('/api/role/getRoleStatus')
+    .then(response => {
+      if (200 === response.code) {
+        status.value = response.data;
+      } else {
+        ElMessage.error(`加载角色状态出错: ${response.message}`);
+      }
+    })
+    .catch(error => {
+      ElMessage.error(`请求失败: ${error.message}`);
+    });
+};
+
+// 加载角色列表
 const handleRole = () => {
-let param=new Object();
-param.pageNum=currentPage.value;
-param.pageSize=pageSize.value;
-request.post('/api/role/page',param)
-  .then(response => {
-    if(200==response.code){
-      roles.value=response.data.records;
-    }else{
-      ElMessage.success(`加载数据出错`);
-    }
-  }
-)}
+  let param = new Object();
+  param.pageNum = currentPage.value;
+  param.pageSize = pageSize.value;
+  param.status = roleStatus.value;
+  param.type = roleType.value;
+  param.keyword = searchKeyword.value;
+  
+  request.post('/api/role/page', param)
+    .then(response => {
+      if (200 === response.code) {
+        roles.value = response.data.records;
+      } else {
+        ElMessage.error(`加载角色列表出错: ${response.message}`);
+      }
+    })
+    .catch(error => {
+      ElMessage.error(`请求失败: ${error.message}`);
+    });
+};
+
+// 页面加载时初始化数据
 onMounted(() => {
   handleRole();
   handleRoleType();
@@ -1232,56 +1120,10 @@ body {
   color: var(--primary-color);
 }
 
-.permission-groups-container {
+.permission-tree-container {
   padding: 24px;
-}
-
-.permission-groups {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
-}
-
-.permission-group {
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.permission-group-header {
-  padding: 12px 16px;
-  background-color: var(--light-bg);
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.permission-group-body {
-  padding: 16px;
-}
-
-.permission-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
-.permission-item:last-child {
-  margin-bottom: 0;
-}
-
-.permission-item label {
-  flex: 1;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.permission-desc {
-  font-size: 12px;
-  color: #666;
-  margin-top: 4px;
+  max-height: 60vh;
+  overflow-y: auto;
 }
 
 /* 表单样式 */
@@ -1376,5 +1218,132 @@ textarea.form-control {
 .rotate-180 {
   transform: rotate(180deg);
   transition: transform 0.3s ease;
+}
+/* 权限树美化样式 */
+.el-tree {
+  --tree-node-padding: 12px 0;
+  --tree-line-color: #e5e7eb;
+  --tree-hover-bg: #fff5eb;
+  --tree-active-color: #ff8326;
+  --tree-text-color: #2d3e50;
+  --tree-depth-indent: 24px;
+}
+
+/* 节点整体样式 */
+.el-tree-node {
+  padding: var(--tree-node-padding);
+  transition: background-color 0.2s;
+}
+
+.el-tree-node:hover {
+  background-color: var(--tree-hover-bg);
+}
+
+/* 节点内容样式 */
+.el-tree-node__content {
+  height: auto !important;
+  padding: 4px 0 !important;
+  align-items: center;
+}
+
+/* 复选框样式优化 */
+.el-tree .el-checkbox {
+  margin-right: 10px;
+}
+
+.el-tree .el-checkbox__input.is-checked .el-checkbox__inner {
+  background-color: var(--tree-active-color);
+  border-color: var(--tree-active-color);
+}
+
+.el-tree .el-checkbox__input.is-checked + .el-checkbox__label {
+  color: var(--tree-active-color);
+  font-weight: 500;
+}
+
+/* 节点文本样式 */
+.el-tree-node__label {
+  font-size: 14px;
+  color: var(--tree-text-color);
+  transition: color 0.2s;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.el-tree-node__label:hover {
+  color: var(--tree-active-color);
+}
+
+/* 连接线样式 */
+.el-tree-node__children {
+  padding-left: var(--tree-depth-indent) !important;
+}
+
+.el-tree--indent .el-tree-node__children {
+  position: relative;
+}
+
+.el-tree--indent .el-tree-node__children::before {
+  content: '';
+  position: absolute;
+  left: 12px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background-color: var(--tree-line-color);
+}
+
+/* 展开/折叠图标样式 */
+.el-tree-node__expand-icon {
+  color: #9ca3af;
+  width: 20px;
+  height: 20px;
+  margin-right: 6px;
+  transition: color 0.2s;
+}
+
+.el-tree-node__expand-icon:hover {
+  color: var(--tree-active-color);
+}
+
+.el-tree-node__expand-icon.is-expanded {
+  color: var(--tree-active-color);
+}
+.el-tree-node__expand-icon.is-leaf {
+  visibility: hidden;
+}
+
+/* 选中节点样式 */
+.el-tree-node.is-current > .el-tree-node__content {
+  background-color: rgba(255, 131, 38, 0.1);
+}
+
+.el-tree-node.is-current > .el-tree-node__content .el-tree-node__label {
+  color: var(--tree-active-color);
+  font-weight: 500;
+}
+
+.el-tree-node.is-disabled .el-tree-node__label {
+  color: #c5c8ce;
+  cursor: not-allowed;
+}
+
+.permission-tree-container::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.permission-tree-container::-webkit-scrollbar-track {
+  background: #f5f5f5;
+  border-radius: 3px;
+}
+
+.permission-tree-container::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.permission-tree-container::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
 }
 </style>

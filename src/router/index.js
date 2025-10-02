@@ -34,7 +34,7 @@ const routes = [
   },
   {
     path: '/role',
-    name: 'rolenPage',
+    name: 'rolePage',
     component: () => import('../views/Role.vue')
   },
   {
