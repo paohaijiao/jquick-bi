@@ -143,13 +143,12 @@
     
     <!-- 新增/编辑变量模态框 -->
     <div class="modal-overlay" :class="{ show: variableModalVisible }" @click="closeModalOutside">
-      <div class="modal" @click.stop>
+      <div class="modal" >
         <div class="modal-header">
           <h3 class="modal-title ">{{ isEditing ? '编辑变量' : '新增变量' }}</h3>
           <button class="modal-close" @click="closeVariableModal">&times;</button>
         </div>
         <div class="modal-body">
-          <form @submit.prevent="saveVariable">
             <input type="hidden" v-model="formData.id">
             <div class="form-group">
               <label class="form-label text-align-left" for="varName">变量名称 <span style="color: var(--danger-color)">*</span></label>
@@ -158,26 +157,23 @@
             </div>
             <div class="form-group">
               <label class="form-label text-align-left" for="varKey">变量键名 <span style="color: var(--danger-color)">*</span></label>
-              <input type="text" class="form-control" id="varKey" v-model="formData.key" required placeholder="请输入变量键名">
+              <input type="text" class="form-control" id="varKey" v-model="formData.varKey" required placeholder="请输入变量键名">
               <div class="form-hint">变量键名用于代码中引用，建议使用大写字母和下划线组合</div>
             </div>
             <div class="form-group">
               <label class="form-label text-align-left" for="varType">变量类型 <span style="color: var(--danger-color)">*</span></label>
               <select class="form-control" id="varType" v-model="formData.type" required>
                 <option value="">请选择变量类型</option>
-                <option value="string">字符串</option>
-                <option value="number">数字</option>
-                <option value="boolean">布尔值</option>
-                <option value="date">日期</option>
+                  <option :value="c.code" v-for="(c,index) in variableType" :key="index">{{c.name}}</option>
               </select>
             </div>
             <div class="form-group">
               <label class="form-label text-align-left" for="varValue">变量值 <span style="color: var(--danger-color)">*</span></label>
-              <input type="text" class="form-control" id="varValue" v-model="formData.value" required placeholder="请输入变量值">
+              <input type="text" class="form-control" id="varValue" v-model="formData.varValue" required placeholder="请输入变量值">
             </div>
             <div class="form-group">
               <label class="form-label text-align-left" for="varDesc">变量描述</label>
-              <textarea class="form-control" id="varDesc" rows="3" v-model="formData.desc" placeholder="请输入变量描述信息"></textarea>
+              <textarea class="form-control" id="varDesc" rows="3" v-model="formData.description" placeholder="请输入变量描述信息"></textarea>
             </div>
             <div class="form-group">
               <label class="form-label text-align-left" for="varStatus">状态</label>
@@ -188,9 +184,8 @@
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-outline" @click="closeVariableModal">取消</button>
-              <button type="submit" class="btn btn-primary">保存</button>
+              <button type="button" class="btn btn-primary" @click="saveVariable">保存</button>
             </div>
-          </form>
         </div>
       </div>
     </div>
@@ -226,6 +221,7 @@ export default {
 </script>
 <script setup>
 import { ref, computed,onMounted } from 'vue';
+import { ElMessage } from 'element-plus';
 import SidebarMenu from '@/components/SidebarMenu.vue';
 import request from '../api/request';
 // 菜单状态管理
@@ -252,19 +248,12 @@ const isEditing = ref(false);
 const currentVariableId = ref(null);
 
 // 表单数据
-const formData = ref({
-  id: '',
-  name: '',
-  key: '',
-  type: '',
-  value: '',
-  desc: '',
-  status: 'active'
-});
+const formData = ref({});
 
 // 变量数据
 const variables = ref([]);
 
+const variableType=ref([]);
 
 // 计算属性 - 总记录数
 const totalItems = computed(() => {
@@ -309,10 +298,10 @@ const openAddModal = () => {
   formData.value = {
     id: '',
     name: '',
-    key: '',
+    varKey: '',
     type: '',
-    value: '',
-    desc: '',
+    varValue: '',
+    description: '',
     status: 'active'
   };
   variableModalVisible.value = true;
@@ -342,7 +331,6 @@ const closeDeleteModal = () => {
 };
 
 const closeModalOutside = (e) => {
-  // 点击模态框外部关闭
   if (e.target === e.currentTarget) {
     variableModalVisible.value = false;
     deleteModalVisible.value = false;
@@ -351,38 +339,25 @@ const closeModalOutside = (e) => {
 
 // 保存变量
 const saveVariable = () => {
-  if (isEditing.value) {
-    // 编辑现有变量
-    const index = variables.value.findIndex(v => v.id === currentVariableId.value);
-    if (index !== -1) {
-      variables.value[index] = {
-        ...formData.value,
-        modifiedTime: new Date().toLocaleString('zh-CN', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: false
-        }).replace(',', '')
-      };
+    debugger;
+  //isEditing.value
+  let param=new Object();
+  param.id=formData.value.id;
+  param.name=formData.value.name;
+  param.varKey=formData.value.varKey;
+  param.varValue=formData.value.varValue;
+  param.type=formData.value.type;
+  param.description=formData.value.description;
+  param.status=formData.value.status;
+
+  request.post('/api/variable/saveOrUpdate',param)
+  .then(response => {
+    if(response.code==200){
+      ElMessage.success('保存成功');
+      handleVariableQuery();
     }
-  } else {
-    // 添加新变量
-    const newId = Math.max(...variables.value.map(v => v.id), 0) + 1;
-    variables.value.push({
-      ...formData.value,
-      id: newId,
-      modifiedTime: new Date().toLocaleString('zh-CN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-      }).replace(',', '')
-    });
   }
+)
   variableModalVisible.value = false;
 };
 
@@ -413,6 +388,17 @@ const getTypeIcon = (type) => {
   };
   return iconMap[type] || 'fa-question';
 };
+
+const handleVariableTypeQuery = () => {
+  request.get('/api/variable/getVariableType')
+  .then(response => {
+    if(response.code==200){
+      variableType.value=response.data;
+    }
+  }
+)
+  variableModalVisible.value = false;
+};
 const handleVariableQuery = () => {
   let query=new Object();
   query.pageNum=currentPage.value;
@@ -426,6 +412,7 @@ const handleVariableQuery = () => {
 )
 };
 onMounted(() => {
+  handleVariableTypeQuery();
   handleVariableQuery();
 });
 </script>
