@@ -25,80 +25,13 @@
     
     <!-- 主内容区 -->
     <div class="main-content">
-      <!-- 左侧BI菜单 -->
-      <aside class="sidebar">
-        <div class="menu-section">
-          <div class="menu-section-title">主导航</div>
-          <div class="menu-item" :class="{ active: activeMainMenu === 'home' }" @click="setActiveMainMenu('home')">
-            <i class="fas fa-home"></i>
-            <span>首页</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMainMenu === 'dataSource' }" @click="toggleSubMenu('dataSource')">
-            <i class="fas fa-database"></i>
-            <span>数据源</span>
-            <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
-          </div>
-          <div class="submenu" :class="{ show: activeMainMenu === 'dataSource' }">
-            <div class="submenu-item text-align-left" :class="{ active: activeSubMenu === 'dataSourceList' }" @click="setActiveSubMenu('dataSourceList')">数据源列表</div>
-            <div class="submenu-item" :class="{ active: activeSubMenu === 'addDataSource' }" @click="setActiveSubMenu('addDataSource')">新增数据源</div>
-            <div class="submenu-item" :class="{ active: activeSubMenu === 'dataSourcePermission' }" @click="setActiveSubMenu('dataSourcePermission')">数据源权限</div>
-          </div>
-          <div class="menu-item" :class="{ active: activeMainMenu === 'report' }" @click="toggleSubMenu('report')">
-            <i class="fas fa-file-alt"></i>
-            <span>报表</span>
-            <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
-          </div>
-          <div class="submenu" :class="{ show: activeMainMenu === 'report' }">
-            <div class="submenu-item" :class="{ active: activeSubMenu === 'myReport' }" @click="setActiveSubMenu('myReport')">我的报表</div>
-            <div class="submenu-item" :class="{ active: activeSubMenu === 'sharedReport' }" @click="setActiveSubMenu('sharedReport')">共享报表</div>
-            <div class="submenu-item" :class="{ active: activeSubMenu === 'favoritedReport' }" @click="setActiveSubMenu('favoritedReport')">收藏报表</div>
-            <div class="submenu-item" :class="{ active: activeSubMenu === 'recycleBin' }" @click="setActiveSubMenu('recycleBin')">回收站</div>
-          </div>
-          <div class="menu-item" :class="{ active: activeMainMenu === 'dashboard' }" @click="setActiveMainMenu('dashboard')">
-            <i class="fas fa-chart-pie"></i>
-            <span>仪表盘</span>
-            <span class="menu-badge">5</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMainMenu === 'dataset' }" @click="setActiveMainMenu('dataset')">
-            <i class="fas fa-cubes"></i>
-            <span>数据集</span>
-          </div>
-        </div>
-        
-        <div class="menu-section">
-          <div class="menu-section-title">系统管理</div>
-          <div class="menu-item" :class="{ active: activeMainMenu === 'userManagement' }" @click="setActiveMainMenu('userManagement')">
-            <i class="fas fa-users"></i>
-            <span>用户管理</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMainMenu === 'rolePermission' }" @click="setActiveMainMenu('rolePermission')">
-            <i class="fas fa-user-shield"></i>
-            <span>角色权限</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMainMenu === 'operationLog' }" @click="setActiveMainMenu('operationLog')">
-            <i class="fas fa-history"></i>
-            <span>操作日志</span>
-          </div>
-        </div>
-        
-        <div class="menu-section">
-          <div class="menu-section-title">帮助中心</div>
-          <div class="menu-item" :class="{ active: activeMainMenu === 'helpDoc' }" @click="setActiveMainMenu('helpDoc')">
-            <i class="fas fa-question-circle"></i>
-            <span>帮助文档</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMainMenu === 'videoTutorial' }" @click="setActiveMainMenu('videoTutorial')">
-            <i class="fas fa-play-circle"></i>
-            <span>视频教程</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMainMenu === 'contactService' }" @click="setActiveMainMenu('contactService')">
-            <i class="fas fa-comment-dots"></i>
-            <span>联系客服</span>
-          </div>
-        </div>
-      </aside>
+      <SidebarMenu 
+        :active-menu="activeMenu" 
+        :unread-count="unreadCount"
+        @menu-click="setActiveMenu"
+        @submenu-click="setActiveSubmenu"
+      />
       
-      <!-- 右侧数据源列表区域 -->
       <main class="content-area">
         <div class="page-header">
           <div>
@@ -112,7 +45,7 @@
             </button>
             <button class="btn btn-primary" id="addDataSourceBtn" @click="openModal('add')">
               <i class="fas fa-plus"></i>
-              <span>新增数据源</span>
+              <span>新增连接器</span>
             </button>
           </div>
         </div>
@@ -120,21 +53,17 @@
         <div class="filter-bar">
           <div class="filter-group">
             <div class="filter-item">
-              <label>数据源类型:</label>
+              <label>连接器类型:</label>
               <select v-model="filter.type">
                 <option value="">全部</option>
-                <option value="mysql">MySQL</option>
-                <option value="oracle">Oracle</option>
-                <option value="api">API接口</option>
-                <option value="excel">Excel</option>
+                <option v-for="c in connectorType" :key="c.code" :value="c.code">{{c.name}}</option>
               </select>
             </div>
             <div class="filter-item">
               <label>状态:</label>
               <select v-model="filter.status">
                 <option value="">全部</option>
-                <option value="online">在线</option>
-                <option value="offline">离线</option>
+                <option v-for="c in connectorStatus" :key="c.code" :value="c.code">{{c.name}}</option>
               </select>
             </div>
             <div class="filter-item">
@@ -146,33 +75,33 @@
           </div>
           <div class="search-filter">
             <el-icon><Search /></el-icon>
-            <input type="text" placeholder="搜索数据源名称..." v-model="filter.keyword">
+            <input type="text" placeholder="搜索连接器名称..." v-model="filter.keyword">
           </div>
         </div>
         
         <div class="data-source-list">
           <div class="table-header">
-            <div class="text-align-left">数据源名称</div>
+            <div class="text-align-left">连接器名称</div>
             <div>类型</div>
             <div>状态</div>
             <div>创建时间</div>
             <div>操作</div>
           </div>
           
-          <div class="table-row" v-for="item in filteredDataSources" :key="item.id" :data-id="item.id">
+          <div class="table-row" v-for="item in connectors" :key="item.id" :data-id="item.id">
             <div class="data-source-name">
               <div class="data-source-icon" :class="item.type">
                 <i :class="item.icon"></i>
               </div>
               <div class="data-source-info">
                 <div class="source-name">{{ item.name }}</div>
-                <div class="source-desc">{{ item.desc }}</div>
+                <div class="source-desc">{{ item.description }}</div>
               </div>
             </div>
-            <div>{{ item.typeText }}</div>
+            <div>{{ item.typeName }}</div>
             <div>
               <span class="status-badge" :class="item.status">
-                <i :class="item.statusIcon"></i> {{ item.statusText }}
+                <i :class="item.statusIcon"></i> {{ item.statusName }}
               </span>
             </div>
             <div>{{ item.createTime }}</div>
@@ -204,7 +133,7 @@
       </main>
     </div>
 
-    <!-- 新增/编辑数据源模态框 -->
+    <!-- 新增/编辑连接器模态框 -->
     <div class="modal-overlay" :class="{ 'modal-visible': isModalVisible }" @click="closeModal(true)">
       <div class="modal" @click.stop>
         <div class="modal-header">
@@ -225,99 +154,24 @@
           <div class="tab-content" :class="{ active: activeTab === 'basic' }" id="basic-tab">
             <input type="hidden" v-model="formData.id">
             <div class="form-group">
-              <label class="text-align-left">数据源名称 <span style="color: #ff4d4f;">*</span></label>
-              <input type="text" class="form-control" v-model="formData.name" placeholder="请输入数据源名称">
+              <label class="text-align-left">连接器名称 <span style="color: #ff4d4f;">*</span></label>
+              <input type="text" class="form-control" v-model="formData.name" placeholder="请输入连接器名称" required>
             </div>
-            
             <div class="form-group">
-              <label class="text-align-left">数据源类型 <span style="color: #ff4d4f;">*</span></label>
-              <select class="form-control" v-model="formData.type" @change="handleTypeChange">
-                <option value="">请选择数据源类型</option>
-                <option value="mysql">MySQL</option>
-                <option value="oracle">Oracle</option>
-                <option value="api">API接口</option>
-                <option value="excel">Excel</option>
+              <label class="text-align-left">连接器图标 <span style="color: #ff4d4f;">*</span></label>
+              <input type="text" class="form-control" v-model="formData.icon" placeholder="请输入连接器图标" required>
+            </div>
+            <div class="form-group">
+              <label class="text-align-left">连接器类型 <span style="color: #ff4d4f;">*</span></label>
+              <select class="form-control" v-model="formData.type" @change="handleTypeChange" required>
+                <option value="">请选择连接器类型</option>
+                <option v-for="c in connectorType" :key="c.code" :value="c.code">{{c.name}}</option>
               </select>
             </div>
             
             <div class="form-group">
-              <label  class="text-align-left">描述信息</label>
-              <textarea class="form-control" v-model="formData.desc" rows="3" placeholder="请输入数据源描述信息"></textarea>
-            </div>
-            
-            <div class="form-group" v-if="formData.type === 'mysql'" id="mysqlConfig">
-              <label  class="text-align-left">数据库配置</label>
-              <div class="form-group">
-                <label class="text-align-left">主机地址</label>
-                <input type="text" class="form-control" v-model="formData.host" placeholder="数据库主机地址">
-              </div>
-              <div class="form-group">
-                <label  class="text-align-left">端口</label>
-                <input type="text" class="form-control" v-model="formData.port" placeholder="数据库端口" value="3306">
-              </div>
-              <div class="form-group">
-                <label  class="text-align-left">数据库名</label>
-                <input type="text" class="form-control" v-model="formData.dbName" placeholder="数据库名称">
-              </div>
-              <div class="form-group">
-                <label  class="text-align-left">用户名</label>
-                <input type="text" class="form-control" v-model="formData.username" placeholder="数据库用户名">
-              </div>
-              <div class="form-group">
-                <label  class="text-align-left">密码</label>
-                <input type="password" class="form-control" v-model="formData.password" placeholder="数据库密码">
-              </div>
-            </div>
-            
-            <div class="form-group" v-if="formData.type === 'oracle'" id="oracleConfig">
-              <label>数据库配置</label>
-              <div class="form-group">
-                <label  class="text-align-left">主机地址</label>
-                <input type="text" class="form-control" v-model="formData.host" placeholder="数据库主机地址">
-              </div>
-              <div class="form-group">
-                <label  class="text-align-left">端口</label>
-                <input type="text" class="form-control" v-model="formData.port" placeholder="数据库端口" value="1521">
-              </div>
-              <div class="form-group">
-                <label  class="text-align-left">服务名/SID</label>
-                <input type="text" class="form-control" v-model="formData.serviceName" placeholder="服务名或SID">
-              </div>
-              <div class="form-group">
-                <label  class="text-align-left">用户名</label>
-                <input type="text" class="form-control" v-model="formData.username" placeholder="数据库用户名">
-              </div>
-              <div class="form-group">
-                <label  class="text-align-left">密码</label>
-                <input type="password" class="form-control" v-model="formData.password" placeholder="数据库密码">
-              </div>
-            </div>
-            
-            <div class="form-group" v-if="formData.type === 'api'" id="apiConfig">
-              <label>API配置</label>
-              <div class="form-group">
-                <label  class="text-align-left">接口URL</label>
-                <input type="text" class="form-control" v-model="formData.url" placeholder="API接口地址">
-              </div>
-              <div class="form-group">
-                <label>请求方法</label>
-                <select class="form-control" v-model="formData.method">
-                  <option value="get">GET</option>
-                  <option value="post">POST</option>
-                  <option value="put">PUT</option>
-                  <option value="delete">DELETE</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>请求头</label>
-                <textarea class="form-control" v-model="formData.headers" placeholder="请输入请求头，JSON格式"></textarea>
-              </div>
-            </div>
-            
-            <div class="form-group" v-if="formData.type === 'excel'" id="excelConfig">
-              <label>文件上传</label>
-              <input type="file" class="form-control" accept=".xlsx,.xls" @change="handleFileUpload">
-              <div v-if="formData.fileName" class="form-text">{{ formData.fileName }}</div>
+              <label  class="text-align-left">连接器描述信息</label>
+              <textarea class="form-control" v-model="formData.description" rows="3" placeholder="请输入连接器描述信息"></textarea>
             </div>
           </div>
           
@@ -327,8 +181,8 @@
               <i class="fas fa-plus"></i>
               <span>添加属性</span>
             </button>
-            <div class="property-item" v-for="(prop, index) in formData.properties" :key="index">
-              <input type="text" class="form-control" v-model="prop.name" placeholder="属性名称">
+            <div class="property-item" v-for="(prop, index) in formData.attrs" :key="index">
+              <input type="text" class="form-control" v-model="prop.name" placeholder="属性名称" >
               <input type="text" class="form-control" v-model="prop.value" placeholder="属性值">
               <button class="remove-property" @click="removeProperty(index)">
                 <i class="fas fa-minus"></i>
@@ -348,8 +202,8 @@
               <input type="number" class="form-control" v-model="formData.cacheTime" placeholder="查询结果缓存时间" value="10">
             </div>
             <div class="form-group">
-              <label class="text-align-left">最大连接数</label>
-              <input type="number" class="form-control" v-model="formData.maxConnections" placeholder="最大并发连接数" value="10">
+              <label class="text-align-left">图标</label>
+              <input type="text" class="form-control" v-model="formData.maxConnections" placeholder="图标" value="10">
             </div>
             <div class="form-group">
               <label class="text-align-left">备注信息</label>
@@ -360,7 +214,7 @@
         
         <div class="modal-footer">
           <button class="btn btn-outline" @click="closeModal">取消</button>
-          <button class="btn btn-primary" @click="saveDataSource">保存</button>
+          <button class="btn btn-primary" @click="saveConnector">保存</button>
         </div>
       </div>
     </div>
@@ -396,87 +250,10 @@ export default {
 </script>
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-
-// 菜单状态管理
-const activeMainMenu = ref('dataSource');
-const activeSubMenu = ref('dataSourceList');
-
-// 设置主菜单激活状态
-const setActiveMainMenu = (menu) => {
-  activeMainMenu.value = menu;
-};
-
-// 切换子菜单显示/隐藏
-const toggleSubMenu = (menu) => {
-  if (activeMainMenu.value === menu) {
-    activeMainMenu.value = '';
-  } else {
-    activeMainMenu.value = menu;
-  }
-};
-
-// 设置子菜单激活状态
-const setActiveSubMenu = (subMenu) => {
-  activeSubMenu.value = subMenu;
-};
-
-// 切换用户菜单
-const toggleUserMenu = () => {
-  // 实际项目中可以实现用户菜单的显示/隐藏逻辑
-  console.log('用户菜单被点击');
-};
-
-// 数据源数据
-const dataSources = ref([
-  {
-    id: 1,
-    name: '销售订单数据库',
-    desc: '存储所有销售订单相关数据',
-    type: 'mysql',
-    typeText: 'MySQL',
-    status: 'status-online',
-    statusText: '在线',
-    statusIcon: 'fas fa-check-circle',
-    icon: 'fas fa-database',
-    createTime: '2023-06-15'
-  },
-  {
-    id: 2,
-    name: '用户行为API',
-    desc: '获取用户行为分析数据的接口',
-    type: 'api',
-    typeText: 'API接口',
-    status: 'status-online',
-    statusText: '在线',
-    statusIcon: 'fas fa-check-circle',
-    icon: 'fas fa-plug',
-    createTime: '2023-05-28'
-  },
-  {
-    id: 3,
-    name: '季度报表汇总',
-    desc: '各季度业务数据汇总表格',
-    type: 'excel',
-    typeText: 'Excel',
-    status: 'status-offline',
-    statusText: '离线',
-    statusIcon: 'fas fa-exclamation-circle',
-    icon: 'fas fa-file-excel',
-    createTime: '2023-04-10'
-  },
-  {
-    id: 4,
-    name: '客户信息库',
-    desc: '存储所有客户基本信息和交互记录',
-    type: 'oracle',
-    typeText: 'Oracle',
-    status: 'status-online',
-    statusText: '在线',
-    statusIcon: 'fas fa-check-circle',
-    icon: 'fas fa-database',
-    createTime: '2023-03-05'
-  }
-]);
+import SidebarMenu from '@/components/SidebarMenu.vue';
+import request from '../api/request';
+import { ElMessage } from 'element-plus';
+const connectors = ref([]);
 
 // 筛选条件
 const filter = ref({
@@ -486,42 +263,13 @@ const filter = ref({
   endDate: '',
   keyword: ''
 });
-
-// 过滤后的数据源列表
-const filteredDataSources = computed(() => {
-  return dataSources.value.filter(item => {
-    // 类型筛选
-    if (filter.value.type && item.type !== filter.value.type) {
-      return false;
-    }
-    
-    // 状态筛选
-    if (filter.value.status && item.status !== `status-${filter.value.status}`) {
-      return false;
-    }
-    
-    // 关键词筛选
-    if (filter.value.keyword && !item.name.includes(filter.value.keyword) && !item.desc.includes(filter.value.keyword)) {
-      return false;
-    }
-    
-    // 时间筛选（简化实现）
-    if (filter.value.startDate && new Date(item.createTime) < new Date(filter.value.startDate)) {
-      return false;
-    }
-    
-    if (filter.value.endDate && new Date(item.createTime) > new Date(filter.value.endDate)) {
-      return false;
-    }
-    
-    return true;
-  });
-});
+const connectorType=ref([]);
+const connectorStatus=ref([]);
 
 // 分页相关
 const currentPage = ref(1);
 const pageSize = ref(4);
-const totalItems = computed(() => filteredDataSources.value.length);
+const totalItems = computed(() => connectors.value.length);
 const pageCount = computed(() => Math.ceil(totalItems.value / pageSize.value));
 
 // 切换页码
@@ -533,71 +281,30 @@ const changePage = (page) => {
 // 模态框相关
 const isModalVisible = ref(false);
 const modalType = ref('add'); // 'add' 或 'edit'
-const modalTitle = computed(() => modalType.value === 'add' ? '新增数据源' : '编辑数据源');
+const modalTitle = computed(() => modalType.value === 'add' ? '新增连接器' : '编辑连接器');
 const activeTab = ref('basic');
 const formData = ref({
   id: '',
   name: '',
   type: '',
-  desc: '',
-  host: '',
-  port: '',
-  dbName: '',
-  serviceName: '',
-  username: '',
-  password: '',
-  url: '',
-  method: 'get',
-  headers: '',
-  fileName: '',
+  description: '',
+  icon: '',
+  status: '',
+  attrs: []  ,
   timeout: 30,
   cacheTime: 10,
   maxConnections: 10,
-  notes: '',
-  properties: []
+  notes: ''
 });
 
 // 打开模态框
 const openModal = (type, item = null) => {
   modalType.value = type;
   activeTab.value = 'basic';
-  
-  // 重置表单
-  formData.value = {
-    id: '',
-    name: '',
-    type: '',
-    desc: '',
-    host: '',
-    port: '',
-    dbName: '',
-    serviceName: '',
-    username: '',
-    password: '',
-    url: '',
-    method: 'get',
-    headers: '',
-    fileName: '',
-    timeout: 30,
-    cacheTime: 10,
-    maxConnections: 10,
-    notes: '',
-    properties: []
-  };
-  
+  debugger;
   // 如果是编辑模式，填充表单数据
   if (type === 'edit' && item) {
-    formData.value.id = item.id;
-    formData.value.name = item.name;
-    formData.value.type = item.type;
-    formData.value.desc = item.desc;
-    
-    // 根据类型设置默认端口
-    if (item.type === 'mysql') {
-      formData.value.port = '3306';
-    } else if (item.type === 'oracle') {
-      formData.value.port = '1521';
-    }
+    handleConnectorDetail(item);
   }
   
   isModalVisible.value = true;
@@ -613,97 +320,60 @@ const closeModal = (isOverlay = false) => {
 
 // 设置激活的Tab
 const setActiveTab = (tab) => {
+  if(tab==='properties'){
+    if(formData.value.type===''){
+        ElMessage.error(`请先选择连接器类型`);
+        return;
+    }else if(formData.value.id===''){
+        request.get('/api/connector/getConnectorAttributeTmpByType?connectType='+formData.value.type)
+        .then(response => {
+          if(response.code==200){
+            formData.value.attrs=response.data;
+          }else{
+            ElMessage.error(`获取该连接器属性失败`);
+          }
+        })
+    }
+  }
   activeTab.value = tab;
 };
 
 // 处理数据源类型变化
 const handleTypeChange = () => {
-  // 清空相关配置
-  formData.value.host = '';
-  formData.value.port = '';
-  formData.value.dbName = '';
-  formData.value.serviceName = '';
-  formData.value.username = '';
-  formData.value.password = '';
-  formData.value.url = '';
-  formData.value.method = 'get';
-  formData.value.headers = '';
-  formData.value.fileName = '';
-  
-  // 设置默认端口
-  if (formData.value.type === 'mysql') {
-    formData.value.port = '3306';
-  } else if (formData.value.type === 'oracle') {
-    formData.value.port = '1521';
-  }
 };
 
-// 处理文件上传
-const handleFileUpload = (e) => {
-  if (e.target.files && e.target.files[0]) {
-    formData.value.fileName = e.target.files[0].name;
-  }
-};
 
 // 添加属性
 const addProperty = () => {
-  formData.value.properties.push({ name: '', value: '' });
+  formData.value.attrs.push({ name: '', value: '' });
 };
 
 // 移除属性
 const removeProperty = (index) => {
-  formData.value.properties.splice(index, 1);
+  formData.value.attrs.splice(index, 1);
 };
-
-// 保存数据源
-const saveDataSource = () => {
-  if (!formData.value.name || !formData.value.type) {
-    alert('请填写必填字段');
-    return;
-  }
-  
-  if (modalType.value === 'add') {
-    // 新增数据源
-    const newId = Math.max(...dataSources.value.map(item => item.id), 0) + 1;
-    const typeTextMap = {
-      mysql: 'MySQL',
-      oracle: 'Oracle',
-      api: 'API接口',
-      excel: 'Excel'
-    };
-    const iconMap = {
-      mysql: 'fas fa-database',
-      oracle: 'fas fa-database',
-      api: 'fas fa-plug',
-      excel: 'fas fa-file-excel'
-    };
-    
-    dataSources.value.push({
-      id: newId,
-      name: formData.value.name,
-      desc: formData.value.desc,
-      type: formData.value.type,
-      typeText: typeTextMap[formData.value.type],
-      status: 'status-online',
-      statusText: '在线',
-      statusIcon: 'fas fa-check-circle',
-      icon: iconMap[formData.value.type],
-      createTime: new Date().toISOString().split('T')[0]
-    });
-  } else {
-    // 编辑数据源
-    const index = dataSources.value.findIndex(item => item.id === formData.value.id);
-    if (index !== -1) {
-      dataSources.value[index].name = formData.value.name;
-      dataSources.value[index].desc = formData.value.desc;
-      // 这里可以根据需要更新其他字段
+const saveConnector = () => { 
+  let param=new Object();
+  param.id=formData.value.id;
+  param.name=formData.value.name;
+  param.type=formData.value.type;
+  param.description=formData.value.description;
+  param.icon=formData.value.icon;
+  param.status=formData.value.status;
+  param.attrs=formData.value.attrs;
+  request.post('/api/connector/saveOrUpdate',param)
+  .then(response => {
+    if(response.code==200){
+      ElMessage.success(`保存成功`);
+    }else{
+      ElMessage.error(`获取连接器状态失败`);
     }
   }
-  
+)
   closeModal();
 };
 
-// 删除确认相关
+
 const isDeleteConfirmVisible = ref(false);
 const idToDelete = ref(null);
 
@@ -723,14 +393,67 @@ const closeDeleteConfirm = (isOverlay = false) => {
 
 // 执行删除
 const deleteDataSource = () => {
-  if (idToDelete.value !== null) {
-    dataSources.value = dataSources.value.filter(item => item.id !== idToDelete.value);
-    closeDeleteConfirm();
-  }
 };
+const handleConnectorDetail = (item) => {
+  let id=item.id;
+  debugger;
+  request.get('/api/connector/getById?id='+id)
+  .then(response => {
+    if(response.code==200){
+      formData.value.id=response.data.id;
+      formData.value.name=response.data.name;
+      formData.value.type=response.data.type;
+      formData.value.description=response.data.description;
+      formData.value.icon=response.data.icon;
+      formData.value.status=response.data.status;
+      formData.value.attrs=response.data.attrs;
+    }else{
+      ElMessage.error(`获取连接器状态失败`);
+    }
+  }
+)
+};
+const handleConnectorTypeQuery = () => {
+  request.get('/api/connector/getConnectorType')
+  .then(response => {
+    if(response.code==200){
+      connectorType.value=response.data;
+    }else{
+      ElMessage.error(`获取连接器类型失败`);
+    }
+  }
+)
+};
+const handleConnectorStatusQuery = () => {
+  request.get('/api/connector/getConnectorStatus')
+  .then(response => {
+    if(response.code==200){
+      connectorStatus.value=response.data;
+    }else{
+      ElMessage.error(`获取连接器状态失败`);
+    }
+  }
+)
+};
+const handleConnectorQuery = () => {
+  let query=new Object();
+  query.pageNum=currentPage.value;
+  query.pageSize=pageSize.value;
+  request.post('/api/connector/page',query)
+  .then(response => {
+    if(response.code==200){
+      connectors.value=response.data.records;
+    }else{
+      ElMessage.error(`查询租户失败`);
+    }
+  }
+)
 
+};
 onMounted(() => {
-  // 初始化时添加一个属性
+  handleConnectorTypeQuery();
+  handleConnectorStatusQuery();
+  handleConnectorQuery();
   addProperty();
 });
 </script>
