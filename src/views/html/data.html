@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据集列表 - JQuick BI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #ff8326;
+            --secondary-color: #fff5eb;
+            --border-color: #ffd5b8;
+            --text-color: #2d3e50;
+            --light-bg: #f9f9f9;
+            --card-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            --sidebar-width: 260px;
+            --header-height: 60px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            color: var(--text-color);
+            background-color: var(--light-bg);
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        /* 顶部导航栏 */
+        .header {
+            height: var(--header-height);
+            background-color: white;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            z-index: 10;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            color: var(--primary-color);
+            font-size: 22px;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            font-size: 26px;
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .search-box {
+            position: relative;
+            width: 280px;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 8px 12px 8px 36px;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(255, 131, 38, 0.2);
+        }
+        
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 20px;
+            transition: background-color 0.2s;
+        }
+        
+        .user-info:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .user-name {
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        
+        .notification-icon {
+            position: relative;
+            font-size: 18px;
+            color: #666;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .notification-icon:hover {
+            color: var(--primary-color);
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: #ff4d4f;
+            color: white;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* 主内容区 */
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        /* 左侧BI菜单 */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: white;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            height: calc(100vh - var(--header-height));
+        }
+        
+        .menu-section {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .menu-section-title {
+            padding: 0 20px;
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #666;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .menu-item:hover {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+        }
+        
+        .menu-item.active {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        .menu-item i {
+            width: 20px;
+            margin-right: 12px;
+            text-align: center;
+        }
+        
+        .menu-item .menu-badge {
+            margin-left: auto;
+            padding: 2px 8px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+        
+        .submenu {
+            background-color: #fff9f2;
+            padding: 0 0 0 52px;
+            display: none;
+        }
+        
+        .submenu.show {
+            display: block;
+        }
+        
+        .submenu-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            color: #666;
+            cursor: pointer;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+        
+        .submenu-item:hover {
+            color: var(--primary-color);
+        }
+        
+        .submenu-item.active {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        /* 右侧数据集列表区域 */
+        .content-area {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            background-color: var(--light-bg);
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        
+        .page-description {
+            font-size: 14px;
+            color: #666;
+            margin-top: 4px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, #ff8326, #ff6a00);
+            color: white;
+            box-shadow: 0 2px 5px rgba(255, 131, 38, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(to right, #ff6a00, #ff8326);
+            box-shadow: 0 4px 8px rgba(255, 131, 38, 0.4);
+            transform: translateY(-1px);
+        }
+        
+        .btn-outline {
+            background-color: white;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .btn i {
+            margin-right: 8px;
+        }
+        
+        /* 筛选和搜索区域 */
+        .filter-bar {
+            background-color: white;
+            border-radius: 12px;
+            padding: 16px 20px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .filter-group {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+        
+        .filter-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .filter-item label {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .filter-item select, .filter-item input {
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .search-filter {
+            position: relative;
+            width: 240px;
+        }
+        
+        .search-filter input {
+            width: 100%;
+            padding: 8px 12px 8px 36px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .search-filter i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+        
+        /* 数据集列表 */
+        .data-set-list {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+        }
+        
+        .table-header {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 120px;
+            padding: 16px 20px;
+            background-color: var(--light-bg);
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .table-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 120px;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+        
+        .table-row:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .table-row:last-child {
+            border-bottom: none;
+        }
+        
+        .data-set-name {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .data-set-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background-color: #e6f7ff;
+            color: #1890ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        
+        .data-set-icon.user {
+            background-color: #fff0f6;
+            color: #eb2f96;
+        }
+        
+        .data-set-icon.order {
+            background-color: #f6ffed;
+            color: #52c41a;
+        }
+        
+        .data-set-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .set-name {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .set-desc {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .column-count {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            background-color: #f0f2f5;
+            color: #4e5969;
+        }
+        
+        .operation-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+        
+        .operation-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .operation-btn:hover {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+        }
+        
+        /* 分页控件 */
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            font-size: 14px;
+        }
+        
+        .pagination-info {
+            color: #666;
+        }
+        
+        .pagination-controls {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .page-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            border: 1px solid var(--border-color);
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .page-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .page-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 模态框样式 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal {
+            width: 800px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal-close:hover {
+            color: var(--primary-color);
+        }
+
+        /* Tab 样式 */
+        .modal-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab-btn {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .tab-btn:hover:not(.active) {
+            color: var(--primary-color);
+            background-color: var(--secondary-color);
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(255, 131, 38, 0.2);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* 列信息表格 */
+        .columns-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+
+        .columns-table th, .columns-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .columns-table th {
+            background-color: var(--light-bg);
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .columns-table tr:hover {
+            background-color: var(--secondary-color);
+        }
+
+        /* 数据预览表格 */
+        .data-preview {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+            font-size: 14px;
+        }
+
+        .data-preview th, .data-preview td {
+            padding: 8px 12px;
+            text-align: left;
+            border: 1px solid var(--border-color);
+        }
+
+        .data-preview th {
+            background-color: var(--light-bg);
+            font-weight: 600;
+        }
+
+        .data-preview tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        /* 模态框底部 */
+        .modal-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* 确认删除模态框 */
+        .confirm-modal {
+            width: 400px;
+        }
+
+        .confirm-content {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .confirm-icon {
+            font-size: 48px;
+            color: #faad14;
+            margin-bottom: 16px;
+        }
+
+        .confirm-message {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部导航栏 -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-chart-line"></i>
+                <span>JQuick BI</span>
+            </div>
+            <div class="header-actions">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="搜索报表、数据集或文档...">
+                </div>
+                <div class="notification-icon">
+                    <i class="far fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar">ZL</div>
+                    <span class="user-name">张磊</span>
+                    <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
+                </div>
+            </div>
+        </header>
+        
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <!-- 左侧BI菜单 -->
+            <aside class="sidebar">
+                <div class="menu-section">
+                    <div class="menu-section-title">主导航</div>
+                    <div class="menu-item">
+                        <i class="fas fa-home"></i>
+                        <span>首页</span>
+                    </div>
+                    <div class="menu-item" id="dataSourceMenu">
+                        <i class="fas fa-database"></i>
+                        <span>数据源</span>
+                        <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
+                    </div>
+                    <div class="submenu" id="dataSourceSubmenu">
+                        <div class="submenu-item">数据源列表</div>
+                        <div class="submenu-item">新增数据源</div>
+                        <div class="submenu-item">数据源权限</div>
+                    </div>
+                    <div class="menu-item" id="reportMenu">
+                        <i class="fas fa-file-alt"></i>
+                        <span>报表</span>
+                        <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
+                    </div>
+                    <div class="submenu" id="reportSubmenu">
+                        <div class="submenu-item">我的报表</div>
+                        <div class="submenu-item">共享报表</div>
+                        <div class="submenu-item">收藏报表</div>
+                        <div class="submenu-item">回收站</div>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>仪表盘</span>
+                        <span class="menu-badge">5</span>
+                    </div>
+                    <div class="menu-item active" id="dataSetMenu">
+                        <i class="fas fa-cubes"></i>
+                        <span>数据集</span>
+                    </div>
+                </div>
+                
+                <div class="menu-section">
+                    <div class="menu-section-title">系统管理</div>
+                    <div class="menu-item">
+                        <i class="fas fa-users"></i>
+                        <span>用户管理</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-user-shield"></i>
+                        <span>角色权限</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-history"></i>
+                        <span>操作日志</span>
+                    </div>
+                </div>
+                
+                <div class="menu-section">
+                    <div class="menu-section-title">帮助中心</div>
+                    <div class="menu-item">
+                        <i class="fas fa-question-circle"></i>
+                        <span>帮助文档</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-play-circle"></i>
+                        <span>视频教程</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-comment-dots"></i>
+                        <span>联系客服</span>
+                    </div>
+                </div>
+            </aside>
+            
+            <!-- 右侧数据集列表区域 -->
+            <main class="content-area">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">数据集列表</h1>
+                        <p class="page-description">管理所有可用的数据集，可从数据源转换生成</p>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-outline">
+                            <i class="fas fa-download"></i>
+                            <span>导出</span>
+                        </button>
+                        <button class="btn btn-primary" id="createDataSetBtn">
+                            <i class="fas fa-plus"></i>
+                            <span>从数据源创建</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="filter-bar">
+                    <div class="filter-group">
+                        <div class="filter-item">
+                            <label>来源数据源:</label>
+                            <select>
+                                <option value="">全部</option>
+                                <option value="mysql">销售订单数据库</option>
+                                <option value="oracle">客户信息库</option>
+                                <option value="api">用户行为API</option>
+                                <option value="excel">季度报表汇总</option>
+                            </select>
+                        </div>
+                        <div class="filter-item">
+                            <label>创建时间:</label>
+                            <input type="date">
+                            <span>至</span>
+                            <input type="date">
+                        </div>
+                    </div>
+                    <div class="search-filter">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="搜索数据集名称...">
+                    </div>
+                </div>
+                
+                <div class="data-set-list">
+                    <div class="table-header">
+                        <div>数据集名称</div>
+                        <div>来源数据源</div>
+                        <div>列数</div>
+                        <div>创建时间</div>
+                        <div>操作</div>
+                    </div>
+                    
+                    <div class="table-row" data-id="1">
+                        <div class="data-set-name">
+                            <div class="data-set-icon user">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="data-set-info">
+                                <div class="set-name">用户数据集 (users)</div>
+                                <div class="set-desc">包含用户基本信息的数据集</div>
+                            </div>
+                        </div>
+                        <div>销售订单数据库</div>
+                        <div><span class="column-count">5 列</span></div>
+                        <div>2024-01-20</div>
+                        <div class="operation-buttons">
+                            <button class="operation-btn view-btn" title="查看详情">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="operation-btn edit-btn" title="编辑">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="operation-btn delete-btn" title="删除">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="table-row" data-id="2">
+                        <div class="data-set-name">
+                            <div class="data-set-icon order">
+                                <i class="fas fa-shopping-cart"></i>
+                            </div>
+                            <div class="data-set-info">
+                                <div class="set-name">订单数据集 (orders)</div>
+                                <div class="set-desc">包含订单信息的数据集</div>
+                            </div>
+                        </div>
+                        <div>销售订单数据库</div>
+                        <div><span class="column-count">6 列</span></div>
+                        <div>2024-01-21</div>
+                        <div class="operation-buttons">
+                            <button class="operation-btn view-btn" title="查看详情">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="operation-btn edit-btn" title="编辑">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="operation-btn delete-btn" title="删除">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="pagination">
+                    <div class="pagination-info">显示 1-2 条，共 2 条</div>
+                    <div class="pagination-controls">
+                        <button class="page-btn" disabled>
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="page-btn active">1</button>
+                        <button class="page-btn" disabled>
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- 创建/编辑数据集模态框 -->
+    <div class="modal-overlay" id="dataSetModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">从数据源创建数据集</h3>
+                <button class="modal-close" id="modalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-tabs">
+                <button class="tab-btn active" data-tab="basic">基本信息</button>
+                <button class="tab-btn" data-tab="columns">列信息</button>
+                <button class="tab-btn" data-tab="preview">数据预览</button>
+            </div>
+            
+            <div class="modal-body">
+                <!-- 基本信息Tab -->
+                <div class="tab-content active" id="basic-tab">
+                    <input type="hidden" id="dataSetId">
+                    <div class="form-group">
+                        <label>数据集名称 <span style="color: #ff4d4f;">*</span></label>
+                        <input type="text" class="form-control" id="setName" placeholder="请输入数据集名称">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>来源数据源 <span style="color: #ff4d4f;">*</span></label>
+                        <select class="form-control" id="sourceDataSet">
+                            <option value="">请选择来源数据源</option>
+                            <option value="mysql">销售订单数据库 (MySQL)</option>
+                            <option value="oracle">客户信息库 (Oracle)</option>
+                            <option value="api">用户行为API</option>
+                            <option value="excel">季度报表汇总 (Excel)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>描述信息</label>
+                        <textarea class="form-control" id="setDesc" rows="3" placeholder="请输入数据集描述信息"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>选择表/集合</label>
+                        <select class="form-control" id="tableSelect">
+                            <option value="">请先选择数据源</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- 列信息Tab -->
+                <div class="tab-content" id="columns-tab">
+                    <h4 style="margin-bottom: 16px;">列信息配置</h4>
+                    <table class="columns-table">
+                        <thead>
+                            <tr>
+                                <th>列名</th>
+                                <th>数据类型</th>
+                                <th>来源表</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="columnsTableBody">
+                            <!-- 列信息将通过JS动态生成 -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- 数据预览Tab -->
+                <div class="tab-content" id="preview-tab">
+                    <h4 style="margin-bottom: 16px;">数据预览</h4>
+                    <p style="font-size: 14px; color: #666; margin-bottom: 12px;">显示前5行数据</p>
+                    <div id="dataPreviewContainer">
+                        <!-- 数据预览表格将通过JS动态生成 -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelBtn">取消</button>
+                <button class="btn btn-primary" id="saveDataSetBtn">保存数据集</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 查看数据集详情模态框 -->
+    <div class="modal-overlay" id="viewDataSetModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="viewModalTitle">数据集详情</h3>
+                <button class="modal-close" id="viewModalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-tabs">
+                <button class="tab-btn active" data-tab="view-columns">列信息</button>
+                <button class="tab-btn" data-tab="view-preview">数据预览</button>
+            </div>
+            
+            <div class="modal-body">
+                <!-- 列信息Tab -->
+                <div class="tab-content active" id="view-columns-tab">
+                    <table class="columns-table">
+                        <thead>
+                            <tr>
+                                <th>列名</th>
+                                <th>数据类型</th>
+                                <th>来源表</th>
+                            </tr>
+                        </thead>
+                        <tbody id="viewColumnsTableBody">
+                            <!-- 列信息将通过JS动态生成 -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- 数据预览Tab -->
+                <div class="tab-content" id="view-preview-tab">
+                    <h4 style="margin-bottom: 16px;">数据预览</h4>
+                    <div id="viewDataPreviewContainer">
+                        <!-- 数据预览表格将通过JS动态生成 -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="closeViewBtn">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 确认删除模态框 -->
+    <div class="modal-overlay" id="confirmDeleteModal">
+        <div class="modal confirm-modal">
+            <div class="modal-header">
+                <h3 class="modal-title">确认删除</h3>
+                <button class="modal-close" id="deleteModalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="confirm-content">
+                <div class="confirm-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="confirm-message">您确定要删除此数据集吗？此操作不可撤销。</div>
+                <input type="hidden" id="deleteDataSetId">
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelDeleteBtn">取消</button>
+                <button class="btn btn-primary" style="background-color: #ff4d4f;" id="confirmDeleteBtn">确认删除</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 示例数据集数据 - 对应提供的Java代码
+        const dataSets = {
+            users: {
+                name: "用户数据集 (users)",
+                description: "包含用户基本信息的数据集",
+                source: "销售订单数据库",
+                createTime: "2024-01-20",
+                columns: [
+                    { name: "id", type: "Integer", table: "users" },
+                    { name: "name", type: "String", table: "users" },
+                    { name: "age", type: "Integer", table: "users" },
+                    { name: "city", type: "String", table: "users" },
+                    { name: "salary", type: "Double", table: "users" }
+                ],
+                data: [
+                    { id: 1, name: "张三", age: 25, city: "北京", salary: 8000.0 },
+                    { id: 2, name: "李四", age: 30, city: "上海", salary: 12000.0 }
+                ]
+            },
+            orders: {
+                name: "订单数据集 (orders)",
+                description: "包含订单信息的数据集",
+                source: "销售订单数据库",
+                createTime: "2024-01-21",
+                columns: [
+                    { name: "order_id", type: "Integer", table: "orders" },
+                    { name: "user_id", type: "Integer", table: "orders" },
+                    { name: "product", type: "String", table: "orders" },
+                    { name: "quantity", type: "Integer", table: "orders" },
+                    { name: "price", type: "Double", table: "orders" },
+                    { name: "order_date", type: "String", table: "orders" }
+                ],
+                data: [
+                    { order_id: 101, user_id: 1, product: "笔记本电脑", quantity: 1, price: 5999.0, order_date: "2024-01-15" },
+                    { order_id: 102, user_id: 1, product: "鼠标", quantity: 2, price: 199.0, order_date: "2024-01-16" },
+                    { order_id: 103, user_id: 2, product: "手机", quantity: 1, price: 3999.0, order_date: "2024-01-17" },
+                    { order_id: 104, user_id: 3, product: "耳机", quantity: 3, price: 299.0, order_date: "2024-01-18" }
+                ]
+            }
+        };
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 菜单交互
+            initMenuInteraction();
+            
+            // 模态框交互
+            initModalInteraction();
+            
+            // 数据集操作按钮事件
+            initDataSetActions();
+        });
+
+        // 初始化菜单交互
+        function initMenuInteraction() {
+            // 数据源菜单点击事件
+            document.getElementById('dataSourceMenu').addEventListener('click', function() {
+                const submenu = document.getElementById('dataSourceSubmenu');
+                submenu.classList.toggle('show');
+                
+                // 切换箭头方向
+                const arrow = this.querySelector('.fa-chevron-down');
+                arrow.style.transform = submenu.classList.contains('show') ? 'rotate(180deg)' : 'rotate(0)';
+            });
+            
+            // 报表菜单点击事件
+            document.getElementById('reportMenu').addEventListener('click', function() {
+                const submenu = document.getElementById('reportSubmenu');
+                submenu.classList.toggle('show');
+                
+                // 切换箭头方向
+                const arrow = this.querySelector('.fa-chevron-down');
+                arrow.style.transform = submenu.classList.contains('show') ? 'rotate(180deg)' : 'rotate(0)';
+            });
+        }
+
+        // 初始化模态框交互
+        function initModalInteraction() {
+            // 打开创建数据集模态框
+            document.getElementById('createDataSetBtn').addEventListener('click', function() {
+                document.getElementById('modalTitle').textContent = '从数据源创建数据集';
+                document.getElementById('dataSetModal').style.display = 'flex';
+                resetDataSetForm();
+            });
+            
+            // 关闭模态框
+            document.getElementById('modalClose').addEventListener('click', function() {
+                document.getElementById('dataSetModal').style.display = 'none';
+            });
+            
+            document.getElementById('cancelBtn').addEventListener('click', function() {
+                document.getElementById('dataSetModal').style.display = 'none';
+            });
+            
+            // 关闭查看模态框
+            document.getElementById('viewModalClose').addEventListener('click', function() {
+                document.getElementById('viewDataSetModal').style.display = 'none';
+            });
+            
+            document.getElementById('closeViewBtn').addEventListener('click', function() {
+                document.getElementById('viewDataSetModal').style.display = 'none';
+            });
+            
+            // 关闭删除确认模态框
+            document.getElementById('deleteModalClose').addEventListener('click', function() {
+                document.getElementById('confirmDeleteModal').style.display = 'none';
+            });
+            
+            document.getElementById('cancelDeleteBtn').addEventListener('click', function() {
+                document.getElementById('confirmDeleteModal').style.display = 'none';
+            });
+            
+            // Tab切换
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    const modal = this.closest('.modal');
+                    
+                    // 激活当前Tab按钮
+                    modal.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // 显示当前Tab内容
+                    modal.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                    modal.querySelector(`#${tabId}-tab`).classList.add('active');
+                    
+                    // 如果切换到列信息或预览，且有选中的数据集，则加载数据
+                    if (tabId === 'columns' || tabId === 'preview') {
+                        loadSelectedDataSetInfo();
+                    }
+                });
+            });
+            
+            // 数据源选择变化时更新表选择
+            document.getElementById('sourceDataSet').addEventListener('change', function() {
+                const tableSelect = document.getElementById('tableSelect');
+                tableSelect.innerHTML = '';
+                
+                if (this.value === 'mysql' || this.value === 'oracle') {
+                    // 数据库类型数据源，添加表选项
+                    const option1 = document.createElement('option');
+                    option1.value = 'users';
+                    option1.textContent = '用户表 (users)';
+                    
+                    const option2 = document.createElement('option');
+                    option2.value = 'orders';
+                    option2.textContent = '订单表 (orders)';
+                    
+                    tableSelect.appendChild(option1);
+                    tableSelect.appendChild(option2);
+                } else if (this.value === 'api') {
+                    // API类型数据源
+                    const option = document.createElement('option');
+                    option.value = 'api_data';
+                    option.textContent = 'API响应数据';
+                    tableSelect.appendChild(option);
+                } else if (this.value === 'excel') {
+                    // Excel类型数据源
+                    const option = document.createElement('option');
+                    option.value = 'sheet1';
+                    option.textContent = '工作表1 (Sheet1)';
+                    tableSelect.appendChild(option);
+                } else {
+                    const option = document.createElement('option');
+                    option.value = '';
+                    option.textContent = '请先选择数据源';
+                    tableSelect.appendChild(option);
+                }
+            });
+            
+            // 保存数据集
+            document.getElementById('saveDataSetBtn').addEventListener('click', function() {
+                // 简单验证
+                const setName = document.getElementById('setName').value;
+                const sourceDataSet = document.getElementById('sourceDataSet').value;
+                const tableSelect = document.getElementById('tableSelect').value;
+                
+                if (!setName || !sourceDataSet || !tableSelect) {
+                    alert('请填写必要的信息');
+                    return;
+                }
+                
+                // 模拟保存成功
+                alert('数据集创建成功！');
+                document.getElementById('dataSetModal').style.display = 'none';
+            });
+            
+            // 确认删除
+            document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+                // 模拟删除操作
+                const dataSetId = document.getElementById('deleteDataSetId').value;
+                document.querySelector(`.table-row[data-id="${dataSetId}"]`).remove();
+                document.getElementById('confirmDeleteModal').style.display = 'none';
+                
+                // 更新分页信息
+                document.querySelector('.pagination-info').textContent = '显示 1-1 条，共 1 条';
+            });
+        }
+
+        // 初始化数据集操作按钮事件
+        function initDataSetActions() {
+            // 查看按钮
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const row = this.closest('.table-row');
+                    const dataSetId = row.getAttribute('data-id');
+                    const dataSetName = row.querySelector('.set-name').textContent;
+                    
+                    // 确定要显示哪个数据集的数据
+                    let dataSetKey = dataSetId == 1 ? 'users' : 'orders';
+                    let dataSet = dataSets[dataSetKey];
+                    
+                    // 更新模态框标题
+                    document.getElementById('viewModalTitle').textContent = `${dataSet.name} - 详情`;
+                    
+                    // 加载列信息
+                    loadViewColumns(dataSet.columns);
+                    
+                    // 加载数据预览
+                    loadViewDataPreview(dataSet.columns, dataSet.data);
+                    
+                    // 显示模态框
+                    document.getElementById('viewDataSetModal').style.display = 'flex';
+                });
+            });
+            
+            // 编辑按钮
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const row = this.closest('.table-row');
+                    const dataSetId = row.getAttribute('data-id');
+                    const dataSetName = row.querySelector('.set-name').textContent;
+                    const sourceName = row.children[1].textContent;
+                    
+                    // 确定要编辑哪个数据集
+                    let dataSetKey = dataSetId == 1 ? 'users' : 'orders';
+                    let dataSet = dataSets[dataSetKey];
+                    
+                    // 更新模态框标题
+                    document.getElementById('modalTitle').textContent = `编辑数据集: ${dataSetName}`;
+                    
+                    // 填充表单
+                    document.getElementById('dataSetId').value = dataSetId;
+                    document.getElementById('setName').value = dataSetName;
+                    document.getElementById('setDesc').value = dataSet.description;
+                    
+                    // 选择数据源
+                    const sourceSelect = document.getElementById('sourceDataSet');
+                    for (let i = 0; i < sourceSelect.options.length; i++) {
+                        if (sourceSelect.options[i].text.includes(sourceName.split(' ')[0])) {
+                            sourceSelect.selectedIndex = i;
+                            break;
+                        }
+                    }
+                    
+                    // 触发数据源变化事件，加载表选项
+                    const event = new Event('change');
+                    sourceSelect.dispatchEvent(event);
+                    
+                    // 选择对应的表
+                    const tableSelect = document.getElementById('tableSelect');
+                    for (let i = 0; i < tableSelect.options.length; i++) {
+                        if (tableSelect.options[i].value === dataSetKey) {
+                            tableSelect.selectedIndex = i;
+                            break;
+                        }
+                    }
+                    
+                    // 显示模态框
+                    document.getElementById('dataSetModal').style.display = 'flex';
+                });
+            });
+            
+            // 删除按钮
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const row = this.closest('.table-row');
+                    const dataSetId = row.getAttribute('data-id');
+                    document.getElementById('deleteDataSetId').value = dataSetId;
+                    document.getElementById('confirmDeleteModal').style.display = 'flex';
+                });
+            });
+        }
+
+        // 重置数据集表单
+        function resetDataSetForm() {
+            document.getElementById('dataSetId').value = '';
+            document.getElementById('setName').value = '';
+            document.getElementById('setDesc').value = '';
+            document.getElementById('sourceDataSet').selectedIndex = 0;
+            document.getElementById('tableSelect').innerHTML = '<option value="">请先选择数据源</option>';
+            document.getElementById('columnsTableBody').innerHTML = '';
+            document.getElementById('dataPreviewContainer').innerHTML = '';
+        }
+
+        // 加载选中的数据集信息
+        function loadSelectedDataSetInfo() {
+            const tableSelect = document.getElementById('tableSelect');
+            const selectedTable = tableSelect.value;
+            
+            if (!selectedTable || !dataSets[selectedTable]) {
+                return;
+            }
+            
+            const dataSet = dataSets[selectedTable];
+            
+            // 加载列信息
+            loadColumns(dataSet.columns);
+            
+            // 加载数据预览
+            loadDataPreview(dataSet.columns, dataSet.data);
+        }
+
+        // 加载列信息
+        function loadColumns(columns) {
+            const tableBody = document.getElementById('columnsTableBody');
+            tableBody.innerHTML = '';
+            
+            columns.forEach(column => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${column.name}</td>
+                    <td>${column.type}</td>
+                    <td>${column.table}</td>
+                    <td>
+                        <button class="operation-btn" title="编辑列">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="operation-btn" title="移除列" style="color: #ff4d4f;">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // 加载查看模式下的列信息
+        function loadViewColumns(columns) {
+            const tableBody = document.getElementById('viewColumnsTableBody');
+            tableBody.innerHTML = '';
+            
+            columns.forEach(column => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${column.name}</td>
+                    <td>${column.type}</td>
+                    <td>${column.table}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // 加载数据预览
+        function loadDataPreview(columns, data) {
+            const container = document.getElementById('dataPreviewContainer');
+            
+            if (data.length === 0) {
+                container.innerHTML = '<p>没有数据可预览</p>';
+                return;
+            }
+            
+            // 创建表格
+            const table = document.createElement('table');
+            table.className = 'data-preview';
+            
+            // 创建表头
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            columns.forEach(column => {
+                const th = document.createElement('th');
+                th.textContent = column.name;
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+            
+            // 创建表体
+            const tbody = document.createElement('tbody');
+            data.forEach(rowData => {
+                const row = document.createElement('tr');
+                columns.forEach(column => {
+                    const td = document.createElement('td');
+                    td.textContent = rowData[column.name];
+                    row.appendChild(td);
+                });
+                tbody.appendChild(row);
+            });
+            table.appendChild(tbody);
+            
+            container.innerHTML = '';
+            container.appendChild(table);
+        }
+
+        // 加载查看模式下的数据预览
+        function loadViewDataPreview(columns, data) {
+            const container = document.getElementById('viewDataPreviewContainer');
+            
+            if (data.length === 0) {
+                container.innerHTML = '<p>没有数据可预览</p>';
+                return;
+            }
+            
+            // 创建表格
+            const table = document.createElement('table');
+            table.className = 'data-preview';
+            
+            // 创建表头
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            columns.forEach(column => {
+                const th = document.createElement('th');
+                th.textContent = column.name;
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+            
+            // 创建表体
+            const tbody = document.createElement('tbody');
+            data.forEach(rowData => {
+                const row = document.createElement('tr');
+                columns.forEach(column => {
+                    const td = document.createElement('td');
+                    td.textContent = rowData[column.name];
+                    row.appendChild(td);
+                });
+                tbody.appendChild(row);
+            });
+            table.appendChild(tbody);
+            
+            container.innerHTML = '';
+            container.appendChild(table);
+        }
+    </script>
+</body>
+</html>
