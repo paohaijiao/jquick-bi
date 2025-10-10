@@ -1,142 +1,155 @@
 <template>
   <div class="login-page">
-    <div class="decoration">
-      <div class="circle circle-1"></div>
-      <div class="circle circle-2"></div>
-      <div class="circle circle-3"></div>
-      <i class="fas fa-chart-pie graphic graphic-1"></i>
-      <i class="fas fa-chart-bar graphic graphic-2"></i>
-    </div>
-    
-    <div class="main-container">
-      <div class="left-content">
-        <div class="app-info">
-          <h2>JQuick BI 数据智能分析平台</h2>
-          <p>将复杂数据转化为直观见解，助力企业智能决策。我们的平台提供强大的数据可视化工具和实时分析功能。</p>
-          <ul class="features">
-            <li><i class="fas fa-bolt"></i> 快速数据处理与分析</li>
-            <li><i class="fas fa-chart-line"></i> 多维度数据可视化</li>
-            <li><i class="fas fa-cloud"></i> 云端报告实时共享</li>
-            <li><i class="fas fa-shield-alt"></i> 企业级数据安全保障</li>
-          </ul>
+    <div class="container">
+      <!-- 顶部导航栏 -->
+      <header class="header">
+        <div class="logo">
+          <i class="fas fa-chart-line"></i>
+          <span>JQuick BI</span>
+        </div>
+        <div class="header-actions">
+          <div class="search-box">
+            <el-icon><search /></el-icon>
+            <input type="text" placeholder="搜索报表、数据集或文档...">
+          </div>
+        </div>
+      </header>
+      
+      <!-- 主内容区 -->
+      <div class="main-content">
+        <div class="login-container">
+          <div class="login-card">
+            <div class="card-header">
+              <h2 >用户登录</h2>
+              <p class="page-description text-align-left">登录JQuick BI数据智能分析平台</p>
+            </div>
+            <div class="form-container">
+              <div class="form-group">
+                <div class="input-group">
+                  <el-icon><User /></el-icon>
+                  <input 
+                    type="text" 
+                    v-model="username" 
+                    placeholder="用户名" 
+                    required
+                    class="form-control"
+                  >
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="input-group">
+                  <el-icon><Lock /></el-icon>
+                  <input 
+                    type="password" 
+                    v-model="password" 
+                    placeholder="密码" 
+                    required
+                    class="form-control"
+                  >
+                </div>
+              </div>
+              
+              <!-- 验证码区域 -->
+              <div class="form-group">
+                <div class="captcha-group">
+                  <div class="captcha-input input-group">
+                    <el-icon><Key /></el-icon>
+                    <input 
+                      type="text" 
+                      v-model="captchaInput" 
+                      placeholder="请输入验证码" 
+                      required
+                      class="form-control"
+                    >
+                  </div>
+                  <div 
+                    class="captcha-image" 
+                    @click="generateCaptcha"
+                  >
+                   <img :src="captchaImage" style="width:120px;height:42px" />
+                    <i 
+                      class="fas fa-sync-alt refresh-icon" 
+                      @click.stop="generateCaptcha"
+                    ></i>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="remember-forgot">
+                <label class="remember">
+                  <input 
+                    type="checkbox" 
+                    v-model="rememberMe"
+                  >
+                  记住我
+                </label>
+                <a href="#" class="forgot">忘记密码?</a>
+              </div>
+              
+              <button 
+                class="btn btn-primary" 
+                @click="handleLogin"
+              >
+                <i class="fas fa-sign-in-alt"></i> 登录
+              </button>
+              
+              <div class="divider">
+                <span>或使用其他方式登录</span>
+              </div>
+              
+              <div class="social-login">
+                <a href="#" class="operation-btn social-btn social-btn-disabled" disabled>
+                  <i class="fab fa-weixin"></i>
+                </a>
+                <a href="#" class="operation-btn social-btn social-btn-disabled" disabled>
+                  <i class="fab fa-qq"></i>
+                </a>
+                <a href="#" class="operation-btn social-btn social-btn-disabled" disabled>
+                  <i class="fab fa-weibo"></i>
+                </a>
+                <a href="#" class="operation-btn social-btn social-btn-disabled" disabled>
+                  <i class="fab fa-github"></i>
+                </a>
+              </div>
+              
+              <div class="external-links">
+                <a 
+                  href="https://github.com/paohaijiao/jquickbi.git" 
+                  class="github-link" 
+                  target="_blank"
+                >
+                  <i class="fab fa-github"></i> GitHub项目
+                </a>
+                <a 
+                  @click="register"
+                  class="register-link"
+                >
+                  <i class="fas fa-user-plus"></i> 注册账号
+                </a>
+              </div>
+            </div>
+          </div>
+          
+          <div class="app-info">
+            <h2 class="page-title text-align-left">JQuick BI 数据智能分析平台</h2>
+            <p class="page-description">将复杂数据转化为直观见解，助力企业智能决策。我们的平台提供强大的数据可视化工具和实时分析功能。</p>
+            <ul class="features">
+              <li><i class="fas fa-bolt"></i> 快速数据处理与分析</li>
+              <li><i class="fas fa-chart-line"></i> 多维度数据可视化</li>
+              <li><i class="fas fa-cloud"></i> 云端报告实时共享</li>
+              <li><i class="fas fa-shield-alt"></i> 企业级数据安全保障</li>
+            </ul>
+          </div>
         </div>
       </div>
       
-      <div class="right-content">
-        <div class="login-card">
-          <div class="header">
-            <div class="logo">
-              <i class="fas fa-chart-line logo-icon"></i>
-              <div class="logo-text">JQuick BI</div>
-            </div>
-            <p class="tagline">智能数据分析平台 · 助力企业决策</p>
-          </div>
-          
-          <div class="form-container">
-            <div class="input-group">
-              <i class="el-icon"><User /></i>
-              <input 
-                type="text" 
-                v-model="username" 
-                placeholder="用户名" 
-                required
-              >
-            </div>
-            
-            <div class="input-group">
-              <el-icon><lock /></el-icon>
-              <input 
-                type="password" 
-                v-model="password" 
-                placeholder="密码" 
-                required
-              >
-            </div>
-            
-            <!-- 验证码区域 -->
-            <div class="captcha-group">
-              <div class="captcha-input">
-                <el-icon><search /></el-icon>
-                <input 
-                  type="text" 
-                  v-model="captchaInput" 
-                  placeholder="请输入验证码" 
-                  required
-                >
-              </div>
-              <div 
-                class="captcha-image" 
-                @click="generateCaptcha"
-              >
-               <img :src="captchaImage" style="width:50px;height:50px" />
-                <i 
-                  class="fas fa-sync-alt refresh-icon" 
-                  @click.stop="generateCaptcha"
-                ></i>
-              </div>
-            </div>
-            
-            <div class="remember-forgot">
-              <label class="remember">
-                <input 
-                  type="checkbox" 
-                  v-model="rememberMe"
-                >
-                记住我
-              </label>
-              <a href="#" class="forgot">忘记密码?</a>
-            </div>
-            
-            <button 
-              class="btn-login" 
-              @click="handleLogin"
-            >
-              登录
-            </button>
-            
-            <div class="divider">
-              <span>或使用其他方式登录</span>
-            </div>
-            
-            <div class="social-login">
-              <a href="#" class="social-btn social-btn-disabled" disabled>
-                <i class="fab fa-weixin"></i>
-              </a>
-              <a href="#" class="social-btn social-btn-disabled" disabled>
-                <i class="fab fa-qq"></i>
-              </a>
-              <a href="#" class="social-btn social-btn-disabled" disabled>
-                <i class="fab fa-weibo"></i>
-              </a>
-              <a href="#" class="social-btn social-btn-disabled" disabled>
-                <i class="fab fa-github"></i>
-              </a>
-            </div>
-            
-            <div class="external-links">
-              <a 
-                href="https://github.com/paohaijiao/jquickbi.git" 
-                class="github-link" 
-                target="_blank"
-              >
-                <i class="fab fa-github"></i> GitHub项目
-              </a>
-              <a 
-                @click="register"
-              >
-                <i class="fab fa-user"></i> 注册账号
-              </a>
-            </div>
-          </div>
-        </div>
+      <div class="footer">
+        <p>© 2023 JQuick BI · 数据智能分析平台 · 隐私政策 · 服务条款</p>
       </div>
-    </div>
-    
-    <div class="footer">
-      <p>© 2023 JQuick BI · 数据智能分析平台 · 隐私政策 · 服务条款</p>
     </div>
   </div>
 </template>
+
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
@@ -149,18 +162,17 @@ const captchaImage = ref('');
 const captchaInput = ref('');
 import { ElMessage } from 'element-plus';
 const deviceId = ref('');
+
 function generateCaptcha() {
- const currentTimestamp = Date.now();
- deviceId.value=currentTimestamp
- request.get('/api/pub/captcha/image?deviceId='+currentTimestamp, {
+  const currentTimestamp = Date.now();
+  deviceId.value = currentTimestamp;
+  request.get('/api/pub/captcha/image?deviceId=' + currentTimestamp, {
     responseType: 'arraybuffer'  
   })
   .then(response => {
-    console.log(response)
     const blob = new Blob([response], { type: 'image/png' })
     const reader = new FileReader()
     reader.onload = (e) => {
-      console.log(e.target.result)
       captchaImage.value = e.target.result
     }
     reader.readAsDataURL(blob)
@@ -169,37 +181,44 @@ function generateCaptcha() {
     console.error('获取验证码失败:', error);
   });
 }
-function register(){
-      router.push('/register');
+
+function register() {
+  router.push('/register');
 }
+
 function handleLogin() {
-  if (!username.value || !password.value||!captchaInput.value ) {
-    alert('请填写所有必填字段！');
+  if (!username.value || !password.value || !captchaInput.value) {
+    ElMessage.warning('请填写所有必填字段！');
     return;
   }
-const params = new URLSearchParams();
-params.append('client_id', 'client');
-params.append('client_secret', '1qaz@WSX');
-params.append('grant_type', 'captcha');
-params.append('username', username.value);
-params.append('password', password.value);
-params.append('scope', 'all');
-params.append('captcha', captchaInput.value);
-params.append('deviceId', deviceId.value);
+  
+  const params = new URLSearchParams();
+  params.append('client_id', 'client');
+  params.append('client_secret', '1qaz@WSX');
+  params.append('grant_type', 'captcha');
+  params.append('username', username.value);
+  params.append('password', password.value);
+  params.append('scope', 'all');
+  params.append('captcha', captchaInput.value);
+  params.append('deviceId', deviceId.value);
 
-const config = {
-  headers: {
-    'Content-Type': 'application/x-www-form-urlencoded'
-  }
-};
-request.post('/api/oauth/token',  params.toString(), config)
-  .then(response => {
-    ElMessage.success('登录成功');
-    localStorage.setItem('tokenInfo', JSON.stringify(response));
-    localStorage.setItem('token', response.access_token);
-    router.push('/index');
-  })
-
+  const config = {
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  };
+  
+  request.post('/api/oauth/token', params.toString(), config)
+    .then(response => {
+      ElMessage.success('登录成功');
+      localStorage.setItem('tokenInfo', JSON.stringify(response));
+      localStorage.setItem('token', response.access_token);
+      router.push('/index');
+    })
+    .catch(error => {
+      console.log(error);
+      ElMessage.error('登录失败，请检查用户名密码');
+    });
 }
 
 // 组件挂载时初始化验证码
@@ -209,14 +228,16 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.social-btn-disabled {
-  filter: grayscale(100%);
-  opacity: 0.6;
-  cursor: not-allowed; 
+:root {
+  --primary-color: #ff8326;
+  --secondary-color: #fff5eb;
+  --border-color: #ffd5b8;
+  --text-color: #2d3e50;
+  --light-bg: #f9f9f9;
+  --card-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  --header-height: 60px;
 }
-body {
-  overflow-y: hidden; /* 隐藏垂直滚动条 */
-}
+
 * {
   margin: 0;
   padding: 0;
@@ -224,181 +245,162 @@ body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.login-page {
-  display: flex;
-  min-height: 98vh;
-  background: linear-gradient(120deg, #ff9d42, #ff8326, #ff6a00);
-  padding: 20px;
-  position: relative;
-  overflow-x: hidden;
+body {
+  color: var(--text-color);
+  background-color: var(--light-bg);
+  height: 100vh;
+  overflow: hidden;
 }
 
-/* 装饰元素 */
-.decoration {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  z-index: 1;
-}
-
-.circle {
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.circle-1 {
-  width: 300px;
-  height: 300px;
-  top: -100px;
-  left: 5%;
-}
-
-.circle-2 {
-  width: 200px;
-  height: 200px;
-  bottom: 50px;
-  left: 10%;
-}
-
-.circle-3 {
-  width: 150px;
-  height: 150px;
-  top: 30%;
-  right: 25%;
-}
-
-.graphic {
-  position: absolute;
-  opacity: 0.05;
-  color: white;
-}
-
-.graphic-1 {
-  top: 15%;
-  left: 20%;
-  font-size: 120px;
-  transform: rotate(-15deg);
-}
-
-.graphic-2 {
-  bottom: 20%;
-  right: 20%;
-  font-size: 100px;
-  transform: rotate(10deg);
-}
-
-.main-container {
-  display: flex;
-  width: 100%;
-  max-width: 1300px;
-  margin-left: auto;
-  z-index: 2;
-}
-
-.left-content {
-  flex: 1;
-  padding: 40px;
-  color: white;
+.container {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  height: 100vh;
 }
 
-.right-content {
-  width: 450px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding-right: 40px;
-}
-
-.login-card {
-  background-color: rgba(255, 255, 255, 0.97);
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
-  transition: transform 0.3s ease;
-  width: 100%;
-  max-width: 420px;
-}
-
-.login-card:hover {
-  transform: translateY(-5px);
-}
-
+/* 顶部导航栏 */
 .header {
-  text-align: center;
-  padding: 35px 20px 15px;
-  background: linear-gradient(to right, #ff8326, #ff6a00);
-  color: white;
+  height: var(--header-height);
+  background-color: white;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  z-index: 10;
 }
 
 .logo {
   display: flex;
-  justify-content: center;
   align-items: center;
-  margin-bottom: 15px;
+  font-weight: bold;
+  color: var(--primary-color);
+  font-size: 22px;
 }
 
-.logo-icon {
-  font-size: 36px;
-  color: white;
-  margin-right: 12px;
+.logo i {
+  margin-right: 10px;
+  font-size: 26px;
 }
 
-.logo-text {
-  font-size: 32px;
-  font-weight: 800;
-  color: white;
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
 }
 
-.tagline {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 16px;
-  margin-top: 5px;
+.search-box {
+  position: relative;
+  width: 280px;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 8px 12px 8px 36px;
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(255, 131, 38, 0.2);
+}
+
+.search-box i {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+}
+
+/* 主内容区 */
+.main-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  padding: 24px;
+}
+
+.login-container {
+  display: flex;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 40px;
+  align-items: center;
+}
+
+.login-card {
+  flex: 1;
+  max-width: 450px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--light-bg);
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 8px;
+}
+
+.page-description {
+  font-size: 14px;
+  color: #666;
 }
 
 .form-container {
-  padding: 25px 35px 35px;
+  padding: 24px;
+}
+
+.form-group {
+  margin-bottom: 16px;
 }
 
 .input-group {
-  margin-bottom: 22px;
   position: relative;
 }
 
 .input-group i {
   position: absolute;
-  left: 15px;
+  left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: #ff8326;
+  color: var(--primary-color);
 }
 
-.input-group input {
+.form-control {
   width: 100%;
-  padding: 15px 20px 15px 50px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  font-size: 16px;
-  transition: all 0.3s;
+  padding: 10px 12px 10px 36px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 14px;
 }
 
-.input-group input:focus {
-  border-color: #ff8326;
-  box-shadow: 0 0 0 3px rgba(255, 131, 38, 0.2);
+.form-control:focus {
   outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(255, 131, 38, 0.2);
 }
 
-/* 验证码区域样式 */
+/* 验证码区域 */
 .captcha-group {
   display: flex;
+  gap: 12px;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 22px;
 }
 
 .captcha-input {
@@ -406,282 +408,210 @@ body {
   position: relative;
 }
 
-.captcha-input i {
-  position: absolute;
-  left: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #ff8326;
-}
-
-.captcha-input input {
-  width: 100%;
-  padding: 15px 20px 15px 50px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  font-size: 16px;
-  transition: all 0.3s;
-}
-
-.captcha-input input:focus {
-  border-color: #ff8326;
-  box-shadow: 0 0 0 3px rgba(255, 131, 38, 0.2);
-  outline: none;
-}
-
 .captcha-image {
-  height: 50px;
-  background: #f5f5f5;
-  border-radius: 8px;
+  width: 120px;
+  height: 42px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  position: relative;
+  cursor: pointer;
+}
+
+.refresh-icon {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  font-size: 12px;
+  color: #666;
+  background-color: rgba(255, 255, 255, 0.7);
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  user-select: none;
-  border: 1px solid #ddd;
-  font-family: 'Arial', sans-serif;
-  font-weight: bold;
-  font-size: 20px;
-  color: #ff6a00;
-  letter-spacing: 5px;
-  padding: 0 10px;
-  position: relative;
-  overflow: hidden;
-}
-
-.captcha-image::before {
-  content: '';
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(45deg, transparent 40%, rgba(255, 255, 255, 0.3) 50%, transparent 60%);
-  animation: shine 3s infinite linear;
-}
-
-@keyframes shine {
-  0% { left: -100%; }
-  100% { left: 100%; }
-}
-
-.captcha-image .refresh-icon {
-  position: absolute;
-  bottom: 2px;
-  right: 2px;
-  font-size: 10px;
-  color: #999;
 }
 
 .remember-forgot {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 22px;
-  font-size: 15px;
+  align-items: center;
+  margin: 16px 0;
+  font-size: 14px;
 }
 
 .remember {
   display: flex;
   align-items: center;
+  gap: 8px;
+  color: #666;
 }
 
 .remember input {
-  margin-right: 8px;
-  accent-color: #ff8326;
+  accent-color: var(--primary-color);
 }
 
 .forgot {
-  color: #ff8326;
+  color: var(--primary-color);
   text-decoration: none;
-  transition: color 0.3s;
-  font-weight: 500;
+  transition: color 0.2s;
 }
 
 .forgot:hover {
   color: #e65c00;
-  text-decoration: underline;
 }
 
-.btn-login {
-  width: 100%;
-  padding: 16px;
-  background: linear-gradient(to right, #ff8326, #ff6a00);
-  border: none;
-  border-radius: 10px;
-  color: white;
-  font-size: 17px;
-  font-weight: 600;
+/* 按钮样式 */
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.3s;
-  box-shadow: 0 4px 10px rgba(255, 131, 38, 0.3);
+  border: none;
+  width: 100%;
 }
 
-.btn-login:hover {
+.btn-primary {
+  background: linear-gradient(to right, #ff8326, #ff6a00);
+  color: white;
+  box-shadow: 0 2px 5px rgba(255, 131, 38, 0.3);
+  padding: 10px 16px;
+}
+
+.btn-primary:hover {
   background: linear-gradient(to right, #ff6a00, #ff8326);
-  box-shadow: 0 6px 15px rgba(255, 131, 38, 0.4);
+  box-shadow: 0 4px 8px rgba(255, 131, 38, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn i {
+  margin-right: 8px;
 }
 
 .divider {
-  margin: 28px 0;
+  margin: 24px 0;
   height: 1px;
-  background: linear-gradient(to right, rgba(255, 131, 38, 0.1), rgba(255, 131, 38, 0.4), rgba(255, 131, 38, 0.1));
+  background-color: var(--border-color);
   position: relative;
   text-align: center;
 }
 
 .divider span {
   position: relative;
-  top: -12px;
+  top: -10px;
   background-color: white;
-  padding: 0 18px;
-  color: #ff8326;
-  font-size: 14px;
-  font-weight: 500;
+  padding: 0 12px;
+  color: #666;
+  font-size: 12px;
 }
 
 .social-login {
   display: flex;
   justify-content: center;
-  gap: 18px;
-  margin-bottom: 25px;
+  gap: 12px;
+  margin-bottom: 24px;
 }
 
-.social-btn {
-  width: 54px;
-  height: 54px;
-  border-radius: 50%;
+.operation-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f8f8f8;
-  color: #555;
-  font-size: 20px;
-  text-decoration: none;
-  transition: all 0.3s;
-  border: 1px solid #eee;
+  color: #666;
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.social-btn:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 7px 12px rgba(0, 0, 0, 0.12);
-  color: #ff8326;
+.operation-btn:hover {
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
+}
+
+.social-btn-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .external-links {
   display: flex;
   justify-content: space-between;
-  margin-top: 25px;
-  padding-top: 20px;
-  border-top: 1px solid #eee;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
 }
 
-.github-link, .email-link {
+.github-link, .register-link {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-size: 14px;
   display: flex;
   align-items: center;
-  text-decoration: none;
-  color: #ff8326;
-  font-size: 15px;
-  font-weight: 500;
-  transition: all 0.3s;
-  padding: 8px 15px;
-  border-radius: 6px;
 }
 
-.github-link:hover, .email-link:hover {
-  color: #e65c00;
-  background-color: rgba(255, 131, 38, 0.1);
-}
-
-.github-link i, .email-link i {
+.github-link i, .register-link i {
   margin-right: 8px;
-  font-size: 18px;
+}
+
+.github-link:hover, .register-link:hover {
+  color: #e65c00;
+  text-decoration: underline;
 }
 
 .app-info {
-  margin-top: 40px;
-}
-
-.app-info h2 {
-  font-size: 42px;
-  margin-bottom: 25px;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-  font-weight: 800;
-}
-
-.app-info p {
-  font-size: 18px;
-  line-height: 1.6;
-  max-width: 600px;
+  flex: 1;
+  padding: 24px;
 }
 
 .features {
   list-style: none;
-  margin-top: 30px;
+  margin-top: 24px;
 }
 
 .features li {
-  margin-bottom: 18px;
+  margin-bottom: 16px;
   display: flex;
   align-items: center;
-  font-size: 18px;
-  font-weight: 500;
+  font-size: 16px;
+  color: #666;
 }
 
 .features i {
   margin-right: 12px;
-  background: rgba(255, 255, 255, 0.2);
-  width: 36px;
-  height: 36px;
+  color: var(--primary-color);
+  width: 24px;
+  height: 24px;
+  background-color: var(--secondary-color);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ff8326;
-  background-color: white;
 }
 
 .footer {
-  position: absolute;
-  bottom: 20px;
-  left: 0;
-  right: 0;
+  padding: 16px 24px;
+  border-top: 1px solid var(--border-color);
   text-align: center;
-  color: rgba(255, 255, 255, 0.85);
   font-size: 14px;
-  z-index: 2;
-}
-
-@media (max-width: 1100px) {
-  .main-container {
-    max-width: 1000px;
-  }
-  
-  .left-content {
-    padding: 30px;
-  }
-  
-  .right-content {
-    padding-right: 20px;
-  }
+  color: #666;
 }
 
 @media (max-width: 992px) {
-  .main-container {
+  .login-container {
     flex-direction: column;
-    margin: 0 auto;
   }
   
-  .left-content {
-    padding: 30px;
+  .app-info {
+    order: -1;
     text-align: center;
-  }
-  
-  .right-content {
-    width: 100%;
-    padding: 20px;
-    justify-content: center;
-  }
-  
-  .app-info h2 {
-    font-size: 32px;
   }
   
   .features li {
@@ -689,32 +619,17 @@ body {
   }
 }
 
-@media (max-width: 480px) {
-  .form-container {
-    padding: 20px 25px 30px;
-  }
-  
+@media (max-width: 576px) {
   .captcha-group {
     flex-direction: column;
   }
   
   .captcha-image {
     width: 100%;
-    margin-top: 10px;
   }
   
-  .features li {
-    font-size: 16px;
-  }
-  
-  .external-links {
-    flex-direction: column;
-    gap: 12px;
-    align-items: center;
-  }
-  
-  .app-info h2 {
-    font-size: 28px;
+  .header-actions {
+    display: none;
   }
 }
 </style>

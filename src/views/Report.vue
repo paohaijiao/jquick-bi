@@ -104,7 +104,7 @@
         
 
         <div class="canvas-container" id="canvas" ref="canvasContainer">
-          <!-- 可拖拽区域 - 修改为可接收外部拖拽 -->
+          <!-- 可拖拽区域 -->
           <draggable 
             v-model="canvasComponents" 
             :group="{ name: 'components', pull: false, put: true }"
@@ -133,7 +133,7 @@
                   </div>
                   <div style="display: flex; gap: 8px;">
                     <div style="color: #999; font-size: 12px;">双击编辑</div>
-                    <!-- 添加删除按钮 -->
+                    <!-- 删除按钮 -->
                     <button 
                       class="delete-btn" 
                       @click.stop="deleteComponent(element.id)"
@@ -178,135 +178,296 @@
           <i class="fas fa-sliders-h"></i>属性设置
         </div>
         
-        <!-- 报表属性设置 -->
-        <div class="setting-group" v-if="!selectedComponentId">
-          <div class="setting-title">基本信息</div>
-          <div class="setting-item">
-            <label>名称</label>
-            <input 
-              type="text" 
-              class="form-control" 
-              v-model="reportInfo.name"
-              @change="saveReportSettings"
-            >
+        <!-- 标签切换栏 -->
+        <div class="panel-tabs">
+          <div 
+            class="tab-item" 
+            :class="{ active: activeTab === 'style' }" 
+            @click="activeTab = 'style'"
+          >
+            <i class="fas fa-paint-brush"></i>样式
           </div>
-          <div class="setting-item">
-            <label>描述</label>
-            <textarea 
-              class="form-control" 
-              rows="3"
-              v-model="reportInfo.description"
-              @change="saveReportSettings"
-            ></textarea>
+          <div 
+            class="tab-item" 
+            :class="{ active: activeTab === 'data' }" 
+            @click="activeTab = 'data'"
+          >
+            <i class="fas fa-database"></i>数据
           </div>
-          <div class="setting-item">
-            <label>所有者</label>
-            <input type="text" class="form-control" value="张经理" readonly>
-          </div>
-          <div class="setting-item">
-            <label>创建时间</label>
-            <input type="text" class="form-control" :value="reportInfo.createTime" readonly>
+          <div 
+            class="tab-item" 
+            :class="{ active: activeTab === 'interaction' }" 
+            @click="activeTab = 'interaction'"
+          >
+            <i class="fas fa-exchange-alt"></i>交互
           </div>
         </div>
         
-        <!-- 组件属性设置 -->
-        <div class="setting-group" v-if="selectedComponentId">
-          <div class="setting-title">组件信息</div>
-          <div class="setting-item">
-            <label>组件名称</label>
-            <input 
-              type="text" 
-              class="form-control" 
-              v-model="selectedComponent.name"
-              @change="updateComponentProperty(selectedComponentId, 'name', selectedComponent.name)"
-            >
-          </div>
-          <div class="setting-item">
-            <label>组件内容</label>
-            <textarea 
-              class="form-control" 
-              rows="3"
-              v-model="selectedComponent.content"
-              @change="updateComponentProperty(selectedComponentId, 'content', selectedComponent.content)"
-            ></textarea>
-          </div>
-          <div class="setting-item">
-            <label>高度(px)</label>
-            <input 
-              type="number" 
-              class="form-control" 
-              v-model="selectedComponent.height"
-              @change="updateComponentProperty(selectedComponentId, 'height', selectedComponent.height + 'px')"
-            >
-          </div>
-        </div>
-        
-        <div class="setting-group">
-          <div class="setting-title">样式设置</div>
-          <div class="setting-item">
-            <label>背景颜色</label>
-            <div class="color-options">
-              <div 
-                class="color-box" 
-                :class="{ selected: reportStyle.bgColor === '#fff' }"
-                style="background-color: #fff;"
-                @click="changeBgColor('#fff')"
-              ></div>
-              <div 
-                class="color-box" 
-                :class="{ selected: reportStyle.bgColor === '#f5f5f5' }"
-                style="background-color: #f5f5f5;"
-                @click="changeBgColor('#f5f5f5')"
-              ></div>
-              <div 
-                class="color-box" 
-                :class="{ selected: reportStyle.bgColor === '#e8f4f8' }"
-                style="background-color: #e8f4f8;"
-                @click="changeBgColor('#e8f4f8')"
-              ></div>
+        <!-- 标签内容区 -->
+        <div class="tab-content">
+          <!-- 样式标签内容 -->
+          <div v-if="activeTab === 'style'">
+            <!-- 报表属性设置 -->
+            <div class="setting-group" v-if="!selectedComponentId">
+              <div class="setting-title">基本信息</div>
+              <div class="setting-item">
+                <label>名称</label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  v-model="reportInfo.name"
+                  @change="saveReportSettings"
+                >
+              </div>
+              <div class="setting-item">
+                <label>描述</label>
+                <textarea 
+                  class="form-control" 
+                  rows="3"
+                  v-model="reportInfo.description"
+                  @change="saveReportSettings"
+                ></textarea>
+              </div>
+              <div class="setting-item">
+                <label>所有者</label>
+                <input type="text" class="form-control" value="张经理" readonly>
+              </div>
+              <div class="setting-item">
+                <label>创建时间</label>
+                <input type="text" class="form-control" :value="reportInfo.createTime" readonly>
+              </div>
+            </div>
+            
+            <!-- 组件属性设置 -->
+            <div class="setting-group" v-if="selectedComponentId">
+              <div class="setting-title">组件信息</div>
+              <div class="setting-item">
+                <label>组件名称</label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  v-model="selectedComponent.name"
+                  @change="updateComponentProperty(selectedComponentId, 'name', selectedComponent.name)"
+                >
+              </div>
+              <div class="setting-item">
+                <label>组件内容</label>
+                <textarea 
+                  class="form-control" 
+                  rows="3"
+                  v-model="selectedComponent.content"
+                  @change="updateComponentProperty(selectedComponentId, 'content', selectedComponent.content)"
+                ></textarea>
+              </div>
+              <div class="setting-item">
+                <label>高度(px)</label>
+                <input 
+                  type="number" 
+                  class="form-control" 
+                  v-model="selectedComponent.height"
+                  @change="updateComponentProperty(selectedComponentId, 'height', selectedComponent.height + 'px')"
+                >
+              </div>
+            </div>
+            
+            <div class="setting-group">
+              <div class="setting-title">样式设置</div>
+              <div class="setting-item">
+                <label>背景颜色</label>
+                <div class="color-options">
+                  <div 
+                    class="color-box" 
+                    :class="{ selected: reportStyle.bgColor === '#fff' }"
+                    style="background-color: #fff;"
+                    @click="changeBgColor('#fff')"
+                  ></div>
+                  <div 
+                    class="color-box" 
+                    :class="{ selected: reportStyle.bgColor === '#f5f5f5' }"
+                    style="background-color: #f5f5f5;"
+                    @click="changeBgColor('#f5f5f5')"
+                  ></div>
+                  <div 
+                    class="color-box" 
+                    :class="{ selected: reportStyle.bgColor === '#e8f4f8' }"
+                    style="background-color: #e8f4f8;"
+                    @click="changeBgColor('#e8f4f8')"
+                  ></div>
+                </div>
+              </div>
+              <div class="setting-item">
+                <label>画布尺寸</label>
+                <select 
+                  class="form-control"
+                  v-model="reportStyle.size"
+                  @change="saveReportSettings"
+                >
+                  <option>自适应</option>
+                  <option>A4 (横向)</option>
+                  <option>A4 (纵向)</option>
+                  <option>自定义</option>
+                </select>
+              </div>
             </div>
           </div>
-          <div class="setting-item">
-            <label>画布尺寸</label>
-            <select 
-              class="form-control"
-              v-model="reportStyle.size"
-              @change="saveReportSettings"
-            >
-              <option>自适应</option>
-              <option>A4 (横向)</option>
-              <option>A4 (纵向)</option>
-              <option>自定义</option>
-            </select>
+          
+          <!-- 数据标签内容 -->
+          <div v-if="activeTab === 'data'">
+            <div class="setting-group">
+              <div class="setting-title">数据源设置</div>
+              <div class="setting-item" v-if="!selectedComponentId">
+                <label>关联数据源</label>
+                <select class="form-control" v-model="reportDataSource" @change="saveToLocalStorage">
+                  <option value="">无</option>
+                  <option v-for="source in dataSources" :value="source.id" :key="source.id">{{ source.name }}</option>
+                </select>
+              </div>
+              
+              <div class="setting-item" v-if="selectedComponentId && selectedComponent.type === 'chart'">
+                <label>数据字段</label>
+                <select 
+                  class="form-control" 
+                  v-model="selectedComponent.dataField"
+                  @change="updateComponentProperty(selectedComponentId, 'dataField', selectedComponent.dataField)"
+                >
+                  <option value="">请选择字段</option>
+                  <option value="sales">销售额</option>
+                  <option value="quantity">销售量</option>
+                  <option value="profit">利润</option>
+                </select>
+              </div>
+              
+              <div class="setting-item" v-if="selectedComponentId && selectedComponent.type === 'table'">
+                <label>显示列</label>
+                <div class="checkbox-group">
+                  <label class="checkbox-item">
+                    <input type="checkbox" v-model="tableColumns" value="name"> 名称
+                  </label>
+                  <label class="checkbox-item">
+                    <input type="checkbox" v-model="tableColumns" value="date"> 日期
+                  </label>
+                  <label class="checkbox-item">
+                    <input type="checkbox" v-model="tableColumns" value="value"> 数值
+                  </label>
+                </div>
+              </div>
+            </div>
+            
+            <div class="setting-group">
+              <div class="setting-title">数据筛选</div>
+              <div class="setting-item">
+                <label>过滤条件</label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  placeholder="例如: 销售额 > 1000" 
+                  v-model="dataFilter"
+                  @change="saveToLocalStorage"
+                >
+              </div>
+              <div class="setting-item">
+                <label>排序方式</label>
+                <select 
+                  class="form-control" 
+                  v-model="dataSort"
+                  @change="saveToLocalStorage"
+                >
+                  <option value="">无</option>
+                  <option value="asc">升序</option>
+                  <option value="desc">降序</option>
+                </select>
+              </div>
+            </div>
           </div>
-        </div>
-        
-        <div class="setting-group" v-if="!selectedComponentId">
-          <div class="setting-title">权限设置</div>
-          <div class="setting-item">
-            <label>查看权限</label>
-            <select 
-              class="form-control"
-              v-model="reportPermissions.view"
-              @change="saveReportSettings"
-            >
-              <option>仅自己可见</option>
-              <option>团队可见</option>
-              <option>公司可见</option>
-              <option>公开</option>
-            </select>
-          </div>
-          <div class="setting-item">
-            <label>编辑权限</label>
-            <select 
-              class="form-control"
-              v-model="reportPermissions.edit"
-              @change="saveReportSettings"
-            >
-              <option>仅自己可编辑</option>
-              <option>指定人员</option>
-              <option>团队可编辑</option>
-            </select>
+          
+          <!-- 交互标签内容 -->
+          <div v-if="activeTab === 'interaction'">
+            <div class="setting-group">
+              <div class="setting-title">交互设置</div>
+              
+              <div class="setting-item" v-if="selectedComponentId">
+                <label>点击行为</label>
+                <select 
+                  class="form-control" 
+                  v-model="selectedComponent.clickAction"
+                  @change="updateComponentProperty(selectedComponentId, 'clickAction', selectedComponent.clickAction)"
+                >
+                  <option value="">无</option>
+                  <option value="drilldown">下钻分析</option>
+                  <option value="link">跳转链接</option>
+                  <option value="detail">显示详情</option>
+                </select>
+              </div>
+              
+              <div class="setting-item" v-if="selectedComponentId && selectedComponent.clickAction === 'link'">
+                <label>链接地址</label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  v-model="selectedComponent.linkUrl"
+                  @change="updateComponentProperty(selectedComponentId, 'linkUrl', selectedComponent.linkUrl)"
+                >
+              </div>
+              
+              <div class="setting-item">
+                <label>联动设置</label>
+                <select 
+                  class="form-control" 
+                  v-model="interactionLinkage"
+                  @change="saveToLocalStorage"
+                >
+                  <option value="none">无联动</option>
+                  <option value="cross">交叉联动</option>
+                  <option value="parent">父子联动</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="setting-group">
+              <div class="setting-title">动画效果</div>
+              <div class="setting-item">
+                <label>加载动画</label>
+                <select 
+                  class="form-control" 
+                  v-model="animationEffect"
+                  @change="saveToLocalStorage"
+                >
+                  <option value="none">无</option>
+                  <option value="fade">淡入</option>
+                  <option value="slide">滑动</option>
+                  <option value="zoom">缩放</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="setting-group" v-if="!selectedComponentId">
+              <div class="setting-title">权限设置</div>
+              <div class="setting-item">
+                <label>查看权限</label>
+                <select 
+                  class="form-control"
+                  v-model="reportPermissions.view"
+                  @change="saveReportSettings"
+                >
+                  <option>仅自己可见</option>
+                  <option>团队可见</option>
+                  <option>公司可见</option>
+                  <option>公开</option>
+                </select>
+              </div>
+              <div class="setting-item">
+                <label>编辑权限</label>
+                <select 
+                  class="form-control"
+                  v-model="reportPermissions.edit"
+                  @change="saveReportSettings"
+                >
+                  <option>仅自己可编辑</option>
+                  <option>指定人员</option>
+                  <option>团队可编辑</option>
+                </select>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -356,7 +517,7 @@
       </div>
     </div>
     
-    <!-- 组件模态框 - 改为可全局拖拽 -->
+    <!-- 组件模态框 -->
     <div class="modal-overlay" :class="{ active: showComponentsModal }" @click="showComponentsModal = false">
       <div class="modal" @click.stop>
         <div class="modal-header">
@@ -364,7 +525,7 @@
           <button class="modal-close" @click="showComponentsModal = false">&times;</button>
         </div>
         <div class="modal-body">
-          <!-- 可拖拽组件列表 - 修改为可向外部拖拽 -->
+          <!-- 可拖拽组件列表 -->
           <draggable 
             v-model="availableComponents" 
             :group="{ name: 'components', pull: 'clone', put: false }"
@@ -386,7 +547,6 @@
       </div>
     </div>
     
-    <!-- 其他模态框保持不变 -->
     <!-- 筛选器模态框 -->
     <div class="modal-overlay" :class="{ active: showFiltersModal }" @click="showFiltersModal = false">
       <div class="modal" @click.stop>
@@ -544,6 +704,20 @@
               <option>面积图</option>
             </select>
           </div>
+          <!-- 编辑模态框中添加交互属性 -->
+          <div class="setting-item">
+            <label>点击行为</label>
+            <select class="form-control" v-model="editingComponent.clickAction">
+              <option value="">无</option>
+              <option value="drilldown">下钻分析</option>
+              <option value="link">跳转链接</option>
+              <option value="detail">显示详情</option>
+            </select>
+          </div>
+          <div class="setting-item" v-if="editingComponent.clickAction === 'link'">
+            <label>链接地址</label>
+            <input type="text" class="form-control" v-model="editingComponent.linkUrl">
+          </div>
         </div>
         <div class="modal-footer">
           <button class="btn btn-outline" @click="showComponentEditModal = false">取消</button>
@@ -575,6 +749,14 @@ const showDataSourceModal = ref(false);
 const showSettingsModal = ref(false);
 const showComponentEditModal = ref(false);
 const editingComponent = ref(null);
+// 新增标签页相关状态
+const activeTab = ref('style');
+const reportDataSource = ref('');
+const dataFilter = ref('');
+const dataSort = ref('');
+const tableColumns = ref(['name', 'date']);
+const interactionLinkage = ref('none');
+const animationEffect = ref('fade');
 
 // 可用组件列表
 const availableComponents = ref([
@@ -646,6 +828,14 @@ onMounted(() => {
     Object.assign(reportSettings, parsedData.reportSettings);
     Object.assign(filters, parsedData.filters);
     canvasComponents.value = parsedData.canvasComponents || [];
+    
+    // 加载新增的标签页相关数据
+    if (parsedData.reportDataSource) reportDataSource.value = parsedData.reportDataSource;
+    if (parsedData.dataFilter) dataFilter.value = parsedData.dataFilter;
+    if (parsedData.dataSort) dataSort.value = parsedData.dataSort;
+    if (parsedData.tableColumns) tableColumns.value = parsedData.tableColumns;
+    if (parsedData.interactionLinkage) interactionLinkage.value = parsedData.interactionLinkage;
+    if (parsedData.animationEffect) animationEffect.value = parsedData.animationEffect;
   }
 });
 
@@ -656,7 +846,7 @@ const generateId = () => {
 
 // 组件克隆函数（用于拖拽）
 const cloneComponent = (component) => {
-  // 创建新组件并确保ID唯一
+  // 创建新组件并确保ID唯一，添加交互相关属性
   const newComponent = {
     id: generateId(),
     type: component.type,
@@ -664,7 +854,11 @@ const cloneComponent = (component) => {
     icon: component.icon,
     content: null,
     height: component.type === 'chart' || component.type === 'table' ? 200 : 100,
-    chartType: component.type === 'chart' ? '折线图' : null
+    chartType: component.type === 'chart' ? '折线图' : null,
+    // 新增交互相关属性
+    clickAction: '',
+    linkUrl: '',
+    dataField: ''
   };
   
   // 使用nextTick确保DOM更新后再添加组件
@@ -762,7 +956,7 @@ const changeBgColor = (color) => {
 const applyFilters = () => {
   showFiltersModal.value = false;
   saveToLocalStorage();
-  // 这里可以添加筛选器应用逻辑
+  // 筛选器应用逻辑
 };
 
 // 保存用户信息
@@ -773,12 +967,12 @@ const saveUserInfo = () => {
 
 // 选择数据源
 const selectDataSource = (id) => {
-  // 这里可以添加数据源选择逻辑
+  reportDataSource.value = id;
+  saveToLocalStorage();
 };
 
 // 添加数据源
 const addDataSource = () => {
-  // 这里可以添加新数据源逻辑
   const newId = Math.max(...dataSources.map(s => s.id), 0) + 1;
   dataSources.push({
     id: newId,
@@ -801,6 +995,13 @@ const newReport = () => {
     reportInfo.description = '';
     canvasComponents.value = [];
     selectedComponentId.value = null;
+    // 重置标签页相关状态
+    reportDataSource.value = '';
+    dataFilter.value = '';
+    dataSort.value = '';
+    tableColumns.value = ['name', 'date'];
+    interactionLinkage.value = 'none';
+    animationEffect.value = 'fade';
     saveToLocalStorage();
   }
 };
@@ -814,12 +1015,19 @@ const saveToLocalStorage = () => {
     reportSettings: { ...reportSettings },
     filters: { ...filters },
     userInfo: { ...userInfo },
-    canvasComponents: [...canvasComponents.value]
+    canvasComponents: [...canvasComponents.value],
+    // 保存新增的标签页相关数据
+    reportDataSource: reportDataSource.value,
+    dataFilter: dataFilter.value,
+    dataSort: dataSort.value,
+    tableColumns: [...tableColumns.value],
+    interactionLinkage: interactionLinkage.value,
+    animationEffect: animationEffect.value
   };
   localStorage.setItem('biDesignerData', JSON.stringify(data));
 };
 
-// 添加删除组件方法
+// 删除组件
 const deleteComponent = (id) => {
   if (confirm('确定要删除此组件吗？')) {
     const index = canvasComponents.value.findIndex(comp => comp.id === id);
@@ -836,7 +1044,57 @@ const deleteComponent = (id) => {
 </script>
 
 <style>
-/* 原有样式保持不变，添加删除按钮样式 */
+/* 添加标签页相关样式 */
+.panel-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 15px;
+}
+
+.tab-item {
+  flex: 1;
+  padding: 10px 0;
+  text-align: center;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #666;
+  border-bottom: 2px solid transparent;
+  transition: var(--transition);
+}
+
+.tab-item.active {
+  color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
+  font-weight: 500;
+}
+
+.tab-item:hover {
+  background-color: var(--secondary-color);
+}
+
+.tab-content {
+  padding-bottom: 20px;
+}
+
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+/* 删除按钮样式 */
 .delete-btn {
   background: none;
   border: none;
@@ -851,7 +1109,7 @@ const deleteComponent = (id) => {
   color: #d93025;
 }
 
-/* 其他原有样式保持不变 */
+/* 基础样式 */
 :root {
   --primary-color: #ff8326;
   --secondary-color: #fff5eb;
