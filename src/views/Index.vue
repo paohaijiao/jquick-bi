@@ -36,7 +36,7 @@
       <main class="content-area">
         <div class="page-header">
           <div>
-            <h1 class="page-title">数据分析概览</h1>
+            <h1 class="page-title text-align-left">数据分析概览</h1>
             <p class="welcome-message">欢迎回来，张磊！这是您的数据分析使用统计</p>
           </div>
           <div class="action-buttons">

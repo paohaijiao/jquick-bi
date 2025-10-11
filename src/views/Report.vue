@@ -175,7 +175,7 @@
       <!-- 右侧属性面板 -->
       <div class="properties-panel" :class="{ active: propertiesPanelActive }">
         <div class="panel-title">
-          <i class="fas fa-sliders-h"></i>属性设置
+          <i class="fas fa-sliders-h text-align-left"></i>属性设置
         </div>
         
         <!-- 标签切换栏 -->
@@ -209,38 +209,74 @@
           <div v-if="activeTab === 'style'">
             <!-- 报表属性设置 -->
             <div class="setting-group" v-if="!selectedComponentId">
-              <div class="setting-title">基本信息</div>
-              <div class="setting-item">
-                <label>名称</label>
-                <input 
-                  type="text" 
-                  class="form-control" 
-                  v-model="reportInfo.name"
-                  @change="saveReportSettings"
-                >
-              </div>
-              <div class="setting-item">
-                <label>描述</label>
-                <textarea 
-                  class="form-control" 
-                  rows="3"
-                  v-model="reportInfo.description"
-                  @change="saveReportSettings"
-                ></textarea>
-              </div>
-              <div class="setting-item">
-                <label>所有者</label>
-                <input type="text" class="form-control" value="张经理" readonly>
-              </div>
-              <div class="setting-item">
-                <label>创建时间</label>
-                <input type="text" class="form-control" :value="reportInfo.createTime" readonly>
+              <div class="setting-title text-align-left">
+                  <i class="fas fa-palette"></i>文本属性
               </div>
             </div>
-            
+            <div class="etting-group text-align-left">
+                <label class="setting-label">
+                  <i class="fas fa-font"></i>字体
+                </label>
+                <select v-model="font.type">
+                  <option value="">微软雅黑</option>
+                  <option value="son">宋体</option>
+                  <option value="hei">黑体</option>
+                  <option value="arial">Arial</option>
+                </select>
+            </div>
+            <div class="etting-group text-align-left">
+                <label class="setting-label">
+                  <i class="fas fa-text-height"></i>字号
+                </label>
+                <select v-model="font.align">
+                  <option value=""></option>
+                  <option value="12px">12px</option>
+                  <option value="14px">14px</option>
+                  <option value="16px">16px</option>
+                  <option value="18px">18px</option>
+                  <option value="20px">20px</option>
+                  <option value="24px">24px</option>
+                  <option value="28px">28px</option>
+                  <option value="32px">32px</option>
+                </select>
+            </div>
+            <div class="etting-group text-align-left">
+              <label class="setting-label">
+                <i class="fas fa-paint-brush"></i>文本颜色
+              </label>
+              <el-color-picker
+                      v-model="font.color"
+                      :predefine="colorOptions"
+                      show-alpha
+                      @change="handleColorChange"
+              />
+            </div>
+            <div class="etting-group text-align-left">
+              <label class="setting-label">
+                <i class="fas fa-bold"></i>文本样式
+              </label>
+              <select v-model="font.style">
+                  <option value=""></option>
+                  <option value="12px">常规</option>
+                  <option value="14px">粗体</option>
+                  <option value="16px">斜体</option>
+                  <option value="18px">下划线</option>
+                  <option value="20px">粗体+斜体</option>
+                </select>
+            </div>
+            <div class="etting-group text-align-left">
+              <label class="setting-label">
+                  <i class="fas fa-align-left"></i>对齐方式
+              </label>
+              <select v-model="font.align">
+                  <option value="12px">左对齐</option>
+                  <option value="14px">居中</option>
+                  <option value="16px">右对齐</option>
+                </select>
+            </div>
             <!-- 组件属性设置 -->
             <div class="setting-group" v-if="selectedComponentId">
-              <div class="setting-title">组件信息</div>
+              <div class="setting-title text-align-left">组件信息</div>
               <div class="setting-item">
                 <label>组件名称</label>
                 <input 
@@ -271,9 +307,9 @@
             </div>
             
             <div class="setting-group">
-              <div class="setting-title">样式设置</div>
+              <div class="setting-title text-align-left">样式设置</div>
               <div class="setting-item">
-                <label>背景颜色</label>
+                <label class="text-align-left">背景颜色</label>
                 <div class="color-options">
                   <div 
                     class="color-box" 
@@ -296,7 +332,7 @@
                 </div>
               </div>
               <div class="setting-item">
-                <label>画布尺寸</label>
+                <label class="text-align-left">画布尺寸</label>
                 <select 
                   class="form-control"
                   v-model="reportStyle.size"
@@ -757,7 +793,14 @@ const dataSort = ref('');
 const tableColumns = ref(['name', 'date']);
 const interactionLinkage = ref('none');
 const animationEffect = ref('fade');
-
+const    colorOptions= ref([
+        { value: '#ff8326', label: '橙色' },
+        { value: '#ff0000', label: '红色' },
+        { value: '#00ff00', label: '绿色' },
+        { value: '#0000ff', label: '蓝色' },
+        { value: '#000000', label: '黑色' },
+        { value: '#ffffff', label: '白色' }
+      ]);
 // 可用组件列表
 const availableComponents = ref([
   { id: 'comp-chart', type: 'chart', name: '图表', icon: 'fas fa-chart-line' },
@@ -793,6 +836,13 @@ const reportSettings = reactive({
   pageSize: 'A4',
   bgSetting: '白色',
   autoRefresh: '关闭'
+});
+const font = reactive({
+  type: '',
+  size: '',
+  color: '',
+  style: '',
+  align: ''
 });
 
 // 筛选器设置
@@ -895,7 +945,9 @@ const getComponentName = (type) => {
   };
   return names[type] || '组件';
 };
-
+const handleColorChange=(color)=> {
+      console.log('选择的颜色:', color);
+}
 // 选中组件
 const selectComponent = (id) => {
   selectedComponentId.value = id;
