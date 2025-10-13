@@ -31,8 +31,6 @@
         @menu-click="setActiveMenu"
         @submenu-click="setActiveSubmenu"
       />
-      
-      <!-- 右侧用户统计信息区域 -->
       <main class="content-area">
         <div class="page-header">
           <div>
@@ -58,7 +56,7 @@
               <i :class="stat.icon"></i>
               {{ stat.title }}
             </div>
-            <div class="stat-value">{{ stat.value }}</div>
+            <div class="stat-value text-align-left">{{ stat.value }}</div>
             <div class="stat-change" :class="stat.changeType">
               <i :class="stat.changeIcon"></i>
               {{ stat.changeText }}
@@ -71,37 +69,17 @@
           <div class="chart-card">
             <div class="chart-header">
               <div class="chart-title">报表创建趋势</div>
-              <div class="chart-filter">
-                <select v-model="chartFilters.trend">
-                  <option>近7天</option>
-                  <option value="30">近30天</option>
-                  <option>近90天</option>
-                  <option>今年</option>
-                </select>
-              </div>
             </div>
             <div class="chart-container">
-              <div class="chart-placeholder">
-                <i class="fas fa-chart-line"></i>
-                <p>报表创建趋势图表</p>
-              </div>
+              <div id="line"></div>
             </div>
           </div>
           <div class="chart-card">
             <div class="chart-header">
               <div class="chart-title">数据访问分布</div>
-              <div class="chart-filter">
-                <select v-model="chartFilters.distribution">
-                  <option value="source">按数据源</option>
-                  <option>按日期</option>
-                </select>
-              </div>
             </div>
             <div class="chart-container">
-              <div class="chart-placeholder">
-                <i class="fas fa-chart-pie"></i>
-                <p>数据访问分布图表</p>
-              </div>
+               <div id="radar"></div>
             </div>
           </div>
         </div>
@@ -158,51 +136,133 @@ export default {
 }
 </script>
 <script setup>
-import { ref } from 'vue';
+import { ref,onMounted,nextTick } from 'vue';
 import SidebarMenu from '@/components/SidebarMenu.vue';
-// 菜单状态管理
-const activeMenu = ref('home');
-const submenus = ref({
-  dataSource: false,
-  report: false
-});
-const activeSubmenu = ref({
-  dataSource: '',
-  report: ''
-});
-
-
-
-// 设置激活的主菜单
-const setActiveMenu = (menu) => {
-  activeMenu.value = menu;
-  // 关闭所有子菜单
-  Object.keys(submenus.value).forEach(key => {
-    submenus.value[key] = false;
-  });
-  // 清空子菜单激活状态
-  Object.keys(activeSubmenu.value).forEach(key => {
-    activeSubmenu.value[key] = '';
-  });
+import request from '../api/request';
+import * as echarts from 'echarts';
+const initRadarChart = () => {
+ const chartDom = document.getElementById('radar');
+ let chartInstance = echarts.init(chartDom);
+ let option  = {
+  title: {
+    text: 'Basic Radar Chart'
+  },
+  legend: {
+    data: ['Allocated Budget', 'Actual Spending']
+  },
+  radar: {
+    // shape: 'circle',
+    indicator: [
+      { name: 'Sales', max: 6500 },
+      { name: 'Administration', max: 16000 },
+      { name: 'Information Technology', max: 30000 },
+      { name: 'Customer Support', max: 38000 },
+      { name: 'Development', max: 52000 },
+      { name: 'Marketing', max: 25000 }
+    ]
+  },
+  series: [
+    {
+      name: 'Budget vs spending',
+      type: 'radar',
+      data: [
+        {
+          value: [4200, 3000, 20000, 35000, 50000, 18000],
+          name: 'Allocated Budget'
+        },
+        {
+          value: [5000, 14000, 28000, 26000, 42000, 21000],
+          name: 'Actual Spending'
+        }
+      ]
+    }
+  ]
 };
-
-// 设置激活的子菜单
-const setActiveSubmenu = (parent, child) => {
-  activeSubmenu.value[parent] = child;
-  activeMenu.value = parent;
+  chartInstance.setOption(option);
 };
-
-// 用户菜单切换
-const toggleUserMenu = () => {
-  // 实际项目中可以在这里实现用户菜单的显示/隐藏逻辑
-  console.log('用户菜单被点击');
-};
-
-// 图表筛选器
-const chartFilters = ref({
-  trend: '30',
-  distribution: 'source'
+const initLineChart = () => {
+ const chartDom = document.getElementById('line');
+ let chartInstance = echarts.init(chartDom);
+const data = [["2000-06-05", 116], ["2000-06-06", 129], ["2000-06-07", 135], ["2000-06-08", 86], ["2000-06-09", 73], ["2000-06-10", 85], ["2000-06-11", 73], ["2000-06-12", 68], ["2000-06-13", 92], ["2000-06-14", 130], ["2000-06-15", 245], ["2000-06-16", 139], ["2000-06-17", 115], ["2000-06-18", 111], ["2000-06-19", 309], ["2000-06-20", 206], ["2000-06-21", 137], ["2000-06-22", 128], ["2000-06-23", 85], ["2000-06-24", 94], ["2000-06-25", 71], ["2000-06-26", 106], ["2000-06-27", 84], ["2000-06-28", 93], ["2000-06-29", 85], ["2000-06-30", 73], ["2000-07-01", 83], ["2000-07-02", 125], ["2000-07-03", 107], ["2000-07-04", 82], ["2000-07-05", 44], ["2000-07-06", 72], ["2000-07-07", 106], ["2000-07-08", 107], ["2000-07-09", 66], ["2000-07-10", 91], ["2000-07-11", 92], ["2000-07-12", 113], ["2000-07-13", 107], ["2000-07-14", 131], ["2000-07-15", 111], ["2000-07-16", 64], ["2000-07-17", 69], ["2000-07-18", 88], ["2000-07-19", 77], ["2000-07-20", 83], ["2000-07-21", 111], ["2000-07-22", 57], ["2000-07-23", 55], ["2000-07-24", 60]];
+const dateList = data.map(function (item) {
+  return item[0];
 });
+const valueList = data.map(function (item) {
+  return item[1];
+});
+let option = {
+  // Make gradient line here
+  visualMap: [
+    {
+      show: false,
+      type: 'continuous',
+      seriesIndex: 0,
+      min: 0,
+      max: 400
+    },
+    {
+      show: false,
+      type: 'continuous',
+      seriesIndex: 1,
+      dimension: 0,
+      min: 0,
+      max: dateList.length - 1
+    }
+  ],
+  title: [
+    {
+      left: 'center',
+      text: 'Gradient along the y axis'
+    },
+    {
+      top: '55%',
+      left: 'center',
+      text: 'Gradient along the x axis'
+    }
+  ],
+  tooltip: {
+    trigger: 'axis'
+  },
+  xAxis: [
+    {
+      data: dateList
+    },
+    {
+      data: dateList,
+      gridIndex: 1
+    }
+  ],
+  yAxis: [
+    {},
+    {
+      gridIndex: 1
+    }
+  ],
+  grid: [
+    {
+      bottom: '60%'
+    },
+    {
+      top: '60%'
+    }
+  ],
+  series: [
+    {
+      type: 'line',
+      showSymbol: false,
+      data: valueList
+    },
+    {
+      type: 'line',
+      showSymbol: false,
+      data: valueList,
+      xAxisIndex: 1,
+      yAxisIndex: 1
+    }
+  ]
+};
+  chartInstance.setOption(option);
+};
 
 // 资源标签切换
 const activeResourceTab = ref('report');
@@ -211,135 +271,66 @@ const setResourceTab = (tab) => {
 };
 
 // 统计数据
-const stats = ref([
-  {
-    id: 1,
-    title: '我的报表总数',
-    value: 24,
-    icon: 'fas fa-file-alt',
-    changeType: 'positive',
-    changeIcon: 'fas fa-arrow-up',
-    changeText: '较上月增长 12%'
-  },
-  {
-    id: 2,
-    title: '数据源数量',
-    value: 8,
-    icon: 'fas fa-database',
-    color: 'blue',
-    changeType: 'positive',
-    changeIcon: 'fas fa-arrow-up',
-    changeText: '较上月增长 1'
-  },
-  {
-    id: 3,
-    title: '本月访问量',
-    value: 356,
-    icon: 'fas fa-eye',
-    color: 'green',
-    changeType: 'positive',
-    changeIcon: 'fas fa-arrow-up',
-    changeText: '较上月增长 28%'
-  },
-  {
-    id: 4,
-    title: '共享报表数',
-    value: 12,
-    icon: 'fas fa-share-alt',
-    color: 'purple',
-    changeType: 'negative',
-    changeIcon: 'fas fa-arrow-down',
-    changeText: '较上月减少 2'
-  }
-]);
+const stats = ref([]);
 
 // 活动记录
-const activities = ref([
-  {
-    id: 1,
-    type: 'create',
-    icon: 'fas fa-plus',
-    description: '创建了新报表《2023年Q3销售分析》',
-    time: '今天 09:45'
-  },
-  {
-    id: 2,
-    type: 'edit',
-    icon: 'fas fa-edit',
-    description: '编辑了数据源《CRM客户数据》',
-    time: '昨天 16:20'
-  },
-  {
-    id: 3,
-    type: '',
-    icon: 'fas fa-share-alt',
-    description: '将报表《用户活跃度分析》共享给市场部',
-    time: '2023-09-28 14:10'
-  },
-  {
-    id: 4,
-    type: 'delete',
-    icon: 'fas fa-trash',
-    description: '删除了过期报表《2023年Q1运营数据》',
-    time: '2023-09-27 10:30'
-  },
-  {
-    id: 5,
-    type: 'edit',
-    icon: 'fas fa-edit',
-    description: '更新了仪表盘《销售总览》的数据刷新频率',
-    time: '2023-09-26 15:45'
-  }
-]);
+const activities = ref([]);
 
 // 资源列表
-const resources = ref([
-  {
-    id: 1,
-    name: '月度销售业绩分析',
-    type: '报表',
-    accessTime: '2小时前访问'
-  },
-  {
-    id: 2,
-    name: '客户画像分析',
-    type: '报表',
-    accessTime: '昨天访问'
-  },
-  {
-    id: 3,
-    name: '产品库存监控',
-    type: '仪表盘',
-    accessTime: '3天前访问'
-  },
-  {
-    id: 4,
-    name: '销售订单明细',
-    type: '数据集',
-    accessTime: '上周访问'
-  }
-]);
+const resources = ref([]);
 
 // 按钮事件处理
 const exportReport = () => {
-  console.log('导出报告');
 };
 
 const createReport = () => {
-  console.log('创建报表');
 };
 
 const viewAllActivities = () => {
-  console.log('查看全部活动');
 };
 
 const manageResources = () => {
-  console.log('管理资源');
 };
 
 const openResource = (resource) => {
   console.log('打开资源:', resource.name);
 };
+const handleStats= () => {
+  request.get('/api/index/stats')
+  .then(response => {
+    if(response.code==200){
+      stats.value=response.data;
+    }
+  }
+)
+};
+const handleActivity =() => {
+  request.get('/api/index/activity')
+  .then(response => {
+    if(response.code==200){
+      activities.value=response.data;
+    }
+  }
+)
+};
+const handleResource =() => {
+  request.get('/api/index/resource')
+  .then(response => {
+    if(response.code==200){
+      resources.value=response.data;
+    }
+  }
+)
+};
+onMounted(() => {
+  handleStats();
+  handleActivity();
+  handleResource();
+  nextTick(() => {
+    initRadarChart();
+    initLineChart();
+  });
+});
 </script>
 
 <style>
@@ -778,14 +769,16 @@ body {
 }
 
 .chart-container {
-  height: 300px;
-  background-color: #fafafa;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #999;
-  overflow: hidden;
+  height: 300px; /* 已存在，确认是否生效 */
+  position: relative; /* 新增 */
+}
+#line {
+  width: 100%;
+  height: 100%;
+}
+#radar {
+  width: 100%;
+  height: 100%;
 }
 
 .chart-placeholder {
