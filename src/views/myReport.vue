@@ -26,83 +26,18 @@
     <!-- 主内容区 -->
     <div class="main-content">
       <!-- 左侧BI菜单 -->
-      <aside class="sidebar">
-        <div class="menu-section">
-          <div class="menu-section-title">主导航</div>
-          <div class="menu-item" :class="{ active: activeMainMenu === 'home' }" @click="setActiveMainMenu('home')">
-            <i class="fas fa-home"></i>
-            <span>首页</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMainMenu === 'dataSource' }" @click="toggleSubMenu('dataSource')">
-            <i class="fas fa-database"></i>
-            <span>数据源</span>
-            <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
-          </div>
-          <div class="submenu" :class="{ show: showSubMenu.dataSource }">
-            <div class="submenu-item" :class="{ active: activeSubMenu.dataSource === 'list' }" @click="setActiveSubMenu('dataSource', 'list')">数据源列表</div>
-            <div class="submenu-item" :class="{ active: activeSubMenu.dataSource === 'new' }" @click="setActiveSubMenu('dataSource', 'new')">新增数据源</div>
-            <div class="submenu-item" :class="{ active: activeSubMenu.dataSource === 'permission' }" @click="setActiveSubMenu('dataSource', 'permission')">数据源权限</div>
-          </div>
-          <div class="menu-item" :class="{ active: activeMainMenu === 'report' }" @click="toggleSubMenu('report')">
-            <i class="fas fa-file-alt"></i>
-            <span>报表</span>
-            <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
-          </div>
-          <div class="submenu" :class="{ show: showSubMenu.report }">
-            <div class="submenu-item" :class="{ active: activeSubMenu.report === 'my' }" @click="setActiveSubMenu('report', 'my')">我的报表</div>
-            <div class="submenu-item" :class="{ active: activeSubMenu.report === 'shared' }" @click="setActiveSubMenu('report', 'shared')">共享报表</div>
-            <div class="submenu-item" :class="{ active: activeSubMenu.report === 'favorite' }" @click="setActiveSubMenu('report', 'favorite')">收藏报表</div>
-            <div class="submenu-item" :class="{ active: activeSubMenu.report === 'recycle' }" @click="setActiveSubMenu('report', 'recycle')">回收站</div>
-          </div>
-          <div class="menu-item" :class="{ active: activeMainMenu === 'dashboard' }" @click="setActiveMainMenu('dashboard')">
-            <i class="fas fa-chart-pie"></i>
-            <span>仪表盘</span>
-            <span class="menu-badge">5</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMainMenu === 'dataset' }" @click="setActiveMainMenu('dataset')">
-            <i class="fas fa-cubes"></i>
-            <span>数据集</span>
-          </div>
-        </div>
-        
-        <div class="menu-section">
-          <div class="menu-section-title">系统管理</div>
-          <div class="menu-item" :class="{ active: activeMainMenu === 'user' }" @click="setActiveMainMenu('user')">
-            <i class="fas fa-users"></i>
-            <span>用户管理</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMainMenu === 'role' }" @click="setActiveMainMenu('role')">
-            <i class="fas fa-user-shield"></i>
-            <span>角色权限</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMainMenu === 'log' }" @click="setActiveMainMenu('log')">
-            <i class="fas fa-history"></i>
-            <span>操作日志</span>
-          </div>
-        </div>
-        
-        <div class="menu-section">
-          <div class="menu-section-title">帮助中心</div>
-          <div class="menu-item" :class="{ active: activeMainMenu === 'help' }" @click="setActiveMainMenu('help')">
-            <i class="fas fa-question-circle"></i>
-            <span>帮助文档</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMainMenu === 'video' }" @click="setActiveMainMenu('video')">
-            <i class="fas fa-play-circle"></i>
-            <span>视频教程</span>
-          </div>
-          <div class="menu-item" :class="{ active: activeMainMenu === 'contact' }" @click="setActiveMainMenu('contact')">
-            <i class="fas fa-comment-dots"></i>
-            <span>联系客服</span>
-          </div>
-        </div>
-      </aside>
+      <SidebarMenu 
+        :active-menu="activeMenu" 
+        :unread-count="unreadCount"
+        @menu-click="setActiveMenu"
+        @submenu-click="setActiveSubmenu"
+      />
       
       <!-- 右侧我的报表区域 -->
       <main class="content-area">
         <div class="page-header">
           <div>
-            <h1 class="page-title">我的报表</h1>
+            <h1 class="page-title text-align-left">我的报表</h1>
             <p class="page-description">管理您创建的所有报表，包括编辑、删除和共享等操作</p>
           </div>
           <div class="action-buttons">
@@ -129,15 +64,6 @@
               </select>
             </div>
             <div class="filter-item">
-              <label>创建时间</label>
-              <select v-model="filterTime">
-                <option value="">全部时间</option>
-                <option value="week">近7天</option>
-                <option value="month">近30天</option>
-                <option value="quarter">近90天</option>
-              </select>
-            </div>
-            <div class="filter-item">
               <label>所属文件夹</label>
               <select v-model="filterFolder">
                 <option value="">全部文件夹</option>
@@ -156,36 +82,32 @@
               <i class="fas fa-th-large"></i>
               卡片视图
             </button>
-            <button class="view-btn" :class="{ active: viewMode === 'list' }" @click="setViewMode('list')">
-              <i class="fas fa-list"></i>
-              列表视图
-            </button>
           </div>
         </div>
         
         <!-- 报表列表 - 卡片视图 -->
         <div class="reports-grid" v-if="viewMode === 'grid'">
-          <div class="report-card" v-for="(report, index) in filteredReports" :key="index">
+          <div class="report-card" v-for="(r, index) in reports" :key="index">
             <div class="report-preview">
               <div class="report-preview-placeholder">
-                <i :class="report.icon"></i>
-                <p>{{ report.previewText }}</p>
+                <i :class="r.icon"></i>
+                <p>{{ r.previewText }}</p>
               </div>
-              <div class="report-favorite" :class="{ active: report.favorite }" @click="toggleFavorite(index)">
+              <div class="report-favorite" :class="{ active: r.favorite }" @click="toggleFavorite(index)">
                 <i class="fas fa-star"></i>
               </div>
             </div>
             <div class="report-info">
-              <div class="report-name">{{ report.name }}</div>
+              <div class="report-name">{{ r.name }}</div>
               <div class="report-meta">
-                <span>更新于 {{ report.updateTime }}</span>
-                <span>{{ report.views }} 访问</span>
+                <span>更新于 {{ r.updatedTime }}</span>
+                <span>{{ r.views }} 访问</span>
               </div>
               <div class="report-tags">
-                <span class="report-tag" v-for="(tag, tagIndex) in report.tags" :key="tagIndex">{{ tag }}</span>
+                <span class="report-tag" v-for="(tag, tagIndex) in r.tags" :key="tagIndex">{{ tag }}</span>
               </div>
               <div class="report-actions">
-                <span class="report-status" :class="'status-' + report.status">{{ report.statusText }}</span>
+                <span class="report-status" :class="'status-' + r.status">{{ r.statusText }}</span>
                 <div class="action-dropdown">
                   <button class="action-btn">
                     <i class="fas fa-ellipsis-v"></i>
@@ -199,7 +121,7 @@
         
         <!-- 分页控件 -->
         <div class="pagination">
-          <div class="pagination-info">显示 1-6 条，共 24 条</div>
+          <div class="pagination-info">显示 1-6 条，共 {{total}} 条</div>
           <div class="pagination-controls">
             <button class="page-btn" :disabled="currentPage === 1" @click="changePage(currentPage - 1)">
               <i class="fas fa-chevron-left"></i>
@@ -219,135 +141,27 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-
-// 菜单状态管理
-const activeMainMenu = ref('report');
-const showSubMenu = ref({
-  dataSource: false,
-  report: true
-});
-const activeSubMenu = ref({
-  dataSource: '',
-  report: 'my'
-});
-
-// 视图模式管理
+import { ref,onMounted } from 'vue';
+import SidebarMenu from '@/components/SidebarMenu.vue';
+import request from '../api/request';
 const viewMode = ref('grid');
 
 // 筛选条件
 const filterStatus = ref('');
-const filterTime = ref('');
 const filterFolder = ref('');
 const searchKeyword = ref('');
-
+const total = ref(0);
 // 分页管理
 const currentPage = ref(1);
 
 // 报表数据
-const reports = ref([
-  {
-    name: '2023年Q3销售业绩分析报表',
-    updateTime: '2023-10-15',
-    views: '3.2k',
-    tags: ['销售', '季度', '业绩'],
-    status: 'published',
-    statusText: '已发布',
-    favorite: true,
-    icon: 'fas fa-chart-bar',
-    previewText: '销售报表预览'
-  },
-  {
-    name: '客户画像与购买行为分析',
-    updateTime: '2023-10-12',
-    views: '1.8k',
-    tags: ['客户', '行为分析'],
-    status: 'published',
-    statusText: '已发布',
-    favorite: false,
-    icon: 'fas fa-chart-pie',
-    previewText: '客户分析预览'
-  },
-  {
-    name: '产品销量趋势预测分析',
-    updateTime: '2023-10-10',
-    views: '2.5k',
-    tags: ['产品', '销量', '预测'],
-    status: 'published',
-    statusText: '已发布',
-    favorite: true,
-    icon: 'fas fa-chart-line',
-    previewText: '趋势分析预览'
-  },
-  {
-    name: '区域销售分布明细报表',
-    updateTime: '2023-10-08',
-    views: '1.2k',
-    tags: ['区域', '销售', '明细'],
-    status: 'published',
-    statusText: '已发布',
-    favorite: false,
-    icon: 'fas fa-table',
-    previewText: '数据表格预览'
-  },
-  {
-    name: 'Q4营销活动效果分析',
-    updateTime: '2023-10-05',
-    views: '856',
-    tags: ['营销', '活动'],
-    status: 'draft',
-    statusText: '草稿',
-    favorite: false,
-    icon: 'fas fa-chart-bar',
-    previewText: '营销分析预览'
-  },
-  {
-    name: '产品成本与利润分析报表',
-    updateTime: '2023-09-30',
-    views: '2.1k',
-    tags: ['产品', '成本', '利润'],
-    status: 'published',
-    statusText: '已发布',
-    favorite: true,
-    icon: 'fas fa-chart-pie',
-    previewText: '成本分析预览'
-  }
-]);
+const reports = ref([]);
 
-// 切换子菜单显示/隐藏
-const toggleSubMenu = (menu) => {
-  // 先关闭所有子菜单
-  Object.keys(showSubMenu.value).forEach(key => {
-    showSubMenu.value[key] = false;
-  });
-  // 激活当前菜单
-  activeMainMenu.value = menu;
-  // 切换当前子菜单显示状态
-  showSubMenu.value[menu] = !showSubMenu.value[menu];
-};
-
-// 设置激活的主导航菜单
-const setActiveMainMenu = (menu) => {
-  // 关闭所有子菜单
-  Object.keys(showSubMenu.value).forEach(key => {
-    showSubMenu.value[key] = false;
-  });
-  activeMainMenu.value = menu;
-  // 清空子菜单激活状态
-  Object.keys(activeSubMenu.value).forEach(key => {
-    activeSubMenu.value[key] = '';
-  });
-};
-
-// 设置激活的子菜单
-const setActiveSubMenu = (parentMenu, subMenu) => {
-  activeMainMenu.value = parentMenu;
-  activeSubMenu.value[parentMenu] = subMenu;
-};
 
 // 切换视图模式
 const setViewMode = (mode) => {
   viewMode.value = mode;
+  handleReport();
 };
 
 // 切换收藏状态
@@ -366,22 +180,22 @@ const toggleUserMenu = () => {
   console.log('用户菜单切换');
 };
 
-// 筛选报表
-const filteredReports = computed(() => {
-  return reports.value.filter(report => {
-    // 状态筛选
-    if (filterStatus.value && report.status !== filterStatus.value) {
-      return false;
+
+const handleReport=() => {
+  let param=new Object();
+  param.pageNum=1;
+  param.pageSize=6;
+  request.post('/api/report/page',param)
+  .then(response => {
+    if(response.code==200){
+      reports.value=response.data.records;
+      total.value=response.data.total;
     }
-    
-    // 搜索关键词筛选
-    if (searchKeyword.value && !report.name.includes(searchKeyword.value)) {
-      return false;
-    }
-    
-    // 这里可以添加更多筛选逻辑（时间和文件夹）
-    return true;
-  });
+  }
+)
+};
+onMounted(() => {
+  handleReport();
 });
 </script>
 
