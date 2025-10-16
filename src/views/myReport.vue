@@ -56,10 +56,6 @@
               <i class="fas fa-th-large"></i>
               卡片视图
             </button>
-            <button class="view-btn" :class="{ active: viewMode === 'list' }" @click="setViewMode('list')">
-              <i class="fas fa-list"></i>
-              列表视图
-            </button>
           </div>
         </div>
         
@@ -68,24 +64,24 @@
           <div class="report-card" v-for="(report) in reports" :key="report.id">
             <div class="report-preview">
               <div class="report-preview-placeholder">
-                <i :class="report.icon"></i>
-                <p>{{ report.previewText }}</p>
+                <i :class="r.icon"></i>
+                <p>{{ r.previewText }}</p>
               </div>
               <div class="report-favorite" :class="{ active: report.favorite }" @click="toggleFavorite(report.id)">
                 <i class="fas fa-star"></i>
               </div>
             </div>
             <div class="report-info">
-              <div class="report-name">{{ report.name }}</div>
+              <div class="report-name">{{ r.name }}</div>
               <div class="report-meta">
                 <span>创建于 {{ report.createdTime }}</span>
                 <span>{{ report.views }} 访问</span>
               </div>
               <div class="report-tags">
-                <span class="report-tag" v-for="(tag, tagIndex) in report.tags" :key="tagIndex">{{ tag }}</span>
+                <span class="report-tag" v-for="(tag, tagIndex) in r.tags" :key="tagIndex">{{ tag }}</span>
               </div>
               <div class="report-actions">
-                <span class="report-status" :class="'status-' + report.status">{{ report.statusText }}</span>
+                <span class="report-status" :class="'status-' + r.status">{{ r.statusText }}</span>
                 <div class="action-dropdown">
                   <button class="action-btn">
                     <i class="fas fa-ellipsis-v"></i>
@@ -99,7 +95,7 @@
         
         <!-- 分页控件 -->
         <div class="pagination">
-          <div class="pagination-info">显示 1-6 条，共 24 条</div>
+          <div class="pagination-info">显示 1-6 条，共 {{total}} 条</div>
           <div class="pagination-controls">
             <button class="page-btn" :disabled="currentPage === 1" @click="changePage(currentPage - 1)">
               <i class="fas fa-chevron-left"></i>
@@ -124,22 +120,23 @@ import Header from '@/components/Header.vue';
 import SidebarMenu from '@/components/SidebarMenu.vue';
 import request from '../api/request';
 import { ElMessage } from 'element-plus';
-// 视图模式管理
 const viewMode = ref('grid');
 
 // 筛选条件
 const filterStatus = ref('');
 const searchKeyword = ref('');
-
+const total = ref(0);
 // 分页管理
 const currentPage = ref(1);
 
 // 报表数据
 const reports = ref([]);
 
+
 // 切换视图模式
 const setViewMode = (mode) => {
   viewMode.value = mode;
+  handleReport();
 };
 
 // 切换收藏状态
@@ -157,16 +154,20 @@ const toggleFavorite = (reportId) => {
 const changePage = (page) => {
   currentPage.value = page;
 };
-const handleReport = () => {
-  var param=new Object();
-  param.pageNum= 1;
-  param.pageSize= 10;
+
+
+const handleReport=() => {
+  let param=new Object();
+  param.pageNum=1;
+  param.pageSize=6;
   request.post('/api/report/page',param)
   .then(response => {
     if(response.code==200){
       reports.value=response.data.records;
+      total.value=response.data.total;
     }
-  });
+  }
+)
 };
 onMounted(() => {
   handleReport();
