@@ -25,7 +25,7 @@
     
     <!-- 主内容区 -->
       <div class="main-content">
-         <SidebarMenu 
+      <SidebarMenu 
         :active-menu="activeMenu" 
         :unread-count="unreadCount"
         @menu-click="setActiveMenu"

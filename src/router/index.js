@@ -23,11 +23,6 @@ const routes = [
     component: () => import('../views/Index.vue')
   },
   {
-    path: '/ds',
-    name: 'DsPage',
-    component: () => import('../views/Ds.vue')
-  },
-  {
     path: '/myReport',
     name: 'myReportPage',
     component: () => import('../views/myReport.vue')
