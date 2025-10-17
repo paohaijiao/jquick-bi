@@ -92,6 +92,11 @@ const routes = [
     path: '/dataSet',
     name: 'dataSetPage',
     component: () => import('../views/DataSet.vue')
+  },
+  {
+    path: '/dataSetList',
+    name: 'dataSetList',
+    component: () => import('../views/DataSetList.vue')
   }
 ]
 

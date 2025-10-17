@@ -15,7 +15,9 @@
     "echarts": "^6.0.0",
     "element-plus": "^2.11.1",
     "vue": "^3.2.13",
+    "vue-icon-picker": "^1.0.0",
     "vue-router": "^4.5.1",
+    "vue3-icon-picker": "^0.2.1",
     "vuedraggable": "^4.1.0"
   },
   "devDependencies": {

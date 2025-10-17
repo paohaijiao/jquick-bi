@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据集管理 - JQuick DataSet</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #ff6a00;
+            --secondary-color: #fff4e5;
+            --border-color: #ffd0a8;
+            --text-color: #2d3e50;
+            --light-bg: #f9f9f9;
+            --card-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            --sidebar-width: 260px;
+            --header-height: 60px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            color: var(--text-color);
+            background-color: var(--light-bg);
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        /* 顶部导航栏 */
+        .header {
+            height: var(--header-height);
+            background-color: white;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 18px;
+        }
+        
+        .logo i {
+            color: var(--primary-color);
+            font-size: 22px;
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .search-box {
+            position: relative;
+        }
+        
+        .search-box input {
+            padding: 6px 12px 6px 32px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            width: 280px;
+        }
+        
+        .search-box i {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+        
+        .notification-icon {
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 18px;
+            height: 18px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+        
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+        
+        .user-name {
+            font-size: 14px;
+        }
+        
+        /* 主内容区 */
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        /* 左侧菜单 */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: white;
+            border-right: 1px solid var(--border-color);
+            overflow-y: auto;
+        }
+        
+        .menu-section {
+            padding: 16px 0;
+        }
+        
+        .menu-section-title {
+            padding: 0 20px 10px;
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .menu-item:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .menu-item.active {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        .menu-item i {
+            width: 20px;
+            margin-right: 12px;
+            text-align: center;
+        }
+        
+        .menu-item .menu-badge {
+            margin-left: auto;
+            padding: 2px 8px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+        
+        .submenu {
+            background-color: #f0f7ff;
+            padding: 0 0 0 52px;
+            display: none;
+        }
+        
+        .submenu.show {
+            display: block;
+        }
+        
+        .submenu-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            color: #666;
+            cursor: pointer;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+        
+        .submenu-item:hover {
+            color: var(--primary-color);
+        }
+        
+        .submenu-item.active {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        /* 右侧数据集内容区域 */
+        .content-area {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            background-color: var(--light-bg);
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        
+        .page-description {
+            font-size: 14px;
+            color: #666;
+            margin-top: 4px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, #ff8326, #ff6a00);
+            color: white;
+            box-shadow: 0 2px 5px rgba(255, 131, 38, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(to right, #ff6a00, #ff8326);
+            box-shadow: 0 4px 8px rgba(255, 131, 38, 0.4);
+            transform: translateY(-1px);
+        }
+        
+        .btn-outline {
+            background-color: white;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .btn i {
+            margin-right: 8px;
+        }
+        
+        /* 数据集列表 */
+        .dataset-list {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+        
+        .table-header {
+            display: grid;
+            padding: 16px 20px;
+            background-color: var(--light-bg);
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .dataset-header {
+            grid-template-columns: 80px 180px 150px 200px 120px 120px;
+        }
+        
+        .table-row {
+            display: grid;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+        
+        .table-row:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .table-row:last-child {
+            border-bottom: none;
+        }
+        
+        .dataset-row {
+            grid-template-columns: 80px 180px 150px 200px 120px 120px;
+        }
+        
+        .icon-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .dataset-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .status {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-active {
+            background-color: #f6ffed;
+            color: #52c41a;
+        }
+        
+        .status-inactive {
+            background-color: #fff2f0;
+            color: #f5222d;
+        }
+        
+        .operation-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+        
+        .operation-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .operation-btn:hover {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+        }
+        
+        /* 分页控件 */
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            font-size: 14px;
+        }
+        
+        .pagination-info {
+            color: #666;
+        }
+        
+        .pagination-controls {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .page-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            border: 1px solid var(--border-color);
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .page-btn:hover {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+        }
+        
+        .page-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* 模态框样式 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal {
+            background-color: white;
+            border-radius: 12px;
+            width: 700px;
+            max-width: 90%;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .modal-close:hover {
+            color: var(--primary-color);
+        }
+        
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(255, 131, 38, 0.2);
+        }
+        
+        textarea.form-control {
+            resize: vertical;
+            min-height: 200px;
+            font-family: monospace;
+        }
+        
+        .form-hint {
+            margin-top: 4px;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .icon-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        
+        .icon-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            background-color: var(--light-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .icon-option:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .icon-option.selected {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+        
+        .modal-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        
+        /* 确认对话框样式 */
+        .confirm-modal {
+            width: 400px;
+            max-width: 90%;
+        }
+        
+        .confirm-content {
+            padding: 24px 20px;
+            text-align: center;
+        }
+        
+        .confirm-icon {
+            font-size: 48px;
+            color: #faad14;
+            margin-bottom: 16px;
+        }
+        
+        .confirm-message {
+            font-size: 16px;
+            margin-bottom: 24px;
+        }
+
+        /* 详情页样式 */
+        .detail-item {
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .detail-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .detail-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+        
+        .detail-value {
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .detail-sql {
+            background-color: var(--light-bg);
+            padding: 12px;
+            border-radius: 6px;
+            font-family: monospace;
+            overflow-x: auto;
+            white-space: pre;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部导航栏 -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-database"></i>
+                <span>JQuick DataSet</span>
+            </div>
+            <div class="header-actions">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="搜索数据集、Code...">
+                </div>
+                <div class="notification-icon">
+                    <i class="far fa-bell"></i>
+                    <span class="notification-badge">2</span>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar">JD</div>
+                    <span class="user-name">JavaDeveloper</span>
+                    <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
+                </div>
+            </div>
+        </header>
+        
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <!-- 左侧菜单 -->
+            <aside class="sidebar">
+                <div class="menu-section">
+                    <div class="menu-section-title">数据管理</div>
+                    <div class="menu-item active">
+                        <i class="fas fa-table"></i>
+                        <span>数据集列表</span>
+                        <span class="menu-badge">4</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-plug"></i>
+                        <span>数据源管理</span>
+                        <span class="menu-badge">3</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-code-branch"></i>
+                        <span>关联关系</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-history"></i>
+                        <span>查询历史</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-cog"></i>
+                        <span>设置</span>
+                    </div>
+                </div>
+                
+                <div class="menu-section">
+                    <div class="menu-section-title">数据集分类</div>
+                    <div class="menu-item">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>销售相关</span>
+                        <span class="menu-badge">2</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-users"></i>
+                        <span>用户相关</span>
+                        <span class="menu-badge">1</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-box"></i>
+                        <span>产品相关</span>
+                        <span class="menu-badge">1</span>
+                    </div>
+                </div>
+            </aside>
+            
+            <!-- 右侧数据集内容区域 -->
+            <main class="content-area">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">数据集管理</h1>
+                        <p class="page-description">管理所有数据集信息，包括名称、Code和SQL等</p>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-outline">
+                            <i class="fas fa-sync-alt"></i>
+                            <span>刷新列表</span>
+                        </button>
+                        <button class="btn btn-primary" id="addDatasetBtn">
+                            <i class="fas fa-plus"></i>
+                            <span>新增数据集</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 数据集列表 -->
+                <div class="dataset-list">
+                    <!-- 数据集表头 -->
+                    <div class="table-header dataset-header">
+                        <div>ID</div>
+                        <div>数据集名称</div>
+                        <div>数据集Code</div>
+                        <div>图标</div>
+                        <div>状态</div>
+                        <div>操作</div>
+                    </div>
+                    
+                    <!-- 数据集行 -->
+                    <div class="table-row dataset-row" data-id="1">
+                        <div>1</div>
+                        <div>用户订单数据集</div>
+                        <div>user_order_dataset</div>
+                        <div class="icon-container">
+                            <div class="dataset-icon">
+                                <i class="fas fa-table"></i>
+                            </div>
+                        </div>
+                        <div><span class="status status-active">启用</span></div>
+                        <div class="operation-buttons">
+                            <button class="operation-btn view-btn" title="查看详情">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="operation-btn edit-btn" title="编辑">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="operation-btn delete-btn" title="删除">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="table-row dataset-row" data-id="2">
+                        <div>2</div>
+                        <div>产品信息数据集</div>
+                        <div>product_info_dataset</div>
+                        <div class="icon-container">
+                            <div class="dataset-icon">
+                                <i class="fas fa-box"></i>
+                            </div>
+                        </div>
+                        <div><span class="status status-active">启用</span></div>
+                        <div class="operation-buttons">
+                            <button class="operation-btn view-btn" title="查看详情">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="operation-btn edit-btn" title="编辑">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="operation-btn delete-btn" title="删除">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="table-row dataset-row" data-id="3">
+                        <div>3</div>
+                        <div>用户信息数据集</div>
+                        <div>user_info_dataset</div>
+                        <div class="icon-container">
+                            <div class="dataset-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                        </div>
+                        <div><span class="status status-active">启用</span></div>
+                        <div class="operation-buttons">
+                            <button class="operation-btn view-btn" title="查看详情">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="operation-btn edit-btn" title="编辑">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="operation-btn delete-btn" title="删除">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="table-row dataset-row" data-id="4">
+                        <div>4</div>
+                        <div>销售统计数据集</div>
+                        <div>sales_stat_dataset</div>
+                        <div class="icon-container">
+                            <div class="dataset-icon">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                        </div>
+                        <div><span class="status status-inactive">禁用</span></div>
+                        <div class="operation-buttons">
+                            <button class="operation-btn view-btn" title="查看详情">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="operation-btn edit-btn" title="编辑">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="operation-btn delete-btn" title="删除">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 分页控件 -->
+                <div class="pagination">
+                    <div class="pagination-info">显示 1-4 条，共 4 条</div>
+                    <div class="pagination-controls">
+                        <button class="page-btn" disabled>
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="page-btn active">1</button>
+                        <button class="page-btn" disabled>
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- 新增/编辑数据集模态框 -->
+    <div class="modal-overlay" id="datasetModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">新增数据集</h2>
+                <button class="modal-close" id="modalClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="datasetForm">
+                    <input type="hidden" id="datasetId">
+                    <div class="form-group">
+                        <label for="name">数据集名称 <span style="color: #f5222d;">*</span></label>
+                        <input type="text" id="name" class="form-control" required placeholder="请输入数据集名称">
+                    </div>
+                    <div class="form-group">
+                        <label for="code">数据集Code <span style="color: #f5222d;">*</span></label>
+                        <input type="text" id="code" class="form-control" required placeholder="请输入数据集唯一标识，英文小写、数字和下划线组成">
+                        <div class="form-hint">由英文小写字母、数字和下划线组成，不能以数字开头</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="sql">SQL查询语句 <span style="color: #f5222d;">*</span></label>
+                        <textarea id="sql" class="form-control" required placeholder="请输入SQL查询语句"></textarea>
+                        <div class="form-hint">支持标准SQL语法，通过此SQL从数据源获取数据</div>
+                    </div>
+                    <div class="form-group">
+                        <label>图标选择</label>
+                        <div class="icon-selector">
+                            <div class="icon-option selected" data-icon="fa-table">
+                                <i class="fas fa-table"></i>
+                            </div>
+                            <div class="icon-option" data-icon="fa-users">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="icon-option" data-icon="fa-box">
+                                <i class="fas fa-box"></i>
+                            </div>
+                            <div class="icon-option" data-icon="fa-chart-bar">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                            <div class="icon-option" data-icon="fa-chart-pie">
+                                <i class="fas fa-chart-pie"></i>
+                            </div>
+                            <div class="icon-option" data-icon="fa-database">
+                                <i class="fas fa-database"></i>
+                            </div>
+                            <div class="icon-option" data-icon="fa-file-excel">
+                                <i class="fas fa-file-excel"></i>
+                            </div>
+                            <div class="icon-option" data-icon="fa-search">
+                                <i class="fas fa-search"></i>
+                            </div>
+                        </div>
+                        <input type="hidden" id="selectedIcon" value="fa-table">
+                    </div>
+                    <div class="form-group">
+                        <label for="status">状态</label>
+                        <select id="status" class="form-control">
+                            <option value="active">启用</option>
+                            <option value="inactive">禁用</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelBtn">取消</button>
+                <button class="btn btn-primary" id="saveBtn">保存</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 查看数据集详情模态框 -->
+    <div class="modal-overlay" id="detailModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">数据集详情</h2>
+                <button class="modal-close" id="detailClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="detail-item">
+                    <div class="detail-label">ID</div>
+                    <div class="detail-value" id="detailId"></div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">数据集名称</div>
+                    <div class="detail-value" id="detailName"></div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">数据集Code</div>
+                    <div class="detail-value" id="detailCode"></div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">图标</div>
+                    <div class="detail-value" id="detailIcon">
+                        <div class="dataset-icon">
+                            <i class="fas fa-table"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">SQL查询语句</div>
+                    <div class="detail-value detail-sql" id="detailSql"></div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">状态</div>
+                    <div class="detail-value" id="detailStatus"></div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">创建时间</div>
+                    <div class="detail-value" id="detailCreateTime"></div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">最后更新时间</div>
+                    <div class="detail-value" id="detailUpdateTime"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="closeDetailBtn">关闭</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 删除确认模态框 -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal confirm-modal">
+            <div class="modal-header">
+                <h2 class="modal-title">确认删除</h2>
+                <button class="modal-close" id="confirmClose">&times;</button>
+            </div>
+            <div class="confirm-content">
+                <div class="confirm-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="confirm-message" id="confirmMessage">
+                    确定要删除此数据集吗？此操作不可撤销。
+                </div>
+                <input type="hidden" id="deleteId">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelDeleteBtn">取消</button>
+                <button class="btn btn-primary" id="confirmDeleteBtn">确认删除</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 图标选择功能
+        document.querySelectorAll('.icon-option').forEach(option => {
+            option.addEventListener('click', function() {
+                // 移除其他图标的选中状态
+                document.querySelectorAll('.icon-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                // 设置当前图标为选中状态
+                this.classList.add('selected');
+                // 保存选中的图标类名
+                const iconClass = this.getAttribute('data-icon');
+                document.getElementById('selectedIcon').value = iconClass;
+            });
+        });
+        
+        // 打开新增数据集模态框
+        document.getElementById('addDatasetBtn').addEventListener('click', function() {
+            document.getElementById('modalTitle').textContent = '新增数据集';
+            document.getElementById('datasetForm').reset();
+            document.getElementById('datasetId').value = '';
+            // 重置图标选择状态
+            document.querySelectorAll('.icon-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            document.querySelector('.icon-option[data-icon="fa-table"]').classList.add('selected');
+            document.getElementById('selectedIcon').value = 'fa-table';
+            document.getElementById('datasetModal').style.display = 'flex';
+        });
+        
+        // 关闭模态框
+        document.getElementById('modalClose').addEventListener('click', function() {
+            document.getElementById('datasetModal').style.display = 'none';
+        });
+        
+        document.getElementById('cancelBtn').addEventListener('click', function() {
+            document.getElementById('datasetModal').style.display = 'none';
+        });
+        
+        // 关闭详情模态框
+        document.getElementById('detailClose').addEventListener('click', function() {
+            document.getElementById('detailModal').style.display = 'none';
+        });
+        
+        document.getElementById('closeDetailBtn').addEventListener('click', function() {
+            document.getElementById('detailModal').style.display = 'none';
+        });
+        
+        // 关闭确认模态框
+        document.getElementById('confirmClose').addEventListener('click', function() {
+            document.getElementById('confirmModal').style.display = 'none';
+        });
+        
+        document.getElementById('cancelDeleteBtn').addEventListener('click', function() {
+            document.getElementById('confirmModal').style.display = 'none';
+        });
+        
+        // 保存数据集
+        document.getElementById('saveBtn').addEventListener('click', function() {
+            // 简单验证
+            const name = document.getElementById('name').value;
+            const code = document.getElementById('code').value;
+            const sql = document.getElementById('sql').value;
+            
+            if (!name) {
+                alert('请输入数据集名称');
+                return;
+            }
+            
+            if (!code) {
+                alert('请输入数据集Code');
+                return;
+            }
+            
+            // 验证code格式
+            const codePattern = /^[a-z_][a-z0-9_]*$/;
+            if (!codePattern.test(code)) {
+                alert('数据集Code只能由英文小写字母、数字和下划线组成，且不能以数字开头');
+                return;
+            }
+            
+            if (!sql) {
+                alert('请输入SQL查询语句');
+                return;
+            }
+            
+            // 这里可以添加保存逻辑，如AJAX请求等
+            
+            // 关闭模态框
+            document.getElementById('datasetModal').style.display = 'none';
+            
+            // 显示成功消息
+            alert('数据集保存成功');
+        });
+        
+        // 编辑数据集
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const row = this.closest('.table-row');
+                const id = row.getAttribute('data-id');
+                const name = row.children[1].textContent;
+                const code = row.children[2].textContent;
+                const iconClass = row.querySelector('.dataset-icon i').className.split(' ')[1]; // 获取图标类名
+                const statusElem = row.querySelector('.status');
+                const status = statusElem.classList.contains('status-active') ? 'active' : 'inactive';
+                
+                // 填充表单
+                document.getElementById('modalTitle').textContent = '编辑数据集';
+                document.getElementById('datasetId').value = id;
+                document.getElementById('name').value = name;
+                document.getElementById('code').value = code;
+                document.getElementById('status').value = status;
+                
+                // 填充示例SQL（实际应用中应从数据库获取）
+                document.getElementById('sql').value = `SELECT * FROM ${code.replace('_dataset', '')} WHERE 1=1`;
+                
+                // 设置图标选择状态
+                document.querySelectorAll('.icon-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                const iconOption = document.querySelector(`.icon-option[data-icon="${iconClass}"]`);
+                if (iconOption) {
+                    iconOption.classList.add('selected');
+                    document.getElementById('selectedIcon').value = iconClass;
+                }
+                
+                // 显示模态框
+                document.getElementById('datasetModal').style.display = 'flex';
+            });
+        });
+        
+        // 查看数据集详情
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const row = this.closest('.table-row');
+                const id = row.children[0].textContent;
+                const name = row.children[1].textContent;
+                const code = row.children[2].textContent;
+                const iconHtml = row.querySelector('.icon-container').innerHTML;
+                const status = row.querySelector('.status').textContent;
+                
+                // 填充详情
+                document.getElementById('detailId').textContent = id;
+                document.getElementById('detailName').textContent = name;
+                document.getElementById('detailCode').textContent = code;
+                document.getElementById('detailIcon').innerHTML = iconHtml;
+                
+                // 填充示例SQL（实际应用中应从数据库获取）
+                document.getElementById('detailSql').textContent = `SELECT * FROM ${code.replace('_dataset', '')} 
+WHERE create_time >= '2024-01-01' 
+AND create_time < '2024-02-01'
+ORDER BY create_time DESC`;
+                
+                document.getElementById('detailStatus').textContent = status;
+                document.getElementById('detailCreateTime').textContent = '2024-01-10 09:30:00';
+                document.getElementById('detailUpdateTime').textContent = '2024-01-20 14:25:30';
+                
+                // 显示详情模态框
+                document.getElementById('detailModal').style.display = 'flex';
+            });
+        });
+        
+        // 删除数据集
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const row = this.closest('.table-row');
+                const id = row.getAttribute('data-id');
+                const name = row.children[1].textContent;
+                
+                // 设置要删除的ID和确认消息
+                document.getElementById('deleteId').value = id;
+                document.getElementById('confirmMessage').textContent = `确定要删除数据集"${name}"吗？此操作不可撤销。`;
+                
+                // 显示确认模态框
+                document.getElementById('confirmModal').style.display = 'flex';
+            });
+        });
+        
+        // 确认删除
+        document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+            const id = document.getElementById('deleteId').value;
+            
+            // 这里可以添加删除逻辑，如AJAX请求等
+            
+            // 关闭确认模态框
+            document.getElementById('confirmModal').style.display = 'none';
+            
+            // 从DOM中移除对应的行
+            const row = document.querySelector(`.table-row[data-id="${id}"]`);
+            if (row) {
+                row.remove();
+            }
+            
+            // 显示成功消息
+            alert('数据集删除成功');
+        });
+    </script>
+</body>
+</html>

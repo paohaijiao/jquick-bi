@@ -2,95 +2,18 @@
   <div class="container">
     <!-- 顶部导航栏 -->
     <header class="header">
-      <div class="logo">
-        <i class="fas fa-database"></i>
-        <span>JQuick DataSet</span>
-      </div>
-      <div class="header-actions">
-        <div class="search-box">
-          <el-icon><Search /></el-icon>
-          <input type="text" placeholder="搜索数据集、字段或查询..." v-model="searchQuery">
-        </div>
-        <div class="notification-icon" @click="handleNotificationClick">
-          <i class="far fa-bell"></i>
-          <span class="notification-badge">2</span>
-        </div>
-        <div class="user-info" @click="toggleUserMenu">
-          <div class="user-avatar">JD</div>
-          <span class="user-name">JavaDeveloper</span>
-          <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
-        </div>
-      </div>
+       <Header 
+      />
     </header>
     
     <!-- 主内容区 -->
     <div class="main-content">
-      <!-- 左侧菜单 -->
-      <aside class="sidebar">
-        <div class="menu-section">
-          <div class="menu-section-title text-align-left">数据集管理</div>
-          <div 
-            class="menu-item" 
-            :class="{ active: activeMenu === 'dataset-list' }"
-            @click="activeMenu = 'dataset-list'"
-          >
-            <i class="fas fa-table"></i>
-            <span>数据集列表</span>
-          </div>
-          <div 
-            class="menu-item" 
-            :class="{ active: activeMenu === 'relationships' }"
-            @click="activeMenu = 'relationships'"
-          >
-            <i class="fas fa-code-branch"></i>
-            <span>关联关系</span>
-          </div>
-          <div 
-            class="menu-item" 
-            :class="{ active: activeMenu === 'query-history' }"
-            @click="activeMenu = 'query-history'"
-          >
-            <i class="fas fa-history"></i>
-            <span>查询历史</span>
-          </div>
-          <div 
-            class="menu-item" 
-            :class="{ active: activeMenu === 'settings' }"
-            @click="activeMenu = 'settings'"
-          >
-            <i class="fas fa-cog"></i>
-            <span>设置</span>
-          </div>
-        </div>
-        
-        <div class="menu-section">
-          <div class="menu-section-title">数据集分类</div>
-          <div 
-            class="menu-item" 
-            @click="switchTab('users')"
-          >
-            <i class="fas fa-users"></i>
-            <span>用户数据集</span>
-            <span class="menu-badge">{{ users.length }}</span>
-          </div>
-          <div 
-            class="menu-item" 
-            @click="switchTab('orders')"
-          >
-            <i class="fas fa-shopping-cart"></i>
-            <span>订单数据集</span>
-            <span class="menu-badge">{{ orders.length }}</span>
-          </div>
-          <div 
-            class="menu-item" 
-            @click="switchTab('joined')"
-          >
-            <i class="fas fa-code-branch"></i>
-            <span>关联数据集</span>
-            <span class="menu-badge">{{ joinedData.length }}</span>
-          </div>
-        </div>
-      </aside>
+      <SidebarMenu 
+        :active-menu="activeMenu" 
+        :unread-count="unreadCount"
+        @menu-click="setActiveMenu"
+        @submenu-click="setActiveSubmenu"
+      />
       
       <!-- 右侧数据集内容区域 -->
       <main class="content-area">
@@ -397,11 +320,12 @@
 
 <script setup>
 import { ref,computed, onMounted } from 'vue';
+import SidebarMenu from '@/components/SidebarMenu.vue';
+import Header from '@/components/Header.vue';
 import DatasetTable from '@/components/DatasetTable.vue';
 // 状态管理
 const activeMenu = ref('dataset-list');
 const activeTab = ref('users');
-const searchQuery = ref('');
 const sqlQuery = ref("select * from user a inner join user_order b on a.id = b.user_id order by b.user_id");
 const currentPage = ref(1);
 const pageSize = ref(10);
@@ -654,14 +578,6 @@ const confirmDelete = () => {
   isConfirmOpen.value = false;
   itemToDelete.value = null;
   deleteType.value = '';
-};
-
-const handleNotificationClick = () => {
-  alert('通知功能将在这里实现');
-};
-
-const toggleUserMenu = () => {
-  alert('用户菜单将在这里实现');
 };
 </script>
 
