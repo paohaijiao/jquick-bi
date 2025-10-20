@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据集管理 - JQuick BI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3675ff;
+            --secondary-color: #e8f3ff;
+            --border-color: #b9d4ff;
+            --text-color: #2d3e50;
+            --light-bg: #f9f9f9;
+            --card-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            --sidebar-width: 260px;
+            --header-height: 60px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            color: var(--text-color);
+            background-color: var(--light-bg);
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        /* 顶部导航栏 */
+        .header {
+            height: var(--header-height);
+            background-color: white;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            z-index: 10;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            color: var(--primary-color);
+            font-size: 22px;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            font-size: 26px;
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .search-box {
+            position: relative;
+            width: 280px;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 8px 12px 8px 36px;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(54, 117, 255, 0.2);
+        }
+        
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 20px;
+            transition: background-color 0.2s;
+        }
+        
+        .user-info:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .user-name {
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        
+        .notification-icon {
+            position: relative;
+            font-size: 18px;
+            color: #666;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .notification-icon:hover {
+            color: var(--primary-color);
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: #ff4d4f;
+            color: white;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* 主内容区 */
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        /* 左侧BI菜单 */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: white;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            height: calc(100vh - var(--header-height));
+        }
+        
+        .menu-section {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .menu-section-title {
+            padding: 0 20px;
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #666;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .menu-item:hover {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+        }
+        
+        .menu-item.active {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        .menu-item i {
+            width: 20px;
+            margin-right: 12px;
+            text-align: center;
+        }
+        
+        .menu-item .menu-badge {
+            margin-left: auto;
+            padding: 2px 8px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+        
+        .submenu {
+            background-color: #f0f7ff;
+            padding: 0 0 0 52px;
+            display: none;
+        }
+        
+        .submenu.show {
+            display: block;
+        }
+        
+        .submenu-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            color: #666;
+            cursor: pointer;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+        
+        .submenu-item:hover {
+            color: var(--primary-color);
+        }
+        
+        .submenu-item.active {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        /* 右侧数据集列表区域 */
+        .content-area {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            background-color: var(--light-bg);
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        
+        .page-description {
+            font-size: 14px;
+            color: #666;
+            margin-top: 4px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, #3675ff, #2563eb);
+            color: white;
+            box-shadow: 0 2px 5px rgba(54, 117, 255, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(to right, #2563eb, #3675ff);
+            box-shadow: 0 4px 8px rgba(54, 117, 255, 0.4);
+            transform: translateY(-1px);
+        }
+        
+        .btn-outline {
+            background-color: white;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .btn i {
+            margin-right: 8px;
+        }
+        
+        /* 筛选和搜索区域 */
+        .filter-bar {
+            background-color: white;
+            border-radius: 12px;
+            padding: 16px 20px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .filter-group {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+        
+        .filter-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .filter-item label {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .filter-item select, .filter-item input {
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .search-filter {
+            position: relative;
+            width: 240px;
+        }
+        
+        .search-filter input {
+            width: 100%;
+            padding: 8px 12px 8px 36px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .search-filter i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+        
+        /* 数据集列表 */
+        .dataset-list {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+        }
+        
+        .table-header {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr 120px;
+            padding: 16px 20px;
+            background-color: var(--light-bg);
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .table-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr 120px;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+        
+        .table-row:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .table-row:last-child {
+            border-bottom: none;
+        }
+        
+        .dataset-name {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .dataset-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        
+        .dataset-icon.sql {
+            background-color: #f0f7ff;
+            color: #2f54eb;
+        }
+        
+        .dataset-icon.manual {
+            background-color: #fff7e6;
+            color: #fa8c16;
+        }
+        
+        .dataset-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .dataset-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .dataset-code {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .column-count {
+            font-size: 12px;
+            color: var(--primary-color);
+            margin-top: 2px;
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-active {
+            background-color: #f0f9eb;
+            color: #52c41a;
+        }
+        
+        .status-inactive {
+            background-color: #fff2f0;
+            color: #ff4d4f;
+        }
+        
+        .operation-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+        
+        .operation-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .operation-btn:hover {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+        }
+        
+        /* 分页控件 */
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            font-size: 14px;
+        }
+        
+        .pagination-info {
+            color: #666;
+        }
+        
+        .pagination-controls {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .page-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            border: 1px solid var(--border-color);
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .page-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .page-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 模态框样式 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal {
+            width: 700px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal-close:hover {
+            color: var(--primary-color);
+        }
+
+        /* Tab 样式 */
+        .modal-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab-btn {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .tab-btn:hover:not(.active) {
+            color: var(--primary-color);
+            background-color: var(--secondary-color);
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(54, 117, 255, 0.2);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        /* 字段列表样式 */
+        .column-list {
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            margin-bottom: 16px;
+        }
+
+        .column-header {
+            display: grid;
+            grid-template-columns: 2fr 1fr 2fr 80px;
+            padding: 12px 16px;
+            background-color: var(--light-bg);
+            font-weight: 500;
+            font-size: 14px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .column-item {
+            display: grid;
+            grid-template-columns: 2fr 1fr 2fr 80px;
+            padding: 12px 16px;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .column-item:last-child {
+            border-bottom: none;
+        }
+
+        .add-column {
+            color: var(--primary-color);
+            background-color: var(--secondary-color);
+            border: 1px dashed var(--primary-color);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .remove-column {
+            color: #ff4d4f;
+            background: none;
+            border: none;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .remove-column:hover {
+            background-color: #fff2f0;
+        }
+
+        /* 模态框底部 */
+        .modal-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* 确认删除模态框 */
+        .confirm-modal {
+            width: 400px;
+        }
+
+        .confirm-content {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .confirm-icon {
+            font-size: 48px;
+            color: #faad14;
+            margin-bottom: 16px;
+        }
+
+        .confirm-message {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        /* 实体关系指示器 */
+        .relationship-indicator {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部导航栏 -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-database"></i>
+                <span>数据实体管理平台</span>
+            </div>
+            <div class="header-actions">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="搜索数据集、实体或字段...">
+                </div>
+                <div class="notification-icon">
+                    <i class="far fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar">ZL</div>
+                    <span class="user-name">张磊</span>
+                    <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
+                </div>
+            </div>
+        </header>
+        
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <!-- 左侧菜单 -->
+            <aside class="sidebar">
+                <div class="menu-section">
+                    <div class="menu-section-title">数据管理</div>
+                    <div class="menu-item active">
+                        <i class="fas fa-cubes"></i>
+                        <span>数据集实体</span>
+                    </div>
+                    <div class="menu-item" id="columnMenu">
+                        <i class="fas fa-columns"></i>
+                        <span>数据集字段</span>
+                        <span class="menu-badge">12</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-project-diagram"></i>
+                        <span>实体关系</span>
+                    </div>
+                </div>
+                
+                <div class="menu-section">
+                    <div class="menu-section-title">系统管理</div>
+                    <div class="menu-item">
+                        <i class="fas fa-users"></i>
+                        <span>用户管理</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-user-shield"></i>
+                        <span>权限设置</span>
+                    </div>
+                </div>
+            </aside>
+            
+            <!-- 右侧数据集列表区域 -->
+            <main class="content-area">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">数据集实体管理</h1>
+                        <p class="page-description">管理业务数据集实体(BusinessDatasetsEntity)及其关联的字段(business_datasets_column)</p>
+                        <p class="relationship-indicator">关系说明: business_datasets_column 与 BusinessDatasetsEntity 为多对一关系</p>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-outline">
+                            <i class="fas fa-download"></i>
+                            <span>导出</span>
+                        </button>
+                        <button class="btn btn-primary" id="addDatasetBtn">
+                            <i class="fas fa-plus"></i>
+                            <span>新增数据集实体</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="filter-bar">
+                    <div class="filter-group">
+                        <div class="filter-item">
+                            <label>数据源:</label>
+                            <select id="connectorFilter">
+                                <option value="">全部</option>
+                                <option value="1">销售订单数据库</option>
+                                <option value="2">用户行为API</option>
+                                <option value="3">季度报表汇总</option>
+                                <option value="4">客户信息库</option>
+                            </select>
+                        </div>
+                        <div class="filter-item">
+                            <label>状态:</label>
+                            <select id="statusFilter">
+                                <option value="">全部</option>
+                                <option value="active">启用</option>
+                                <option value="inactive">禁用</option>
+                            </select>
+                        </div>
+                        <div class="filter-item">
+                            <label>创建时间:</label>
+                            <input type="date">
+                            <span>至</span>
+                            <input type="date">
+                        </div>
+                    </div>
+                    <div class="search-filter">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="搜索数据集名称或标识...">
+                    </div>
+                </div>
+                
+                <div class="dataset-list">
+                    <div class="table-header">
+                        <div>数据集实体名称</div>
+                        <div>数据源</div>
+                        <div>关联字段数</div>
+                        <div>状态</div>
+                        <div>创建时间</div>
+                        <div>操作</div>
+                    </div>
+                    
+                    <div class="table-row" data-id="1">
+                        <div class="dataset-name">
+                            <div class="dataset-icon sql">
+                                <i class="fas fa-table"></i>
+                            </div>
+                            <div class="dataset-info">
+                                <div class="dataset-title">销售订单分析</div>
+                                <div class="dataset-code">SALES_ORDER_ANALYSIS</div>
+                                <div class="relationship-indicator">ID: BDE1001</div>
+                            </div>
+                        </div>
+                        <div>销售订单数据库</div>
+                        <div><span class="column-count">8个字段</span></div>
+                        <div><span class="status-badge status-active"><i class="fas fa-check-circle"></i> 启用</span></div>
+                        <div>2023-06-18</div>
+                        <div class="operation-buttons">
+                            <button class="operation-btn edit-btn" title="编辑实体">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="operation-btn columns-btn" title="管理字段">
+                                <i class="fas fa-list"></i>
+                            </button>
+                            <button class="operation-btn delete-btn" title="删除实体">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="table-row" data-id="2">
+                        <div class="dataset-name">
+                            <div class="dataset-icon sql">
+                                <i class="fas fa-table"></i>
+                            </div>
+                            <div class="dataset-info">
+                                <div class="dataset-title">用户行为分析</div>
+                                <div class="dataset-code">USER_BEHAVIOR_ANALYSIS</div>
+                                <div class="relationship-indicator">ID: BDE1002</div>
+                            </div>
+                        </div>
+                        <div>用户行为API</div>
+                        <div><span class="column-count">12个字段</span></div>
+                        <div><span class="status-badge status-active"><i class="fas fa-check-circle"></i> 启用</span></div>
+                        <div>2023-05-29</div>
+                        <div class="operation-buttons">
+                            <button class="operation-btn edit-btn" title="编辑实体">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="operation-btn columns-btn" title="管理字段">
+                                <i class="fas fa-list"></i>
+                            </button>
+                            <button class="operation-btn delete-btn" title="删除实体">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="table-row" data-id="3">
+                        <div class="dataset-name">
+                            <div class="dataset-icon manual">
+                                <i class="fas fa-table"></i>
+                            </div>
+                            <div class="dataset-info">
+                                <div class="dataset-title">季度业绩汇总</div>
+                                <div class="dataset-code">QUARTERLY_PERFORMANCE</div>
+                                <div class="relationship-indicator">ID: BDE1003</div>
+                            </div>
+                        </div>
+                        <div>季度报表汇总</div>
+                        <div><span class="column-count">5个字段</span></div>
+                        <div><span class="status-badge status-inactive"><i class="fas fa-exclamation-circle"></i> 禁用</span></div>
+                        <div>2023-04-12</div>
+                        <div class="operation-buttons">
+                            <button class="operation-btn edit-btn" title="编辑实体">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="operation-btn columns-btn" title="管理字段">
+                                <i class="fas fa-list"></i>
+                            </button>
+                            <button class="operation-btn delete-btn" title="删除实体">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="pagination">
+                    <div class="pagination-info">显示 1-3 条，共 18 条</div>
+                    <div class="pagination-controls">
+                        <button class="page-btn" disabled>
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="page-btn active">1</button>
+                        <button class="page-btn">2</button>
+                        <button class="page-btn">3</button>
+                        <button class="page-btn">4</button>
+                        <button class="page-btn">5</button>
+                        <button class="page-btn">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- 新增/编辑数据集实体模态框 -->
+    <div class="modal-overlay" id="datasetModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">新增数据集实体</h3>
+                <button class="modal-close" id="modalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-tabs">
+                <button class="tab-btn active" data-tab="basic">基本信息</button>
+                <button class="tab-btn" data-tab="query">数据查询</button>
+                <button class="tab-btn" data-tab="advanced">高级配置</button>
+            </div>
+            
+            <div class="modal-body">
+                <!-- 基本信息Tab -->
+                <div class="tab-content active" id="basic-tab">
+                    <input type="hidden" id="datasetId">
+                    <div class="form-group">
+                        <label>数据集实体名称 <span style="color: #ff4d4f;">*</span></label>
+                        <input type="text" class="form-control" id="datasetName" placeholder="请输入数据集实体名称">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>数据源 <span style="color: #ff4d4f;">*</span></label>
+                        <select class="form-control" id="connectorId">
+                            <option value="">请选择数据源</option>
+                            <option value="1">销售订单数据库 (MySQL)</option>
+                            <option value="2">用户行为API (API接口)</option>
+                            <option value="3">季度报表汇总 (Excel)</option>
+                            <option value="4">客户信息库 (Oracle)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>实体唯一标识 <span style="color: #ff4d4f;">*</span></label>
+                        <input type="text" class="form-control" id="datasetCode" placeholder="请输入实体唯一标识（英文大写+下划线）">
+                        <p style="font-size: 12px; color: #666; margin-top: 4px;">仅允许字母、数字和下划线，建议使用大写字母</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>状态</label>
+                        <select class="form-control" id="datasetStatus">
+                            <option value="active">启用</option>
+                            <option value="inactive">禁用</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>描述</label>
+                        <textarea class="form-control" id="datasetDescription" placeholder="请输入数据集实体描述信息"></textarea>
+                    </div>
+                </div>
+                
+                <!-- 数据查询Tab -->
+                <div class="tab-content" id="query-tab">
+                    <div class="form-group">
+                        <label>数据查询语句</label>
+                        <textarea class="form-control" id="sqlQuery" placeholder="请输入获取数据的查询语句"></textarea>
+                        <p style="font-size: 12px; color: #666; margin-top: 4px;">注意：查询语句将用于从数据源获取数据，需符合数据源类型的语法规范</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <button class="btn btn-outline" id="testQueryBtn">
+                            <i class="fas fa-play"></i>
+                            <span>测试查询</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 高级配置Tab -->
+                <div class="tab-content" id="advanced-tab">
+                    <div class="form-group">
+                        <label>缓存时间（分钟）</label>
+                        <input type="number" class="form-control" id="cacheTime" value="10" min="0" max="1440">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>刷新频率</label>
+                        <select class="form-control" id="refreshFrequency">
+                            <option value="manual">手动刷新</option>
+                            <option value="hourly">每小时</option>
+                            <option value="daily">每天</option>
+                            <option value="weekly">每周</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>权限设置</label>
+                        <select class="form-control" id="permissionSetting">
+                            <option value="private">仅自己可见</option>
+                            <option value="team">团队可见</option>
+                            <option value="public">全部可见</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelBtn">取消</button>
+                <button class="btn btn-primary" id="saveBtn">保存实体</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 字段管理模态框 -->
+    <div class="modal-overlay" id="columnsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">字段管理</h3>
+                <button class="modal-close" id="columnsClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <input type="hidden" id="columnsDatasetId">
+                
+                <div class="form-group">
+                    <label>关联数据集实体</label>
+                    <div class="form-control" id="relatedDatasetName" style="background-color: #f5f5f5; border: 1px solid #ddd;" readonly>
+                        销售订单分析 (SALES_ORDER_ANALYSIS)
+                    </div>
+                    <p class="relationship-indicator">当前字段均关联到此数据集实体（多对一关系）</p>
+                </div>
+                
+                <div class="form-group">
+                    <label>数据集字段列表</label>
+                    <p style="font-size: 12px; color: #666; margin-bottom: 10px;">管理属于当前数据集实体的字段信息，包括字段名称、类型和处理表达式</p>
+                    
+                    <div class="column-list" id="columnsContainer">
+                        <div class="column-header">
+                            <div>字段名称</div>
+                            <div>字段类型</div>
+                            <div>处理表达式</div>
+                            <div>操作</div>
+                        </div>
+                        
+                        <div class="column-item">
+                            <input type="text" class="form-control" placeholder="字段名称" name="columnName[]">
+                            <select class="form-control" name="columnType[]">
+                                <option value="varchar">字符串</option>
+                                <option value="int">整数</option>
+                                <option value="decimal">小数</option>
+                                <option value="datetime">日期时间</option>
+                                <option value="boolean">布尔值</option>
+                            </select>
+                            <input type="text" class="form-control" placeholder="例如：CONCAT(name, '_suffix')" name="handler[]">
+                            <button type="button" class="remove-column">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="add-column" id="addColumnBtn">
+                        <i class="fas fa-plus"></i>
+                        <span>添加字段</span>
+                    </button>
+                </div>
+                
+                <div class="form-group">
+                    <button class="btn btn-outline" id="autoGenerateBtn">
+                        <i class="fas fa-magic"></i>
+                        <span>从查询自动生成字段</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelColumnsBtn">取消</button>
+                <button class="btn btn-primary" id="saveColumnsBtn">保存字段</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 确认删除模态框 -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal confirm-modal">
+            <div class="modal-header">
+                <h3 class="modal-title">确认删除</h3>
+                <button class="modal-close" id="confirmClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="confirm-content">
+                <div class="confirm-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <p class="confirm-message">您确定要删除这个数据集实体吗？此操作将同时删除所有关联的字段（business_datasets_column），且不可撤销。</p>
+                <input type="hidden" id="deleteId">
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelDeleteBtn">取消</button>
+                <button class="btn btn-primary" style="background-color: #ff4d4f;" id="confirmDeleteBtn">确认删除</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 数据模型定义 - 体现多对一关系
+        class BusinessDatasetsEntity {
+            constructor(id, name, code, dataSource, status, createTime) {
+                this.id = id;          // 数据集实体ID
+                this.name = name;      // 实体名称
+                this.code = code;      // 实体标识
+                this.dataSource = dataSource;  // 数据源
+                this.status = status;  // 状态
+                this.createTime = createTime;  // 创建时间
+                this.columns = [];     // 关联的字段列表（一对多关系）
+            }
+            
+            // 添加字段（一个实体可以有多个字段）
+            addColumn(column) {
+                column.datasetId = this.id;  // 设置字段关联的实体ID
+                this.columns.push(column);
+            }
+            
+            // 获取字段数量
+            getColumnCount() {
+                return this.columns.length;
+            }
+        }
+        
+        class BusinessDatasetsColumn {
+            constructor(id, name, type, handler) {
+                this.id = id;              // 字段ID
+                this.name = name;          // 字段名称
+                this.type = type;          // 字段类型
+                this.handler = handler;    // 处理表达式
+                this.datasetId = null;     // 关联的实体ID（多对一关系）
+            }
+        }
+        
+        // 模拟数据
+        const datasets = [
+            new BusinessDatasetsEntity(
+                "BDE1001",
+                "销售订单分析",
+                "SALES_ORDER_ANALYSIS",
+                "销售订单数据库",
+                "active",
+                "2023-06-18"
+            ),
+            new BusinessDatasetsEntity(
+                "BDE1002",
+                "用户行为分析",
+                "USER_BEHAVIOR_ANALYSIS",
+                "用户行为API",
+                "active",
+                "2023-05-29"
+            ),
+            new BusinessDatasetsEntity(
+                "BDE1003",
+                "季度业绩汇总",
+                "QUARTERLY_PERFORMANCE",
+                "季度报表汇总",
+                "inactive",
+                "2023-04-12"
+            )
+        ];
+        
+        // 为第一个数据集添加字段（多对一关系示例）
+        datasets[0].addColumn(new BusinessDatasetsColumn("COL1001", "订单ID", "int", ""));
+        datasets[0].addColumn(new BusinessDatasetsColumn("COL1002", "客户名称", "varchar", ""));
+        datasets[0].addColumn(new BusinessDatasetsColumn("COL1003", "订单金额", "decimal", "ROUND(amount, 2)"));
+        
+        // Tab切换功能
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                this.classList.add('active');
+                const tabId = this.getAttribute('data-tab');
+                document.getElementById(`${tabId}-tab`).classList.add('active');
+            });
+        });
+        
+        // 添加字段按钮功能
+        document.getElementById('addColumnBtn').addEventListener('click', function() {
+            const columnsContainer = document.getElementById('columnsContainer');
+            
+            const newColumn = document.createElement('div');
+            newColumn.className = 'column-item';
+            newColumn.innerHTML = `
+                <input type="text" class="form-control" placeholder="字段名称" name="columnName[]">
+                <select class="form-control" name="columnType[]">
+                    <option value="varchar">字符串</option>
+                    <option value="int">整数</option>
+                    <option value="decimal">小数</option>
+                    <option value="datetime">日期时间</option>
+                    <option value="boolean">布尔值</option>
+                </select>
+                <input type="text" class="form-control" placeholder="例如：CONCAT(name, '_suffix')" name="handler[]">
+                <button type="button" class="remove-column">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            columnsContainer.appendChild(newColumn);
+            
+            newColumn.querySelector('.remove-column').addEventListener('click', function() {
+                columnsContainer.removeChild(newColumn);
+            });
+        });
+        
+        // 初始字段项的删除按钮事件
+        document.querySelectorAll('.remove-column').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const columnItem = this.closest('.column-item');
+                if (document.querySelectorAll('.column-item').length > 1) {
+                    document.getElementById('columnsContainer').removeChild(columnItem);
+                }
+            });
+        });
+        
+        // 模态框控制
+        const datasetModal = document.getElementById('datasetModal');
+        const columnsModal = document.getElementById('columnsModal');
+        const confirmModal = document.getElementById('confirmModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const datasetId = document.getElementById('datasetId');
+        const datasetName = document.getElementById('datasetName');
+        const connectorId = document.getElementById('connectorId');
+        const datasetCode = document.getElementById('datasetCode');
+        const datasetStatus = document.getElementById('datasetStatus');
+        const sqlQuery = document.getElementById('sqlQuery');
+        const relatedDatasetName = document.getElementById('relatedDatasetName');
+        
+        // 打开新增数据集实体模态框
+        document.getElementById('addDatasetBtn').addEventListener('click', function() {
+            modalTitle.textContent = '新增数据集实体';
+            datasetId.value = '';
+            datasetName.value = '';
+            connectorId.value = '';
+            datasetCode.value = '';
+            datasetStatus.value = 'active';
+            sqlQuery.value = '';
+            
+            datasetModal.style.display = 'flex';
+        });
+        
+        // 打开编辑数据集实体模态框
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const row = this.closest('.table-row');
+                const id = row.getAttribute('data-id');
+                const name = row.querySelector('.dataset-title').textContent;
+                const code = row.querySelector('.dataset-code').textContent;
+                const status = row.querySelector('.status-badge').classList.contains('status-active') ? 'active' : 'inactive';
+                
+                modalTitle.textContent = '编辑数据集实体';
+                datasetId.value = id;
+                datasetName.value = name;
+                datasetCode.value = code;
+                datasetStatus.value = status;
+                
+                datasetModal.style.display = 'flex';
+            });
+        });
+        
+        // 打开字段管理模态框
+        document.querySelectorAll('.columns-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const row = this.closest('.table-row');
+                const id = row.getAttribute('data-id');
+                const name = row.querySelector('.dataset-title').textContent;
+                const code = row.querySelector('.dataset-code').textContent;
+                
+                document.getElementById('columnsDatasetId').value = id;
+                document.querySelector('#columnsModal .modal-title').textContent = `${name} - 字段管理`;
+                relatedDatasetName.value = `${name} (${code})`;
+                
+                // 这里可以根据数据集实体ID加载关联的字段数据
+                loadColumnsByDatasetId(id);
+                
+                columnsModal.style.display = 'flex';
+            });
+        });
+        
+        // 加载指定数据集实体的字段
+        function loadColumnsByDatasetId(datasetId) {
+            // 清空现有字段
+            const columnItems = document.querySelectorAll('.column-item');
+            columnItems.forEach((item, index) => {
+                if (index > 0) { // 保留第一个空字段
+                    item.remove();
+                }
+            });
+            
+            // 查找数据集
+            const dataset = datasets.find(d => d.id === `BDE${datasetId}00${datasetId}`);
+            if (dataset && dataset.columns.length > 0) {
+                // 为每个字段创建字段项
+                dataset.columns.forEach(column => {
+                    const addBtn = document.getElementById('addColumnBtn');
+                    addBtn.click(); // 触发添加字段按钮
+                    
+                    // 获取最后一个字段项并填充数据
+                    const lastColumn = document.querySelector('.column-item:last-child');
+                    lastColumn.querySelector('[name="columnName[]"]').value = column.name;
+                    lastColumn.querySelector('[name="columnType[]"]').value = column.type;
+                    lastColumn.querySelector('[name="handler[]"]').value = column.handler;
+                });
+            }
+        }
+        
+        // 打开删除确认模态框
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const row = this.closest('.table-row');
+                const id = row.getAttribute('data-id');
+                document.getElementById('deleteId').value = id;
+                confirmModal.style.display = 'flex';
+            });
+        });
+        
+        // 关闭模态框
+        document.getElementById('modalClose').addEventListener('click', () => datasetModal.style.display = 'none');
+        document.getElementById('columnsClose').addEventListener('click', () => columnsModal.style.display = 'none');
+        document.getElementById('cancelBtn').addEventListener('click', () => datasetModal.style.display = 'none');
+        document.getElementById('cancelColumnsBtn').addEventListener('click', () => columnsModal.style.display = 'none');
+        document.getElementById('confirmClose').addEventListener('click', () => confirmModal.style.display = 'none');
+        document.getElementById('cancelDeleteBtn').addEventListener('click', () => confirmModal.style.display = 'none');
+        
+        // 点击模态框外部关闭
+        [datasetModal, columnsModal, confirmModal].forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.style.display = 'none';
+                }
+            });
+        });
+        
+        // 保存数据集实体
+        document.getElementById('saveBtn').addEventListener('click', function() {
+            if (!datasetName.value.trim()) {
+                alert('请输入数据集实体名称');
+                return;
+            }
+            
+            if (!connectorId.value) {
+                alert('请选择数据源');
+                return;
+            }
+            
+            if (!datasetCode.value.trim()) {
+                alert('请输入实体唯一标识');
+                return;
+            }
+            
+            // 构建实体数据
+            const formData = {
+                id: datasetId.value || `BDE${Math.floor(Math.random() * 1000)}`,
+                name: datasetName.value.trim(),
+                connectorId: connectorId.value,
+                code: datasetCode.value.trim(),
+                status: datasetStatus.value,
+                sqlQuery: sqlQuery.value.trim()
+            };
+            
+            console.log('保存数据集实体:', formData);
+            alert(datasetId.value ? '数据集实体更新成功' : '数据集实体创建成功');
+            datasetModal.style.display = 'none';
+        });
+        
+        // 保存字段
+        document.getElementById('saveColumnsBtn').addEventListener('click', function() {
+            const datasetId = document.getElementById('columnsDatasetId').value;
+            
+            // 收集字段数据
+            const columns = [];
+            document.querySelectorAll('.column-item').forEach(item => {
+                const name = item.querySelector('[name="columnName[]"]').value.trim();
+                const type = item.querySelector('[name="columnType[]"]').value;
+                const handler = item.querySelector('[name="handler[]"]').value.trim();
+                
+                if (name) {
+                    columns.push({
+                        datasetId: datasetId,  // 关联的数据集实体ID
+                        columnName: name,
+                        columnType: type,
+                        handler: handler
+                    });
+                }
+            });
+            
+            if (columns.length === 0) {
+                alert('请至少添加一个字段');
+                return;
+            }
+            
+            console.log('保存字段 (多对一关联):', columns);
+            alert('字段保存成功，已关联到指定数据集实体');
+            columnsModal.style.display = 'none';
+        });
+        
+        // 确认删除
+        document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+            const id = document.getElementById('deleteId').value;
+            
+            console.log('删除数据集实体及关联字段, ID:', id);
+            document.querySelector(`.table-row[data-id="${id}"]`).remove();
+            confirmModal.style.display = 'none';
+            alert('数据集实体及关联的所有字段已删除');
+        });
+        
+        // 测试查询按钮
+        document.getElementById('testQueryBtn').addEventListener('click', function() {
+            if (!connectorId.value) {
+                alert('请先选择数据源');
+                return;
+            }
+            
+            if (!sqlQuery.value.trim()) {
+                alert('请输入查询语句');
+                return;
+            }
+            
+            alert('查询测试成功，返回10条数据');
+        });
+        
+        // 自动生成字段按钮
+        document.getElementById('autoGenerateBtn').addEventListener('click', function() {
+            const datasetId = document.getElementById('columnsDatasetId').value;
+            alert(`已根据数据集实体ID: ${datasetId} 的查询语句自动生成字段列表`);
+        });
+    </script>
+</body>
+</html>

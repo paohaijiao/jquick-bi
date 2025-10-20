@@ -2,82 +2,25 @@
   <div class="container">
     <!-- 顶部导航栏 -->
     <header class="header">
-      <div class="logo">
-        <i class="fas fa-database"></i>
-        <span>JQuick DataSet</span>
-      </div>
-      <div class="header-actions">
-        <div class="search-box">
-          <i class="fas fa-search"></i>
-          <input type="text" placeholder="搜索数据集、Code...">
-        </div>
-        <div class="notification-icon">
-          <i class="far fa-bell"></i>
-          <span class="notification-badge">2</span>
-        </div>
-        <div class="user-info">
-          <div class="user-avatar">JD</div>
-          <span class="user-name">JavaDeveloper</span>
-          <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
-        </div>
-      </div>
+      <Header 
+      />
     </header>
     
     <!-- 主内容区 -->
     <div class="main-content">
       <!-- 左侧菜单 -->
-      <aside class="sidebar">
-        <div class="menu-section">
-          <div class="menu-section-title">数据管理</div>
-          <div class="menu-item active">
-            <i class="fas fa-table"></i>
-            <span>数据集列表</span>
-            <span class="menu-badge">4</span>
-          </div>
-          <div class="menu-item">
-            <i class="fas fa-plug"></i>
-            <span>数据源管理</span>
-            <span class="menu-badge">3</span>
-          </div>
-          <div class="menu-item">
-            <i class="fas fa-code-branch"></i>
-            <span>关联关系</span>
-          </div>
-          <div class="menu-item">
-            <i class="fas fa-history"></i>
-            <span>查询历史</span>
-          </div>
-          <div class="menu-item">
-            <i class="fas fa-cog"></i>
-            <span>设置</span>
-          </div>
-        </div>
-        
-        <div class="menu-section">
-          <div class="menu-section-title">数据集分类</div>
-          <div class="menu-item">
-            <i class="fas fa-shopping-cart"></i>
-            <span>销售相关</span>
-            <span class="menu-badge">2</span>
-          </div>
-          <div class="menu-item">
-            <i class="fas fa-users"></i>
-            <span>用户相关</span>
-            <span class="menu-badge">1</span>
-          </div>
-          <div class="menu-item">
-            <i class="fas fa-box"></i>
-            <span>产品相关</span>
-            <span class="menu-badge">1</span>
-          </div>
-        </div>
-      </aside>
+      <SidebarMenu 
+        :active-menu="activeMenu" 
+        :unread-count="unreadCount"
+        @menu-click="setActiveMenu"
+        @submenu-click="setActiveSubmenu"
+      />
       
       <!-- 右侧数据集内容区域 -->
       <main class="content-area">
         <div class="page-header">
           <div>
-            <h1 class="page-title">数据集管理</h1>
+            <h1 class="page-title text-align-left">数据集管理</h1>
             <p class="page-description">管理所有数据集信息，包括名称、Code和SQL等</p>
           </div>
           <div class="action-buttons">
@@ -328,10 +271,22 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
-
+import Header from '@/components/Header.vue';
+import SidebarMenu from '@/components/SidebarMenu.vue';
 // 图标列表
 const iconList = [
-  'fa-table', 'fa-users', 'fa-box', 'fa-chart-bar'
+  'fa-table', 'fa-users', 'fa-box', 'fa-chart-bar','fa-cart-shopping',
+  'fa-gear','fa-clock-rotate-left','fa-code-branch','fa-plug','fa-table',
+  'fa-check','fa-times','fa-plus','fa-minus','fa-edit','fa-pencil','fa-trash',
+  'fa-search','fa-save','fa-undo','fa-redo','fa-home','fa-bars','fa-arrow-circle-left',
+  'fa-chevron-left','fa-chevron-right','fa-arrow-up','fa-arrow-down','fa-arrow-left','fa-arrow-right',
+  'fa-user','fa-user-circle','fa-user-plus','fa-user-lock','fa-sign-in','fa-sign-out',
+  'fa-file','fa-file-text','fa-file-pdf','fa-file-excel','fa-file-image','fa-folder',
+  'fa-download','fa-upload','fa-envelope','fa-phone','fa-comment','fa-comments','fa-share-alt',
+  'fa-at','fa-exclamation-circle','fa-info-circle','fa-question-circle','fa-check-circle','fa-exclamation-triangle','fa-spinner',
+  'fa-play','fa-pause','fa-volume-up','fa-volume-off','fa-video','fa-image','fa-picture-o',
+  'fa-mobile','fa-laptop','fa-star','fa-heart','fa-map-marker','fa-calendar','fa-bell','fa-lock','fa-unlock',
+  'fa-comment-dots', 'fa-user-plus', 'fa-folder-open', 'fa-spinner', 'fa-mobile-screen', 'fa-check-circle', 'fa-minus-circle', 'fa-upload'
 ];
 
 // 数据集列表数据

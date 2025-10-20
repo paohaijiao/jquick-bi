@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管道管理 - JQuick BI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #ff8326;
+            --secondary-color: #fff5eb;
+            --border-color: #ffd5b8;
+            --text-color: #2d3e50;
+            --light-bg: #f9f9f9;
+            --card-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            --sidebar-width: 260px;
+            --header-height: 60px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            color: var(--text-color);
+            background-color: var(--light-bg);
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        /* 顶部导航栏 */
+        .header {
+            height: var(--header-height);
+            background-color: white;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            z-index: 10;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            color: var(--primary-color);
+            font-size: 22px;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            font-size: 26px;
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .search-box {
+            position: relative;
+            width: 280px;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 8px 12px 8px 36px;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(255, 131, 38, 0.2);
+        }
+        
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 20px;
+            transition: background-color 0.2s;
+        }
+        
+        .user-info:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .user-name {
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        
+        /* 主内容区 */
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        /* 左侧菜单 */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: white;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            height: calc(100vh - var(--header-height));
+        }
+        
+        .menu-section {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .menu-section-title {
+            padding: 0 20px;
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #666;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .menu-item:hover {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+        }
+        
+        .menu-item.active {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        .menu-item i {
+            width: 20px;
+            margin-right: 12px;
+            text-align: center;
+        }
+        
+        /* 右侧内容区域 */
+        .content-area {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            background-color: var(--light-bg);
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        
+        .page-description {
+            font-size: 14px;
+            color: #666;
+            margin-top: 4px;
+        }
+        
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, #ff8326, #ff6a00);
+            color: white;
+            box-shadow: 0 2px 5px rgba(255, 131, 38, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(to right, #ff6a00, #ff8326);
+            box-shadow: 0 4px 8px rgba(255, 131, 38, 0.4);
+            transform: translateY(-1px);
+        }
+        
+        .btn-outline {
+            background-color: white;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .btn i {
+            margin-right: 8px;
+        }
+        
+        /* 列表卡片 */
+        .list-card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+        
+        .list-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .list-search {
+            position: relative;
+            width: 300px;
+        }
+        
+        .list-search input {
+            width: 100%;
+            padding: 8px 12px 8px 36px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .list-search i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+        
+        /* 表格样式 */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .data-table th,
+        .data-table td {
+            padding: 12px 24px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .data-table th {
+            font-weight: 600;
+            background-color: var(--light-bg);
+        }
+        
+        .data-table tr:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .table-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .table-action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #666;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        
+        .table-action-btn.edit-btn:hover {
+            color: var(--primary-color);
+            background-color: rgba(255, 131, 38, 0.15);
+        }
+        
+        .table-action-btn.delete-btn:hover {
+            color: #ff4d4f;
+            background-color: #fff2f0;
+        }
+        
+        /* 分页样式 */
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .pagination-info {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .pagination-controls {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .page-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .page-btn:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .page-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* 模态框样式 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-container {
+            background-color: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 1000px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: translateY(-20px);
+            transition: all 0.3s;
+        }
+        
+        .modal-overlay.active .modal-container {
+            transform: translateY(0);
+        }
+        
+        .modal-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #666;
+            transition: color 0.2s;
+        }
+        
+        .modal-close:hover {
+            color: var(--primary-color);
+        }
+        
+        .modal-body {
+            padding: 24px;
+        }
+        
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        
+        /* 表单样式 - 从配置页面复用 */
+        .form-card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .form-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(255, 131, 38, 0.2);
+        }
+        
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        /* 字段列表样式 */
+        .fields-container {
+            margin-top: 24px;
+        }
+        
+        .fields-header {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 80px;
+            padding: 12px 16px;
+            background-color: var(--light-bg);
+            border-radius: 8px 8px 0 0;
+            font-weight: 600;
+            font-size: 14px;
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+        }
+        
+        .field-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 80px;
+            padding: 12px 16px;
+            align-items: center;
+            border: 1px solid var(--border-color);
+            border-top: none;
+            gap: 12px;
+        }
+        
+        .field-row:last-child {
+            border-radius: 0 0 8px 8px;
+        }
+        
+        .field-row:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .field-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+        
+        .field-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .field-btn:hover {
+            background-color: rgba(255, 131, 38, 0.15);
+            color: var(--primary-color);
+        }
+        
+        .delete-field:hover {
+            color: #ff4d4f;
+            background-color: #fff2f0;
+        }
+        
+        .add-field-btn {
+            margin-top: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary-color);
+            background-color: var(--secondary-color);
+            border: 1px dashed var(--primary-color);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .add-field-btn:hover {
+            background-color: rgba(255, 131, 38, 0.15);
+        }
+        
+        .required-mark {
+            color: #ff4d4f;
+        }
+        
+        .help-text {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部导航栏 -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-chart-line"></i>
+                <span>JQuick BI</span>
+            </div>
+            <div class="header-actions">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="搜索报表、数据源或文档...">
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar">ZL</div>
+                    <span class="user-name">张磊</span>
+                    <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
+                </div>
+            </div>
+        </header>
+        
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <!-- 左侧菜单 -->
+            <aside class="sidebar">
+                <div class="menu-section">
+                    <div class="menu-section-title">管道管理</div>
+                    <div class="menu-item active">
+                        <i class="fas fa-plug"></i>
+                        <span>管道列表</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-table"></i>
+                        <span>表字段设置</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>同步设置</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-history"></i>
+                        <span>同步历史</span>
+                    </div>
+                </div>
+                
+                <div class="menu-section">
+                    <div class="menu-section-title">数据源</div>
+                    <div class="menu-item">
+                        <i class="fas fa-database"></i>
+                        <span>连接器列表</span>
+                    </div>
+                    <div class="menu-item">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>新增数据源</span>
+                    </div>
+                </div>
+            </aside>
+            
+            <!-- 右侧列表内容区域 -->
+            <main class="content-area">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">管道管理</h1>
+                        <p class="page-description">管理所有管道连接，包括查看、编辑和删除操作</p>
+                    </div>
+                    <button class="btn btn-primary" id="addConnectorBtn">
+                        <i class="fas fa-plus"></i>
+                        <span>新增管道</span>
+                    </button>
+                </div>
+                
+                <div class="list-card">
+                    <div class="list-header">
+                        <div class="list-search">
+                            <i class="fas fa-search"></i>
+                            <input type="text" placeholder="搜索管道名称...">
+                        </div>
+                    </div>
+                    
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>管道名称</th>
+                                <th>关联连接器</th>
+                                <th>关联表名</th>
+                                <th>字段数量</th>
+                                <th>创建时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-id="1">
+                                <td>销售订单连接器</td>
+                                <td>销售订单数据库 (MySQL)</td>
+                                <td>sales_orders</td>
+                                <td>12</td>
+                                <td>2023-06-15 10:30</td>
+                                <td>
+                                    <div class="table-actions">
+                                        <button class="table-action-btn edit-btn" title="编辑">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="table-action-btn delete-btn" title="删除">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr data-id="2">
+                                <td>用户信息连接器</td>
+                                <td>客户信息库 (Oracle)</td>
+                                <td>user_info</td>
+                                <td>8</td>
+                                <td>2023-06-10 14:20</td>
+                                <td>
+                                    <div class="table-actions">
+                                        <button class="table-action-btn edit-btn" title="编辑">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="table-action-btn delete-btn" title="删除">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr data-id="3">
+                                <td>产品目录连接器</td>
+                                <td>销售订单数据库 (MySQL)</td>
+                                <td>product_catalog</td>
+                                <td>6</td>
+                                <td>2023-06-05 09:15</td>
+                                <td>
+                                    <div class="table-actions">
+                                        <button class="table-action-btn edit-btn" title="编辑">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="table-action-btn delete-btn" title="删除">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr data-id="4">
+                                <td>季度报表连接器</td>
+                                <td>季度报表汇总 (Excel)</td>
+                                <td>quarterly_reports</td>
+                                <td>5</td>
+                                <td>2023-05-28 16:40</td>
+                                <td>
+                                    <div class="table-actions">
+                                        <button class="table-action-btn edit-btn" title="编辑">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="table-action-btn delete-btn" title="删除">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr data-id="5">
+                                <td>用户行为连接器</td>
+                                <td>用户行为API (API接口)</td>
+                                <td>user_behavior</td>
+                                <td>9</td>
+                                <td>2023-05-20 11:50</td>
+                                <td>
+                                    <div class="table-actions">
+                                        <button class="table-action-btn edit-btn" title="编辑">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="table-action-btn delete-btn" title="删除">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="pagination">
+                        <div class="pagination-info">
+                            显示 1-5 条，共 23 条
+                        </div>
+                        <div class="pagination-controls">
+                            <button class="page-btn" disabled>
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <button class="page-btn active">1</button>
+                            <button class="page-btn">2</button>
+                            <button class="page-btn">3</button>
+                            <button class="page-btn">4</button>
+                            <button class="page-btn">5</button>
+                            <button class="page-btn">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- 编辑/新增连接器模态框 -->
+    <div class="modal-overlay" id="connectorModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">编辑连接器表字段</h3>
+                <button class="modal-close" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-card">
+                    <h2 class="form-section-title">基本信息</h2>
+                    <div class="form-group">
+                        <label>连接器名称 <span class="required-mark">*</span></label>
+                        <input type="text" class="form-control" id="connectorName" placeholder="请输入连接器名称">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>关联数据源 <span class="required-mark">*</span></label>
+                        <select class="form-control" id="dataSource">
+                            <option value="">请选择数据源</option>
+                            <option value="1">销售订单数据库 (MySQL)</option>
+                            <option value="2">用户行为API (API接口)</option>
+                            <option value="3">季度报表汇总 (Excel)</option>
+                            <option value="4">客户信息库 (Oracle)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>关联表名 <span class="required-mark">*</span></label>
+                        <input type="text" class="form-control" id="tableName" placeholder="请输入关联表名">
+                        <span class="help-text">请输入数据源中实际存在的表名</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>描述信息</label>
+                        <textarea class="form-control" id="description" placeholder="请输入连接器描述信息"></textarea>
+                    </div>
+                </div>
+                
+                <div class="form-card">
+                    <h2 class="form-section-title">字段配置</h2>
+                    <p class="help-text" style="margin-bottom: 16px;">配置表字段信息，包括字段名称、数据类型、长度等属性</p>
+                    
+                    <div class="fields-container">
+                        <div class="fields-header">
+                            <div>字段名称 <span class="required-mark">*</span></div>
+                            <div>数据类型 <span class="required-mark">*</span></div>
+                            <div>长度</div>
+                            <div>是否主键</div>
+                            <div>操作</div>
+                        </div>
+                        
+                        <!-- 字段行 - 将通过JS动态添加更多行 -->
+                        <div class="field-row" data-index="0">
+                            <input type="text" class="form-control field-name" placeholder="请输入字段名称">
+                            <select class="form-control field-type">
+                                <option value="">请选择</option>
+                                <option value="varchar">字符串 (varchar)</option>
+                                <option value="int">整数 (int)</option>
+                                <option value="bigint">长整数 (bigint)</option>
+                                <option value="decimal">小数 (decimal)</option>
+                                <option value="datetime">日期时间 (datetime)</option>
+                                <option value="boolean">布尔值 (boolean)</option>
+                            </select>
+                            <input type="text" class="form-control field-length" placeholder="如: 255">
+                            <select class="form-control field-primary">
+                                <option value="false">否</option>
+                                <option value="true">是</option>
+                            </select>
+                            <div class="field-actions">
+                                <button class="field-btn delete-field" title="删除">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="add-field-btn" id="addFieldBtn">
+                        <i class="fas fa-plus"></i>
+                        <span>添加字段</span>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelBtn">取消</button>
+                <button class="btn btn-primary" id="saveBtn">确认保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 获取DOM元素
+        const connectorModal = document.getElementById('connectorModal');
+        const closeModal = document.getElementById('closeModal');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const addConnectorBtn = document.getElementById('addConnectorBtn');
+        const editButtons = document.querySelectorAll('.edit-btn');
+        const modalTitle = document.getElementById('modalTitle');
+        const saveBtn = document.getElementById('saveBtn');
+        
+        // 字段计数器，用于生成唯一索引
+        let fieldCounter = 1;
+        
+        // 打开模态框函数
+        function openModal(isEdit = false, id = null) {
+            connectorModal.classList.add('active');
+            // 阻止背景滚动
+            document.body.style.overflow = 'hidden';
+            
+            if (isEdit && id) {
+                modalTitle.textContent = '编辑连接器表字段';
+                // 这里可以根据ID加载对应的数据
+                loadConnectorData(id);
+            } else {
+                modalTitle.textContent = '新增连接器表字段';
+                // 重置表单
+                resetForm();
+            }
+        }
+        
+        // 关闭模态框函数
+        function closeModalFunc() {
+            connectorModal.classList.remove('active');
+            // 恢复背景滚动
+            document.body.style.overflow = 'auto';
+        }
+        
+        // 加载连接器数据（模拟）
+        function loadConnectorData(id) {
+            // 这里只是模拟数据，实际应用中应该从服务器加载
+            const mockData = {
+                1: {
+                    name: '销售订单连接器',
+                    dataSource: '1',
+                    tableName: 'sales_orders',
+                    description: '用于连接销售订单数据库的连接器',
+                    fields: [
+                        {name: 'order_id', type: 'int', length: '', primary: 'true'},
+                        {name: 'order_no', type: 'varchar', length: '50', primary: 'false'},
+                        {name: 'customer_id', type: 'int', length: '', primary: 'false'},
+                        {name: 'order_date', type: 'datetime', length: '', primary: 'false'},
+                        {name: 'amount', type: 'decimal', length: '10,2', primary: 'false'}
+                    ]
+                },
+                2: {
+                    name: '用户信息连接器',
+                    dataSource: '4',
+                    tableName: 'user_info',
+                    description: '用户基本信息连接器',
+                    fields: [
+                        {name: 'user_id', type: 'bigint', length: '', primary: 'true'},
+                        {name: 'username', type: 'varchar', length: '100', primary: 'false'},
+                        {name: 'email', type: 'varchar', length: '200', primary: 'false'},
+                        {name: 'register_time', type: 'datetime', length: '', primary: 'false'}
+                    ]
+                }
+            };
+            
+            // 填充表单数据
+            const data = mockData[id] || {
+                name: '',
+                dataSource: '',
+                tableName: '',
+                description: '',
+                fields: []
+            };
+            
+            document.getElementById('connectorName').value = data.name;
+            document.getElementById('dataSource').value = data.dataSource;
+            document.getElementById('tableName').value = data.tableName;
+            document.getElementById('description').value = data.description;
+            
+            // 清空现有字段行（保留一行）
+            const fieldsContainer = document.querySelector('.fields-container');
+            const existingRows = fieldsContainer.querySelectorAll('.field-row');
+            existingRows.forEach((row, index) => {
+                if (index > 0) row.remove();
+            });
+            
+            // 如果有字段数据，填充字段
+            if (data.fields && data.fields.length > 0) {
+                // 填充第一行
+                const firstRow = fieldsContainer.querySelector('.field-row');
+                fillFieldRow(firstRow, data.fields[0]);
+                
+                // 添加剩余字段
+                for (let i = 1; i < data.fields.length; i++) {
+                    addNewFieldRow(data.fields[i]);
+                }
+            } else {
+                // 重置第一行
+                const firstRow = fieldsContainer.querySelector('.field-row');
+                resetFieldRow(firstRow);
+            }
+            
+            // 更新计数器
+            fieldCounter = Math.max(data.fields.length, 1);
+        }
+        
+        // 填充字段行数据
+        function fillFieldRow(row, data) {
+            row.querySelector('.field-name').value = data.name || '';
+            row.querySelector('.field-type').value = data.type || '';
+            row.querySelector('.field-length').value = data.length || '';
+            row.querySelector('.field-primary').value = data.primary || 'false';
+        }
+        
+        // 重置字段行
+        function resetFieldRow(row) {
+            row.querySelector('.field-name').value = '';
+            row.querySelector('.field-type').value = '';
+            row.querySelector('.field-length').value = '';
+            row.querySelector('.field-primary').value = 'false';
+        }
+        
+        // 重置整个表单
+        function resetForm() {
+            document.getElementById('connectorName').value = '';
+            document.getElementById('dataSource').value = '';
+            document.getElementById('tableName').value = '';
+            document.getElementById('description').value = '';
+            
+            // 清空现有字段行（保留一行）
+            const fieldsContainer = document.querySelector('.fields-container');
+            const existingRows = fieldsContainer.querySelectorAll('.field-row');
+            existingRows.forEach((row, index) => {
+                if (index > 0) row.remove();
+                else resetFieldRow(row);
+            });
+            
+            fieldCounter = 1;
+        }
+        
+        // 添加新的字段行
+        function addNewFieldRow(data = {}) {
+            const fieldsContainer = document.querySelector('.fields-container');
+            
+            // 创建新的字段行
+            const newFieldRow = document.createElement('div');
+            newFieldRow.className = 'field-row';
+            newFieldRow.dataset.index = fieldCounter;
+            
+            // 字段行内容
+            newFieldRow.innerHTML = `
+                <input type="text" class="form-control field-name" placeholder="请输入字段名称">
+                <select class="form-control field-type">
+                    <option value="">请选择</option>
+                    <option value="varchar">字符串 (varchar)</option>
+                    <option value="int">整数 (int)</option>
+                    <option value="bigint">长整数 (bigint)</option>
+                    <option value="decimal">小数 (decimal)</option>
+                    <option value="datetime">日期时间 (datetime)</option>
+                    <option value="boolean">布尔值 (boolean)</option>
+                </select>
+                <input type="text" class="form-control field-length" placeholder="如: 255">
+                <select class="form-control field-primary">
+                    <option value="false">否</option>
+                    <option value="true">是</option>
+                </select>
+                <div class="field-actions">
+                    <button class="field-btn delete-field" title="删除">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            
+            // 如果有数据，填充
+            if (data) {
+                fillFieldRow(newFieldRow, data);
+            }
+            
+            // 添加到容器
+            fieldsContainer.appendChild(newFieldRow);
+            
+            // 为新添加的删除按钮绑定事件
+            newFieldRow.querySelector('.delete-field').addEventListener('click', function() {
+                newFieldRow.remove();
+            });
+            
+            fieldCounter++;
+        }
+        
+        // 事件监听
+        addConnectorBtn.addEventListener('click', () => openModal(false));
+        
+        editButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const row = this.closest('tr');
+                const id = row.dataset.id;
+                openModal(true, id);
+            });
+        });
+        
+        closeModal.addEventListener('click', closeModalFunc);
+        cancelBtn.addEventListener('click', closeModalFunc);
+        
+        // 点击模态框外部关闭
+        connectorModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModalFunc();
+            }
+        });
+        
+        // 添加字段按钮点击事件
+        document.getElementById('addFieldBtn').addEventListener('click', addNewFieldRow);
+        
+        // 为初始的删除按钮绑定事件
+        document.querySelector('.delete-field').addEventListener('click', function() {
+            // 确保至少保留一个字段
+            if (document.querySelectorAll('.field-row').length > 1) {
+                this.closest('.field-row').remove();
+            } else {
+                alert('至少需要保留一个字段');
+            }
+        });
+        
+        // 保存按钮点击事件
+        saveBtn.addEventListener('click', function() {
+            // 收集表单数据
+            const formData = {
+                name: document.getElementById('connectorName').value,
+                dataSource: document.getElementById('dataSource').value,
+                tableName: document.getElementById('tableName').value,
+                description: document.getElementById('description').value,
+                fields: []
+            };
+            
+            // 收集字段数据
+            const fieldRows = document.querySelectorAll('.field-row');
+            fieldRows.forEach(row => {
+                formData.fields.push({
+                    name: row.querySelector('.field-name').value,
+                    type: row.querySelector('.field-type').value,
+                    length: row.querySelector('.field-length').value,
+                    primary: row.querySelector('.field-primary').value
+                });
+            });
+            
+            // 简单验证
+            if (!formData.name || !formData.dataSource || !formData.tableName) {
+                alert('请填写必填字段');
+                return;
+            }
+            
+            // 检查是否有至少一个有效字段
+            const hasValidField = formData.fields.some(field => field.name && field.type);
+            if (!hasValidField) {
+                alert('请至少配置一个有效的字段');
+                return;
+            }
+            
+            // 这里可以添加保存到服务器的逻辑
+            console.log('保存的数据:', formData);
+            
+            // 显示成功消息并关闭模态框
+            alert('保存成功！');
+            closeModalFunc();
+        });
+        
+        // 分页按钮点击事件
+        const pageButtons = document.querySelectorAll('.page-btn:not([disabled])');
+        pageButtons.forEach(button => {
+            if (!button.querySelector('i')) { // 排除箭头按钮
+                button.addEventListener('click', function() {
+                    // 移除其他按钮的active类
+                    document.querySelectorAll('.page-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    // 给当前点击的按钮添加active类
+                    this.classList.add('active');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

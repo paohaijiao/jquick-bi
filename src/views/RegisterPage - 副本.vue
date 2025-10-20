@@ -242,14 +242,12 @@
           
           <div class="app-info">
             <h2 class="page-title text-align-left">JQuick BI 数据智能分析平台</h2>
-            <p class="page-description text-align-left">让数据会说话，让决策更精准。我们将企业繁杂数据转化为清晰可视的洞察，
-    通过拖拽式操作即可生成专业分析报告，实时响应业务变化，
-    为您的企业装上数据驱动的"智慧大脑"。</p>
+            <p class="page-description">将复杂数据转化为直观见解，助力企业智能决策。我们的平台提供强大的数据可视化工具和实时分析功能。</p>
             <ul class="features">
-              <li><i class="fas fa-bolt"></i> 快速数据处理与分析，告别等待</li>
-              <li><i class="fas fa-chart-line"></i> 40+可视化图表，数据一目了然</li>
-              <li><i class="fas fa-cloud"></i> 全终端同步，随时随地掌控业务</li>
-              <li><i class="fas fa-shield-alt"></i> 银行级加密体系，保障数据安全</li>
+              <li><i class="fas fa-bolt"></i> 快速数据处理与分析</li>
+              <li><i class="fas fa-chart-line"></i> 多维度数据可视化</li>
+              <li><i class="fas fa-cloud"></i> 云端报告实时共享</li>
+              <li><i class="fas fa-shield-alt"></i> 企业级数据安全保障</li>
             </ul>
           </div>
         </div>
