@@ -365,6 +365,7 @@ const saveConnector = () => {
   .then(response => {
     if(response.code==200){
       ElMessage.success(`保存成功`);
+      handleConnectorQuery();
     }else{
       ElMessage.error(`获取连接器状态失败`);
     }
