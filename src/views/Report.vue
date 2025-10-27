@@ -1,6 +1,5 @@
 <template>
   <div class="container">
-    <!-- 顶部导航 -->
     <header class="header">
       <button class="mobile-menu-toggle" @click="sidebarActive = !sidebarActive">
         <i class="fas fa-bars"></i>
@@ -10,6 +9,16 @@
         <span>JQuick BI 设计器</span>
       </div>
       <div class="header-actions">
+        <button 
+            class="action-btn" 
+            v-preview="{ 
+              reportInfo, 
+              components: canvasComponents,
+              onPrint: handlePrint
+            }"
+          >
+            <i class="fas fa-eye"></i>预览
+        </button>
         <button class="action-btn" @click="showComponentsModal = true">
           <i class="fas fa-cubes"></i>组件
         </button>
@@ -27,17 +36,22 @@
           <div class="user-avatar">
             <i class="fas fa-user"></i>
           </div>
-          <span>张经理</span>
+          <span>{{currentUserInfo.realName}}</span>
         </div>
       </div>
     </header>
-    
+    <PreviewModal
+      v-model="showPreviewModal"
+      :report-info="reportInfo"
+      :components="canvasComponents"
+      :report-style="reportStyle"
+      @print="handlePrint"
+    />
     <!-- 主内容区 -->
     <div class="main-content">
-      <!-- 左侧菜单 -->
       <aside class="sidebar" :class="{ active: sidebarActive }">
         <div class="menu-section">
-          <div class="menu-section-title">报表管理</div>
+          <div class="menu-section-title text-align-left">报表管理</div>
           <div class="menu-item" :class="{ active: activeReport === 'sales' }" @click="activeReport = 'sales'">
             <i class="fas fa-file-alt"></i>
             <span>销售仪表板</span>
@@ -61,7 +75,7 @@
         </div>
         
         <div class="menu-section">
-          <div class="menu-section-title">资源</div>
+          <div class="menu-section-title text-align-left">资源</div>
           <div class="menu-item">
             <i class="fas fa-image"></i>
             <span>图片库</span>
@@ -97,7 +111,7 @@
       <div class="workspace">
         <div class="workspace-header">
           <div>
-            <h1 class="workspace-title">{{ reportInfo.name }}</h1>
+            <h1 class="workspace-title text-align-left">{{ reportInfo.name }}</h1>
             <p class="workspace-description">拖放组件到画布中创建您的报表，使用右侧面板编辑属性</p>
           </div>
         </div>
@@ -522,33 +536,32 @@
               <i class="fas fa-user"></i>
             </div>
             <div>
-              <div style="font-size: 18px; font-weight: 600;">张经理</div>
-              <div style="color: #666;">销售部 | 经理</div>
+              <div style="font-size: 18px; font-weight: 600;">{{currentUserInfo.realName}}</div>
+              <div style="color: #666;">{{currentUserInfo.dept}} | {{currentUserInfo.position}}</div>
             </div>
           </div>
           
           <div class="setting-group">
             <div class="setting-item">
               <label>姓名</label>
-              <input type="text" class="form-control" v-model="userInfo.name">
+              <input type="text" class="form-control" v-model="currentUserInfo.nickName">
             </div>
             <div class="setting-item">
               <label>邮箱</label>
-              <input type="email" class="form-control" v-model="userInfo.email">
+              <input type="email" class="form-control" v-model="currentUserInfo.email">
             </div>
             <div class="setting-item">
               <label>电话</label>
-              <input type="tel" class="form-control" v-model="userInfo.phone">
+              <input type="tel" class="form-control" v-model="currentUserInfo.phone">
             </div>
             <div class="setting-item">
-              <label>部门</label>
-              <input type="text" class="form-control" value="销售部" readonly>
+              <label>签名</label>
+              <textarea class="form-control"  v-model="currentUserInfo.signature"></textarea>
             </div>
           </div>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-outline" @click="showUserProfileModal = false">取消</button>
-          <button class="btn btn-primary" @click="saveUserInfo">保存修改</button>
+          <button class="btn btn-outline" @click="showUserProfileModal = false" style="align:center">关闭</button>
         </div>
       </div>
     </div>
@@ -770,8 +783,13 @@ export default {
 </script>
 <script setup>
 import { ref, reactive, onMounted, computed, nextTick } from 'vue';
-import draggable from 'vuedraggable';
+import PreviewModal from '../components/PreviewModal.vue'
 
+import draggable from 'vuedraggable';
+import request from '../api/request';
+import { ElMessage } from 'element-plus';
+const currentUserInfo = ref({});
+const showPreviewModal = ref(false)
 // 状态管理
 const sidebarActive = ref(false);
 const propertiesPanelActive = ref(true);
@@ -785,11 +803,11 @@ const showDataSourceModal = ref(false);
 const showSettingsModal = ref(false);
 const showComponentEditModal = ref(false);
 const editingComponent = ref(null);
-// 新增标签页相关状态
 const activeTab = ref('style');
 const reportDataSource = ref('');
 const dataFilter = ref('');
 const dataSort = ref('');
+
 const tableColumns = ref(['name', 'date']);
 const interactionLinkage = ref('none');
 const animationEffect = ref('fade');
@@ -844,15 +862,12 @@ const font = reactive({
   style: '',
   align: ''
 });
-
-// 筛选器设置
 const filters = reactive({
   timeRange: '近30天',
   productType: '全部',
   region: '全部'
 });
 
-// 用户信息
 const userInfo = reactive({
   name: '张明',
   email: 'zhang.ming@example.com',
@@ -865,11 +880,21 @@ const dataSources = reactive([
   { id: 2, name: '客户信息表', lastUpdate: '2023-06-14' },
   { id: 3, name: '产品目录', lastUpdate: '2023-06-10' }
 ]);
-
-// 初始化
+const handleUserDetailQuery = () => {
+  request.get('/api/uaa-user/getCurrentUserInfo')
+  .then(response => {
+    if(response.code==200){
+      currentUserInfo.value=response.data;
+    }else{
+      ElMessage.error(`查询当前用户信息失败`);
+    }
+  }
+)
+};
 onMounted(() => {
-  // 尝试从本地存储加载数据
+  handleUserDetailQuery();
   const savedData = localStorage.getItem('biDesignerData');
+
   if (savedData) {
     const parsedData = JSON.parse(savedData);
     Object.assign(reportInfo, parsedData.reportInfo);
@@ -1011,12 +1036,6 @@ const applyFilters = () => {
   // 筛选器应用逻辑
 };
 
-// 保存用户信息
-const saveUserInfo = () => {
-  showUserProfileModal.value = false;
-  saveToLocalStorage();
-};
-
 // 选择数据源
 const selectDataSource = (id) => {
   reportDataSource.value = id;
@@ -1093,10 +1112,27 @@ const deleteComponent = (id) => {
     }
   }
 };
+const vPreview = {
+  mounted(el, binding) {
+    el.addEventListener('click', () => {
+      const { reportInfo, components, onPrint } = binding.value;
+      openPreview(reportInfo, components, onPrint);
+    });
+  }
+};
+const openPreview = (reportInfo, components, onPrint) => {
+  showPreviewModal.value = true
+}
+
+// 处理打印
+const handlePrint = (printData) => {
+  console.log('打印数据:', printData)
+  window.print() // 浏览器打印
+  ElMessage.success('已发送到打印队列')
+}
 </script>
 
 <style>
-/* 添加标签页相关样式 */
 .panel-tabs {
   display: flex;
   border-bottom: 1px solid var(--border-color);
@@ -1146,7 +1182,6 @@ const deleteComponent = (id) => {
   font-size: 14px;
 }
 
-/* 删除按钮样式 */
 .delete-btn {
   background: none;
   border: none;
@@ -1160,8 +1195,6 @@ const deleteComponent = (id) => {
 .delete-btn:hover {
   color: #d93025;
 }
-
-/* 基础样式 */
 :root {
   --primary-color: #ff8326;
   --secondary-color: #fff5eb;
@@ -1193,8 +1226,6 @@ body {
   flex-direction: column;
   height: 100vh;
 }
-
-/* 顶部导航栏 */
 .header {
   height: var(--header-height);
   background-color: white;
@@ -1244,7 +1275,6 @@ body {
   color: var(--primary-color);
 }
 
-/* 个人中心样式 */
 .user-profile {
   display: flex;
   align-items: center;
@@ -1270,15 +1300,12 @@ body {
   color: white;
   font-weight: bold;
 }
-
-/* 主内容区 */
 .main-content {
   display: flex;
   flex: 1;
   overflow: hidden;
 }
 
-/* 左侧菜单 */
 .sidebar {
   width: var(--sidebar-width);
   background-color: white;
@@ -1324,8 +1351,6 @@ body {
   margin-right: 12px;
   text-align: center;
 }
-
-/* 工作区 */
 .workspace {
   flex: 1;
   padding: 24px;
@@ -1363,7 +1388,6 @@ body {
   min-height: 400px;
 }
 
-/* 右侧属性面板 */
 .properties-panel {
   width: 300px;
   background-color: white;
@@ -1381,7 +1405,6 @@ body {
   border-bottom: 1px solid var(--border-color);
 }
 
-/* 模态框样式 */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -1470,7 +1493,6 @@ body {
   border: 1px solid var(--primary-color);
 }
 
-/* 组件列表样式 */
 .components-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1497,7 +1519,6 @@ body {
   margin-bottom: 8px;
 }
 
-/* 表单控件样式 */
 .form-control {
   width: 100%;
   padding: 8px 12px;
@@ -1580,7 +1601,6 @@ body {
   background-color: var(--secondary-color);
 }
 
-/* 响应式调整 */
 @media (max-width: 1100px) {
   .sidebar {
     width: 240px;
@@ -1625,7 +1645,6 @@ body {
   }
 }
 
-/* 移动端菜单切换按钮 */
 .mobile-menu-toggle {
   display: none;
   background: none;
@@ -1634,5 +1653,100 @@ body {
   color: var(--primary-color);
   cursor: pointer;
   margin-right: 15px;
+}
+
+.setting-label,
+.setting-item label,
+.filter-item label,
+.data-source-item label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 100px; 
+  vertical-align: middle;
+}
+.etting-group,
+.setting-item,
+.filter-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  flex-wrap: nowrap; 
+}
+.etting-group select,
+.etting-group .el-color-picker,
+.setting-item .form-control,
+.setting-item select,
+.setting-item .color-options,
+.setting-item .checkbox-group,
+.filter-item .form-control {
+  flex: 1; /* 占满剩余空间 */
+  min-width: 0; 
+}
+
+.etting-group .el-color-picker {
+  width: auto;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap; 
+}
+
+.modal-body .setting-item,
+.modal-body .filter-item {
+  display: flex;
+  align-items: center;
+}
+
+.setting-group {
+  padding: 0;
+}
+
+.setting-item {
+  margin: 0;
+  border-bottom: 1px solid #f2f3f5;
+}
+
+.setting-item:last-child {
+  border-bottom: none;
+}
+
+
+
+.preview-modal {
+  max-width: 90%;
+  max-height: 90vh;
+}
+
+@media print {
+  .modal-overlay,
+  .modal-overlay.active {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: white;
+    z-index: 9999;
+  }
+  
+  .modal-header,
+  .modal-footer,
+  .preview-actions {
+    display: none !important;
+  }
+  
+  .preview-modal {
+    box-shadow: none;
+    max-width: none;
+    max-height: none;
+  }
+  
+  .preview-container {
+    box-shadow: none;
+  }
 }
 </style>
