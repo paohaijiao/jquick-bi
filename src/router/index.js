@@ -106,10 +106,9 @@ const routes = [
   {
     path: '/builder',
     name: 'builderPage',
-    component: () => import('../views/builderbak.vue')
+    component: () => import('../views/builder.vue')
   }
 ]
-
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes
