@@ -102,6 +102,11 @@ const routes = [
     path: '/pipLine',
     name: 'dataSetList',
     component: () => import('../views/PipLine.vue')
+  },
+  {
+    path: '/builder',
+    name: 'builderPage',
+    component: () => import('../views/builderbak.vue')
   }
 ]
 
