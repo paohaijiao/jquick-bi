@@ -18,7 +18,7 @@
         <button class="action-btn">
           <i class="fas fa-eye"></i>预览
         </button>
-        <button class="action-btn" @click="showHtmlEditor = true">
+        <button class="action-btn" @click="openModal('HTML编辑器')">
           <i class="fas fa-code"></i>编辑器
         </button>
       </div>
@@ -170,8 +170,11 @@
           </div>
         </div>
 
-        <div class="canvas-container" id="canvas" @dragover.prevent @drop="handleDrop">
-          <div class="canvas-drag-area" :class="{ 'grid-layout': useGridLayout }">
+        <div class="canvas-container" id="canvas"
+             @dragover.prevent="handleDragOver"
+             @drop="handleDrop"
+             @dragleave="handleDragLeave">
+          <div class="canvas-drag-area" :class="{ 'grid-layout': useGridLayout, 'dragover': isDraggingOver }">
             <div
                 class="canvas-component"
                 :class="{
@@ -311,8 +314,6 @@
         </div>
       </div>
     </div>
-
-    <!-- 模态框 -->
     <div class="modal-overlay" :class="{ active: activeModal === 'Head设置' }" @click="closeModal">
       <div class="modal large-modal" @click.stop>
         <div class="modal-header">
@@ -423,13 +424,16 @@
 
 <script>
 import { defineComponent, ref, computed } from 'vue';
-
-// 自定义拖拽指令
 const draggable = {
   mounted(el, binding) {
     el.draggable = true;
     el.addEventListener('dragstart', (e) => {
       e.dataTransfer.setData('text/plain', JSON.stringify(binding.value));
+      el.classList.add('dragging');
+    });
+
+    el.addEventListener('dragend', () => {
+      el.classList.remove('dragging');
     });
   }
 };
@@ -439,17 +443,14 @@ export default defineComponent({
     draggable
   },
   setup() {
-    // 状态管理
     const sidebarActive = ref(false);
     const propertiesPanelActive = ref(true);
     const activeTab = ref('properties');
     const activeModal = ref('');
     const selectedComponentId = ref('h1_1234');
-    const useGridLayout = ref(true); // 启用网格布局
+    const useGridLayout = ref(true);
     const showMobileMenu = ref(false);
-    const showHtmlEditor = ref(false);
-
-    // 页面设置
+    const isDraggingOver = ref(false);
     const pageTitle = ref('JQuick BI 报表');
     const charset = ref('UTF-8');
     const viewport = ref('width=device-width, initial-scale=1.0');
@@ -457,13 +458,9 @@ export default defineComponent({
       { name: 'description', content: 'JQuick BI 报表设计' },
       { name: 'keywords', content: 'BI,报表,数据分析' }
     ]);
-
-    // DOM关系
     const domRelations = ref([
       { source: 'div_1234', target: 'h1_1234, p_5678' }
     ]);
-
-    // HTML编辑器内容
     const htmlCode = ref(`head: {
   title: "JQuick BI 报表";
   meta { charset: "UTF-8"; }
@@ -476,8 +473,6 @@ h1[h1_1234]: { style-fontSize: "24px"; style-color: "#333"; } :: "一级标题";
 p[p_5678]: { style-fontSize: "14px"; style-color: "#666"; } :: "这是一个段落文本";
 button[button_9012]: { style-padding: "8px 16px"; style-backgroundColor: "#ff8326"; style-color: "white"; } :: "按钮";
 input[input_3456]: { type: "text"; placeholder: "请输入内容"; style-padding: "8px"; style-border: "1px solid #ddd"; };`);
-
-    // 组件数据 - 添加 inline 属性和样式属性
     const components = ref([
       {
         id: 'h1_1234',
@@ -542,13 +537,9 @@ input[input_3456]: { type: "text"; placeholder: "请输入内容"; style-padding
         relations: ''
       }
     ]);
-
-    // 计算属性
     const selectedComponent = computed(() => {
       return components.value.find(c => c.id === selectedComponentId.value) || null;
     });
-
-    // 方法
     const getComponentStyle = (component) => {
       return {
         fontSize: component.style.fontSize,
@@ -595,7 +586,6 @@ input[input_3456]: { type: "text"; placeholder: "请输入内容"; style-padding
 
     const saveHeadSettings = () => {
       closeModal();
-      // 实际应用中可以在这里保存设置
     };
 
     const addRelation = () => {
@@ -608,16 +598,13 @@ input[input_3456]: { type: "text"; placeholder: "请输入内容"; style-padding
 
     const saveRelations = () => {
       closeModal();
-      // 实际应用中可以在这里保存关系
     };
 
     const parseHtml = () => {
-      // 解析HTML代码的逻辑
       console.log('解析HTML:', htmlCode.value);
     };
 
     const generateHtml = () => {
-      // 生成HTML代码的逻辑
       console.log('生成HTML');
     };
 
@@ -626,7 +613,6 @@ input[input_3456]: { type: "text"; placeholder: "请输入内容"; style-padding
     };
 
     const applyHtml = () => {
-      // 应用HTML代码的逻辑
       console.log('应用HTML:', htmlCode.value);
       closeModal();
     };
@@ -654,8 +640,6 @@ input[input_3456]: { type: "text"; placeholder: "请输入内容"; style-padding
         ol: 'fas fa-list-ol',
         li: 'fas fa-list'
       };
-
-      // 定义哪些元素是内联元素
       const inlineElements = ['button', 'input', 'label', 'span', 'a', 'img', 'select'];
       const isInline = inlineElements.includes(type);
 
@@ -673,37 +657,51 @@ input[input_3456]: { type: "text"; placeholder: "请输入内容"; style-padding
                             `${type.charAt(0).toUpperCase() + type.slice(1)} 内容`
       };
     };
+    const handleDragOver = (e) => {
+      e.preventDefault();
+      isDraggingOver.value = true;
+      e.dataTransfer.dropEffect = 'copy';
+    };
+
+    const handleDragLeave = () => {
+      isDraggingOver.value = false;
+    };
 
     const handleDrop = (e) => {
       e.preventDefault();
-      const data = JSON.parse(e.dataTransfer.getData('text/plain'));
-      const newId = `${data.type}_${Math.floor(Math.random() * 10000)}`;
+      e.stopPropagation();
+      isDraggingOver.value = false;
 
-      // 根据元素类型设置默认样式
-      const defaultStyle = data.inline ? {
-        width: 'auto',
-        display: 'inline-block',
-        padding: '8px 16px',
-        margin: '4px',
-        fontSize: '14px'
-      } : {
-        width: '100%',
-        display: 'block',
-        margin: '10px 0',
-        fontSize: '14px'
-      };
+      try {
+        const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+        const newId = `${data.type}_${Math.floor(Math.random() * 10000)}`;
+        const defaultStyle = data.inline ? {
+          width: 'auto',
+          display: 'inline-block',
+          padding: '8px 16px',
+          margin: '4px',
+          fontSize: '14px'
+        } : {
+          width: '100%',
+          display: 'block',
+          margin: '10px 0',
+          fontSize: '14px'
+        };
 
-      components.value.push({
-        id: newId,
-        name: data.name,
-        icon: data.icon,
-        content: data.content,
-        inline: data.inline,
-        style: { ...defaultStyle },
-        relations: ''
-      });
+        components.value.push({
+          id: newId,
+          name: data.name,
+          icon: data.icon,
+          content: data.content,
+          inline: data.inline,
+          style: { ...defaultStyle },
+          relations: ''
+        });
 
-      selectComponent(newId);
+        selectComponent(newId);
+      } catch (error) {
+        console.error('拖拽数据解析失败:', error);
+      }
     };
 
     return {
@@ -721,7 +719,7 @@ input[input_3456]: { type: "text"; placeholder: "请输入内容"; style-padding
       htmlCode,
       useGridLayout,
       showMobileMenu,
-      showHtmlEditor,
+      isDraggingOver,
       selectedComponent,
       getComponentStyle,
       toggleSidebar,
@@ -740,6 +738,8 @@ input[input_3456]: { type: "text"; placeholder: "请输入内容"; style-padding
       clearHtml,
       applyHtml,
       draggableOptions,
+      handleDragOver,
+      handleDragLeave,
       handleDrop
     };
   }
@@ -774,7 +774,6 @@ body {
   height: 100vh;
 }
 
-/* 头部样式 */
 .header {
   display: flex;
   align-items: center;
@@ -1000,6 +999,11 @@ body {
   background-color: var(--secondary-color);
 }
 
+.menu-item.dragging {
+  opacity: 0.5;
+  background-color: rgba(255, 131, 38, 0.1);
+}
+
 .menu-item i {
   width: 20px;
   color: var(--primary-color);
@@ -1047,6 +1051,15 @@ body {
 .canvas-drag-area {
   min-height: 100%;
   padding: 20px;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+/* 拖拽悬停效果 */
+.canvas-drag-area.dragover {
+  border-color: var(--primary-color);
+  background-color: rgba(255, 131, 38, 0.1);
 }
 
 /* 网格布局 */
