@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-      <header class="header">
+    <header class="header">
       <button class="mobile-menu-toggle" @click="toggleSidebar">
         <i class="fas fa-bars"></i>
       </button>
@@ -153,7 +153,7 @@
           </div>
         </div>
       </aside>
-      
+
       <div class="workspace">
         <div class="workspace-header">
           <div>
@@ -171,13 +171,17 @@
         </div>
 
         <div class="canvas-container" id="canvas" @dragover.prevent @drop="handleDrop">
-          <div class="canvas-drag-area">
-            <div 
-              class="canvas-component" 
-              :class="{ selected: selectedComponentId === component.id }"
-              v-for="component in components" 
-              :key="component.id"
-              @click="selectComponent(component.id)"
+          <div class="canvas-drag-area" :class="{ 'grid-layout': useGridLayout }">
+            <div
+                class="canvas-component"
+                :class="{
+                selected: selectedComponentId === component.id,
+                'inline-component': component.inline
+              }"
+                v-for="component in components"
+                :key="component.id"
+                @click="selectComponent(component.id)"
+                :style="getComponentStyle(component)"
             >
               <div class="component-header">
                 <div class="component-info">
@@ -192,20 +196,20 @@
                   </button>
                 </div>
               </div>
-              
+
               <div class="component-content">
-                {{ component.content }}
+                <div v-html="component.content"></div>
               </div>
             </div>
           </div>
         </div>
       </div>
-      
+
       <div class="properties-panel active" :class="{ active: propertiesPanelActive }">
         <div class="panel-title">
           <i class="fas fa-sliders-h"></i>属性设置
         </div>
-        
+
         <div class="panel-tabs">
           <div class="tab-item" :class="{ active: activeTab === 'properties' }" @click="activeTab = 'properties'">
             <i class="fas fa-tag"></i>属性
@@ -217,36 +221,36 @@
             <i class="fas fa-project-diagram"></i>关系
           </div>
         </div>
-        
+
         <div class="tab-content" v-if="selectedComponent">
           <div v-if="activeTab === 'properties'">
             <div class="setting-group">
               <div class="setting-title">元素属性</div>
-              
+
               <div class="setting-item">
                 <label>元素ID</label>
                 <input type="text" class="form-control" v-model="selectedComponent.id">
               </div>
-              
+
               <div class="setting-item">
                 <label>元素名称</label>
                 <input type="text" class="form-control" v-model="selectedComponent.name">
               </div>
-              
+
               <div class="setting-item">
                 <label>内容文本</label>
                 <textarea class="form-control" rows="3" v-model="selectedComponent.content"></textarea>
               </div>
             </div>
-            
+
             <div class="setting-group">
               <div class="setting-title">页面属性</div>
-              
+
               <div class="setting-item">
                 <label>页面标题</label>
                 <input type="text" class="form-control" v-model="pageTitle">
               </div>
-              
+
               <div class="setting-item">
                 <label>字符编码</label>
                 <select class="form-control" v-model="charset">
@@ -257,32 +261,46 @@
               </div>
             </div>
           </div>
-          
+
           <div v-if="activeTab === 'style'">
             <div class="setting-group">
               <div class="setting-title">样式设置</div>
-              
+
               <div class="setting-item">
                 <label>字体大小</label>
                 <input type="text" class="form-control" v-model="selectedComponent.style.fontSize">
               </div>
-              
+
               <div class="setting-item">
                 <label>颜色</label>
                 <input type="text" class="form-control" v-model="selectedComponent.style.color">
               </div>
-              
+
               <div class="setting-item">
                 <label>背景色</label>
                 <input type="text" class="form-control" v-model="selectedComponent.style.backgroundColor">
               </div>
+
+              <div class="setting-item">
+                <label>宽度</label>
+                <input type="text" class="form-control" v-model="selectedComponent.style.width">
+              </div>
+
+              <div class="setting-item">
+                <label>显示方式</label>
+                <select class="form-control" v-model="selectedComponent.style.display">
+                  <option value="block">块级显示</option>
+                  <option value="inline-block">内联块</option>
+                  <option value="inline">内联</option>
+                </select>
+              </div>
             </div>
           </div>
-          
+
           <div v-if="activeTab === 'relation'">
             <div class="setting-group">
               <div class="setting-title">元素关系</div>
-              
+
               <div class="relation-item">
                 <input type="text" class="form-control" v-model="selectedComponent.id" readonly>
                 <span class="relation-arrow">-></span>
@@ -307,7 +325,7 @@
               <label>页面标题</label>
               <input type="text" class="form-control" v-model="pageTitle">
             </div>
-            
+
             <div class="setting-item">
               <label>页面编码</label>
               <select class="form-control" v-model="charset">
@@ -316,13 +334,13 @@
                 <option value="ISO-8859-1">ISO-8859-1</option>
               </select>
             </div>
-            
+
             <div class="setting-item">
               <label>视口设置</label>
               <input type="text" class="form-control" v-model="viewport" placeholder="width=device-width, initial-scale=1.0">
             </div>
           </div>
-          
+
           <div class="meta-items">
             <div class="setting-title">Meta标签</div>
             <div class="meta-item" v-for="(meta, index) in metaTags" :key="index">
@@ -427,7 +445,10 @@ export default defineComponent({
     const activeTab = ref('properties');
     const activeModal = ref('');
     const selectedComponentId = ref('h1_1234');
-    
+    const useGridLayout = ref(true); // 启用网格布局
+    const showMobileMenu = ref(false);
+    const showHtmlEditor = ref(false);
+
     // 页面设置
     const pageTitle = ref('JQuick BI 报表');
     const charset = ref('UTF-8');
@@ -436,63 +457,12 @@ export default defineComponent({
       { name: 'description', content: 'JQuick BI 报表设计' },
       { name: 'keywords', content: 'BI,报表,数据分析' }
     ]);
-    
-    // 组件数据
-    const components = ref([
-      {
-        id: 'h1_1234',
-        name: 'H1 标题',
-        icon: 'fas fa-heading',
-        content: '一级标题',
-        style: {
-          fontSize: '24px',
-          color: '#333',
-          backgroundColor: ''
-        },
-        relations: ''
-      },
-      {
-        id: 'p_5678',
-        name: 'P 段落',
-        icon: 'fas fa-paragraph',
-        content: '这是一个段落文本',
-        style: {
-          fontSize: '14px',
-          color: '#666',
-          backgroundColor: ''
-        },
-        relations: ''
-      },
-      {
-        id: 'button_9012',
-        name: 'Button 按钮',
-        icon: 'fas fa-hand-pointer',
-        content: '按钮',
-        style: {
-          fontSize: '14px',
-          color: 'white',
-          backgroundColor: '#ff8326'
-        },
-        relations: ''
-      },
-      {
-        id: 'input_3456',
-        name: 'Input 输入框',
-        icon: 'fas fa-edit',
-        content: '<input type="text" class="preview-input" placeholder="请输入内容" disabled>',
-        style: {
-          padding: '8px',
-          border: '1px solid #ddd'
-        },
-        relations: ''
-      }
-    ]);
-    
+
     // DOM关系
     const domRelations = ref([
       { source: 'div_1234', target: 'h1_1234, p_5678' }
     ]);
-    
+
     // HTML编辑器内容
     const htmlCode = ref(`head: {
   title: "JQuick BI 报表";
@@ -506,82 +476,161 @@ h1[h1_1234]: { style-fontSize: "24px"; style-color: "#333"; } :: "一级标题";
 p[p_5678]: { style-fontSize: "14px"; style-color: "#666"; } :: "这是一个段落文本";
 button[button_9012]: { style-padding: "8px 16px"; style-backgroundColor: "#ff8326"; style-color: "white"; } :: "按钮";
 input[input_3456]: { type: "text"; placeholder: "请输入内容"; style-padding: "8px"; style-border: "1px solid #ddd"; };`);
-    
+
+    // 组件数据 - 添加 inline 属性和样式属性
+    const components = ref([
+      {
+        id: 'h1_1234',
+        name: 'H1 标题',
+        icon: 'fas fa-heading',
+        content: '一级标题',
+        inline: false,
+        style: {
+          fontSize: '24px',
+          color: '#333',
+          backgroundColor: '',
+          width: '100%',
+          display: 'block'
+        },
+        relations: ''
+      },
+      {
+        id: 'p_5678',
+        name: 'P 段落',
+        icon: 'fas fa-paragraph',
+        content: '这是一个段落文本',
+        inline: false,
+        style: {
+          fontSize: '14px',
+          color: '#666',
+          backgroundColor: '',
+          width: '100%',
+          display: 'block'
+        },
+        relations: ''
+      },
+      {
+        id: 'button_9012',
+        name: 'Button 按钮',
+        icon: 'fas fa-hand-pointer',
+        content: '按钮',
+        inline: true,
+        style: {
+          fontSize: '14px',
+          color: 'white',
+          backgroundColor: '#ff8326',
+          width: 'auto',
+          display: 'inline-block',
+          padding: '8px 16px',
+          margin: '4px'
+        },
+        relations: ''
+      },
+      {
+        id: 'input_3456',
+        name: 'Input 输入框',
+        icon: 'fas fa-edit',
+        content: '<input type="text" class="preview-input" placeholder="请输入内容" disabled>',
+        inline: true,
+        style: {
+          padding: '8px',
+          border: '1px solid #ddd',
+          width: '200px',
+          display: 'inline-block',
+          margin: '4px'
+        },
+        relations: ''
+      }
+    ]);
+
     // 计算属性
     const selectedComponent = computed(() => {
       return components.value.find(c => c.id === selectedComponentId.value) || null;
     });
-    
+
     // 方法
+    const getComponentStyle = (component) => {
+      return {
+        fontSize: component.style.fontSize,
+        color: component.style.color,
+        backgroundColor: component.style.backgroundColor,
+        width: component.style.width,
+        display: component.style.display,
+        padding: component.style.padding,
+        margin: component.style.margin,
+        border: component.style.border
+      };
+    };
+
     const toggleSidebar = () => {
       sidebarActive.value = !sidebarActive.value;
     };
-    
+
     const selectComponent = (id) => {
       selectedComponentId.value = id;
     };
-    
+
     const deleteComponent = (id) => {
       components.value = components.value.filter(c => c.id !== id);
       if (selectedComponentId.value === id) {
         selectedComponentId.value = components.value.length > 0 ? components.value[0].id : '';
       }
     };
-    
+
     const openModal = (type) => {
       activeModal.value = type;
     };
-    
+
     const closeModal = () => {
       activeModal.value = '';
     };
-    
+
     const addMeta = () => {
       metaTags.value.push({ name: '', content: '' });
     };
-    
+
     const removeMeta = (index) => {
       metaTags.value.splice(index, 1);
     };
-    
+
     const saveHeadSettings = () => {
       closeModal();
       // 实际应用中可以在这里保存设置
     };
-    
+
     const addRelation = () => {
       domRelations.value.push({ source: '', target: '' });
     };
-    
+
     const removeRelation = (index) => {
       domRelations.value.splice(index, 1);
     };
-    
+
     const saveRelations = () => {
       closeModal();
       // 实际应用中可以在这里保存关系
     };
-    
+
     const parseHtml = () => {
       // 解析HTML代码的逻辑
       console.log('解析HTML:', htmlCode.value);
     };
-    
+
     const generateHtml = () => {
       // 生成HTML代码的逻辑
       console.log('生成HTML');
     };
-    
+
     const clearHtml = () => {
       htmlCode.value = '';
     };
-    
+
     const applyHtml = () => {
       // 应用HTML代码的逻辑
       console.log('应用HTML:', htmlCode.value);
       closeModal();
     };
-    
+
     const draggableOptions = (type) => {
       const icons = {
         div: 'fas fa-square',
@@ -605,36 +654,58 @@ input[input_3456]: { type: "text"; placeholder: "请输入内容"; style-padding
         ol: 'fas fa-list-ol',
         li: 'fas fa-list'
       };
-      
+
+      // 定义哪些元素是内联元素
+      const inlineElements = ['button', 'input', 'label', 'span', 'a', 'img', 'select'];
+      const isInline = inlineElements.includes(type);
+
       return {
         type,
         name: `${type.charAt(0).toUpperCase() + type.slice(1)} ${type === 'div' ? '容器' : ''}`,
         icon: icons[type] || 'fas fa-cube',
-        content: type === 'input' ? 
-          '<input type="text" class="preview-input" placeholder="请输入内容" disabled>' : 
-          type === 'button' ? '按钮' : 
-          type === 'img' ? '<img src="..." alt="图片">' : 
-          `${type.charAt(0).toUpperCase() + type.slice(1)} 内容`
+        inline: isInline,
+        content: type === 'input' ?
+            '<input type="text" class="preview-input" placeholder="请输入内容" disabled>' :
+            type === 'button' ? '按钮' :
+                type === 'img' ? '<img src="..." alt="图片">' :
+                    type === 'select' ? '<select class="preview-select" disabled><option>选项1</option></select>' :
+                        type === 'textarea' ? '<textarea class="preview-textarea" placeholder="请输入内容" disabled></textarea>' :
+                            `${type.charAt(0).toUpperCase() + type.slice(1)} 内容`
       };
     };
-    
+
     const handleDrop = (e) => {
       e.preventDefault();
       const data = JSON.parse(e.dataTransfer.getData('text/plain'));
       const newId = `${data.type}_${Math.floor(Math.random() * 10000)}`;
-      
+
+      // 根据元素类型设置默认样式
+      const defaultStyle = data.inline ? {
+        width: 'auto',
+        display: 'inline-block',
+        padding: '8px 16px',
+        margin: '4px',
+        fontSize: '14px'
+      } : {
+        width: '100%',
+        display: 'block',
+        margin: '10px 0',
+        fontSize: '14px'
+      };
+
       components.value.push({
         id: newId,
         name: data.name,
         icon: data.icon,
         content: data.content,
-        style: {},
+        inline: data.inline,
+        style: { ...defaultStyle },
         relations: ''
       });
-      
+
       selectComponent(newId);
     };
-    
+
     return {
       sidebarActive,
       propertiesPanelActive,
@@ -648,7 +719,11 @@ input[input_3456]: { type: "text"; placeholder: "请输入内容"; style-padding
       components,
       domRelations,
       htmlCode,
+      useGridLayout,
+      showMobileMenu,
+      showHtmlEditor,
       selectedComponent,
+      getComponentStyle,
       toggleSidebar,
       selectComponent,
       deleteComponent,
@@ -679,229 +754,7 @@ input[input_3456]: { type: "text"; placeholder: "请输入内容"; style-padding
   --text-color: #333;
   --bg-color: #f9f9f9;
 }
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 16px;
-  background-color: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  z-index: 100;
-  gap: 12px;
-  min-height: 56px;
-}
 
-/* Logo 样式 */
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 1.1rem;
-  font-weight: bold;
-  color: var(--primary-color);
-  flex-shrink: 0;
-}
-
-/* 主要操作按钮组 */
-.header-main-actions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex: 1;
-  justify-content: center;
-  max-width: 400px;
-}
-
-/* 次要操作按钮组 */
-.header-secondary-actions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
-}
-
-/* 操作按钮优化 */
-.action-btn {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 6px 10px;
-  background-color: white;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-size: 0.85rem;
-  white-space: nowrap;
-}
-
-.action-btn.compact {
-  padding: 6px 8px;
-}
-
-.action-btn:hover {
-  background-color: var(--secondary-color);
-  border-color: var(--primary-color);
-}
-
-/* 用户信息优化 */
-.user-profile {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.user-profile.compact .username {
-  display: none;
-}
-
-.user-profile:hover {
-  background-color: var(--secondary-color);
-}
-
-.user-avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background-color: var(--primary-color);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 0.8rem;
-}
-
-/* 移动端菜单 */
-.mobile-menu-toggle {
-  display: none;
-  background: none;
-  border: none;
-  font-size: 1.1rem;
-  cursor: pointer;
-  color: var(--text-color);
-  padding: 6px;
-}
-
-.mobile-more-menu {
-  display: none;
-  position: relative;
-}
-
-.mobile-menu-dropdown {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  background: white;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  z-index: 101;
-  min-width: 120px;
-}
-
-.mobile-menu-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  width: 100%;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 0.85rem;
-  transition: background-color 0.2s;
-}
-
-.mobile-menu-item:hover {
-  background-color: var(--secondary-color);
-}
-
-/* 响应式设计 */
-@media (max-width: 1024px) {
-  .header {
-    padding: 8px 12px;
-    gap: 8px;
-  }
-  
-  .action-btn {
-    padding: 5px 8px;
-    font-size: 0.8rem;
-  }
-  
-  .action-btn span {
-    display: none;
-  }
-  
-  .action-btn.compact {
-    padding: 5px 7px;
-  }
-}
-
-@media (max-width: 768px) {
-  .mobile-menu-toggle {
-    display: block;
-  }
-  
-  .header-main-actions {
-    max-width: none;
-    justify-content: flex-start;
-    overflow-x: auto;
-    padding: 0 8px;
-  }
-  
-  .header-secondary-actions {
-    display: none;
-  }
-  
-  .mobile-more-menu {
-    display: block;
-  }
-  
-  .logo span {
-    display: none;
-  }
-  
-  .action-btn {
-    padding: 6px 8px;
-  }
-  
-  .action-btn i {
-    margin: 0;
-  }
-}
-
-@media (max-width: 480px) {
-  .header {
-    padding: 6px 8px;
-  }
-  
-  .header-main-actions {
-    gap: 4px;
-  }
-  
-  .action-btn {
-    padding: 5px 6px;
-    font-size: 0.75rem;
-  }
-  
-  .logo {
-    font-size: 1rem;
-  }
-}
-
-/* 滚动条样式用于移动端水平滚动 */
-.header-main-actions::-webkit-scrollbar {
-  display: none;
-}
-
-.header-main-actions {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
 * {
   margin: 0;
   padding: 0;
@@ -1008,7 +861,125 @@ body {
   padding: 15px 0;
   border-bottom: 1px solid var(--border-color);
 }
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  gap: 12px;
+  min-height: 56px;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+/* Logo 样式 */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--primary-color);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
 
+.logo i {
+  font-size: 1.3rem;
+}
+
+/* 主要操作按钮组 */
+.header-main-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  justify-content: center;
+  max-width: 400px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
+
+/* 次要操作按钮组 */
+.header-secondary-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* 操作按钮优化 */
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  background-color: white;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.action-btn.compact {
+  padding: 6px 8px;
+}
+
+.action-btn:hover {
+  background-color: var(--secondary-color);
+  border-color: var(--primary-color);
+}
+
+/* 用户信息优化 */
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  flex-shrink: 0;
+}
+
+.user-profile.compact .username {
+  display: inline;
+}
+
+.user-profile:hover {
+  background-color: var(--secondary-color);
+}
+
+.user-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+/* 移动端菜单 */
+.mobile-menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: var(--text-color);
+  padding: 6px;
+  flex-shrink: 0;
+}
 .menu-section-title {
   padding: 0 15px 10px;
   font-weight: bold;
@@ -1065,7 +1036,7 @@ body {
   gap: 10px;
 }
 
-/* 画布区域 */
+/* 画布区域 - 改进布局 */
 .canvas-container {
   flex: 1;
   padding: 20px;
@@ -1075,20 +1046,42 @@ body {
 
 .canvas-drag-area {
   min-height: 100%;
+  padding: 20px;
+}
+
+/* 网格布局 */
+.canvas-drag-area.grid-layout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 10px;
 }
 
 .canvas-component {
-  margin: 10px;
+  margin: 0;
   padding: 15px;
   border: 1px solid var(--border-color);
   border-radius: 8px;
   background-color: white;
   transition: all 0.2s;
+  box-sizing: border-box;
 }
 
 .canvas-component.selected {
   border: 2px solid var(--primary-color);
   box-shadow: 0 0 0 2px rgba(255, 131, 38, 0.2);
+}
+
+/* 内联组件样式 */
+.canvas-component.inline-component {
+  display: inline-block;
+  vertical-align: top;
+  min-width: 100px;
+}
+
+/* 块级组件样式 */
+.canvas-component:not(.inline-component) {
+  width: 100%;
 }
 
 .component-header {
@@ -1136,8 +1129,10 @@ body {
   align-items: center;
   justify-content: center;
   color: #666;
+  overflow: hidden;
 }
 
+/* 预览元素样式 */
 .preview-button {
   padding: 8px 16px;
   background-color: var(--primary-color);
@@ -1145,20 +1140,30 @@ body {
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  width: 100%;
 }
 
 .preview-input {
   padding: 8px;
   border: 1px solid var(--border-color);
   border-radius: 4px;
-  width: 200px;
+  width: 100%;
 }
 
 .preview-select {
   padding: 8px;
   border: 1px solid var(--border-color);
   border-radius: 4px;
-  width: 200px;
+  width: 100%;
+}
+
+.preview-textarea {
+  padding: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  width: 100%;
+  min-height: 80px;
+  resize: vertical;
 }
 
 .preview-image {
@@ -1187,24 +1192,6 @@ body {
 
 .list-item {
   padding: 4px 0;
-}
-
-.drop-zone {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 200px;
-  border: 2px dashed var(--border-color);
-  border-radius: 8px;
-  color: #999;
-  text-align: center;
-  padding: 20px;
-}
-
-.drop-zone i {
-  font-size: 2rem;
-  margin-bottom: 10px;
 }
 
 /* 属性面板 */
@@ -1439,55 +1426,6 @@ body {
   padding: 5px;
 }
 
-.component-children {
-  margin-top: 10px;
-  padding: 10px;
-  background-color: #f8f9fa;
-  border-radius: 4px;
-}
-
-.children-container {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.child-component {
-  padding: 8px;
-  border: 1px solid #e9ecef;
-  border-radius: 4px;
-  background: white;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-}
-
-.child-component.selected {
-  border-color: var(--primary-color);
-}
-
-.child-component:hover {
-  background-color: var(--secondary-color);
-}
-
-.children-list {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  max-height: 150px;
-  overflow-y: auto;
-}
-
-.child-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 5px 8px;
-  background: #f8f9fa;
-  border-radius: 4px;
-}
-
 /* 响应式设计 */
 @media (max-width: 1024px) {
   .properties-panel {
@@ -1536,10 +1474,6 @@ body {
     align-self: flex-end;
   }
 
-  .header-actions {
-    display: none;
-  }
-
   .workspace-header {
     flex-direction: column;
     align-items: flex-start;
@@ -1549,6 +1483,19 @@ body {
   .workspace-actions {
     width: 100%;
     justify-content: space-between;
+  }
+
+  /* 移动端布局调整 */
+  .canvas-drag-area.grid-layout {
+    gap: 8px;
+  }
+
+  .canvas-component {
+    padding: 12px;
+  }
+
+  .canvas-component.inline-component {
+    min-width: 80px;
   }
 }
 </style>
