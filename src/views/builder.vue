@@ -8,8 +8,6 @@
         <i class="fas fa-chart-line"></i>
         <span>JQuick BI</span>
       </div>
-      
-      <!-- 主要操作按钮 -->
       <div class="header-main-actions">
         <button class="action-btn">
           <i class="fas fa-code"></i>导出
@@ -24,8 +22,6 @@
           <i class="fas fa-code"></i>编辑器
         </button>
       </div>
-
-      <!-- 次要操作按钮 - 在桌面端显示 -->
       <div class="header-secondary-actions">
         <button class="action-btn compact">
           <i class="fas fa-cubes" title="组件"></i>
@@ -41,7 +37,6 @@
         </div>
       </div>
 
-      <!-- 移动端更多菜单 -->
       <div class="mobile-more-menu">
         <button class="action-btn" @click="showMobileMenu = !showMobileMenu">
           <i class="fas fa-ellipsis-v"></i>
