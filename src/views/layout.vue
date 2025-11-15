@@ -1,7 +1,6 @@
 <template>
   <div class="container">
-    <!-- 顶部导航栏 -->
-    <header class="header">
+     <header class="header">
       <button class="mobile-menu-toggle" @click="toggleSidebar">
         <i class="fas fa-bars"></i>
       </button>
@@ -9,7 +8,6 @@
         <i class="fas fa-chart-line"></i>
         <span>JQuick BI</span>
       </div>
-
       <div class="header-actions">
         <button class="action-btn" @click="loadLayout">
           <i class="fas fa-download"></i>加载
@@ -26,7 +24,6 @@
         <button class="action-btn" @click="openModal('HTML编辑器')">
           <i class="fas fa-code"></i>编辑器
         </button>
-
         <div class="user-profile">
           <div class="user-avatar">
             <i class="fas fa-user"></i>
@@ -37,7 +34,6 @@
     </header>
 
     <div class="main-content">
-      <!-- 左侧组件面板 -->
       <aside class="sidebar" :class="{ collapsed: !sidebarActive }">
         <div class="sidebar-title">HTML元素</div>
         <div class="component-list">
@@ -63,8 +59,6 @@
           </div>
         </div>
       </aside>
-
-      <!-- 中间工作区 -->
       <div class="workspace">
         <div class="workspace-header">
           <div class="workspace-info">
@@ -93,11 +87,9 @@
           </div>
         </div>
 
-        <!-- 布局设计画布 -->
         <div class="canvas-wrapper">
           <div class="canvas-container" id="canvas">
             <div class="layout-grid">
-              <!-- 行 -->
               <div
                   class="layout-row"
                   v-for="(row, rowIndex) in layout.rows"
@@ -121,7 +113,6 @@
                   </div>
                 </div>
 
-                <!-- 列 -->
                 <div class="row-columns">
                   <div
                       class="layout-column"
@@ -153,7 +144,6 @@
                       </div>
                     </div>
 
-                    <!-- 单元格内容 -->
                     <div class="column-content">
                       <div
                           class="canvas-component"
@@ -173,8 +163,6 @@
                         </div>
                         <div class="component-body" v-html="component.content"></div>
                       </div>
-
-                      <!-- 空单元格提示 -->
                       <div class="empty-cell-hint" v-if="column.components.length === 0">
                         <i class="fas fa-arrow-down"></i>
                         <p>拖放元素到此处</p>
@@ -183,8 +171,6 @@
                   </div>
                 </div>
               </div>
-
-              <!-- 空布局提示 -->
               <div class="empty-layout-hint" v-if="layout.rows.length === 0">
                 <i class="fas fa-table"></i>
                 <p>点击"添加行"开始设计布局</p>
@@ -193,8 +179,6 @@
           </div>
         </div>
       </div>
-
-      <!-- 右侧属性面板 -->
       <div class="properties-panel" :class="{ collapsed: !propertiesPanelActive }">
         <div class="panel-header">
           <h3 class="panel-title">属性设置</h3>
@@ -217,7 +201,6 @@
           </div>
 
           <div class="tab-content">
-            <!-- 布局设置面板 -->
             <div v-if="activeTab === 'layout'">
               <div class="setting-group" v-if="selectedRow">
                 <h4 class="setting-title">行设置</h4>
@@ -289,7 +272,6 @@
               </div>
             </div>
 
-            <!-- 元素设置面板 -->
             <div v-if="activeTab === 'element' && selectedComponent">
               <div class="setting-group">
                 <h4 class="setting-title">元素属性</h4>
@@ -308,7 +290,6 @@
               </div>
             </div>
 
-            <!-- 样式设置面板 -->
             <div v-if="activeTab === 'style' && selectedComponent">
               <div class="setting-group">
                 <h4 class="setting-title">样式设置</h4>
@@ -335,7 +316,6 @@
       </div>
     </div>
 
-    <!-- 模态框 -->
     <div class="modal-overlay" :class="{ active: activeModal === 'HTML编辑器' }" @click="closeModal">
       <div class="modal-dialog" @click.stop>
         <div class="modal-header">
@@ -359,7 +339,6 @@
 <script>
 import { defineComponent, ref, computed, onMounted } from 'vue';
 
-// 拖拽指令
 const draggable = {
   mounted(el, binding) {
     el.draggable = true;
@@ -373,13 +352,10 @@ const draggable = {
   }
 };
 
-// 模拟后端接口
 const mockApi = {
-  // 保存布局
   saveLayout: async (data) => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        // 实际项目中这里会调用真实接口
         console.log('后端保存布局数据:', data);
         resolve({ success: true, message: '保存成功' });
       }, 500);
@@ -406,7 +382,6 @@ export default defineComponent({
     draggable
   },
   setup() {
-    // 状态管理
     const sidebarActive = ref(true);
     const propertiesPanelActive = ref(true);
     const activeTab = ref('layout');
@@ -417,17 +392,12 @@ export default defineComponent({
     const selectedRowIndex = ref(-1);
     const selectedColumnIndex = ref(-1);
     const storageType = ref('local'); // 存储方式：local-本地存储，server-服务器存储
-
-    // 布局数据结构
     const layout = ref({
       rows: []
     });
 
-    // 初始化布局
     const initLayout = () => {
-      // 优先从存储加载
       loadLayout().then(() => {
-        // 如果没有加载到数据，使用默认布局
         if (layout.value.rows.length === 0) {
           layout.value = {
             rows: [
@@ -451,19 +421,15 @@ export default defineComponent({
         }
       });
     };
-
-    // 保存布局
     const saveLayout = async () => {
       try {
         if (storageType.value === 'local') {
-          // 本地存储
           localStorage.setItem('reportLayout', JSON.stringify(layout.value));
           alert('本地存储保存成功！');
         } else {
           // 服务器存储（模拟）
           const response = await mockApi.saveLayout(layout.value);
           if (response.success) {
-            // 模拟服务器存储，实际项目中不需要这行
             localStorage.setItem('serverLayout', JSON.stringify(layout.value));
             alert('服务器保存成功！');
           } else {
@@ -476,16 +442,13 @@ export default defineComponent({
       }
     };
 
-    // 加载布局
     const loadLayout = async () => {
       try {
         let loadedData = null;
         if (storageType.value === 'local') {
-          // 从本地存储加载
           const saved = localStorage.getItem('reportLayout');
           loadedData = saved ? JSON.parse(saved) : null;
         } else {
-          // 从服务器加载（模拟）
           const response = await mockApi.getLayout();
           if (response.success) {
             loadedData = response.data;
@@ -508,7 +471,6 @@ export default defineComponent({
       }
     };
 
-    // 行操作
     const addRow = () => {
       const newRow = {
         id: `row_${Date.now()}`,
@@ -556,21 +518,14 @@ export default defineComponent({
     const updateRowStyle = (rowIndex) => {
       layout.value.rows = [...layout.value.rows];
     };
-
-    // 列操作
     const addColumnToSelectedRow = () => {
       if (selectedRowIndex.value === -1) return;
-
       const row = layout.value.rows[selectedRowIndex.value];
       const columnCount = row.columns.length;
       const newWidth = 100 / (columnCount + 1);
-
-      // 调整现有列宽度
       row.columns.forEach(col => {
         col.width = newWidth;
       });
-
-      // 添加新列
       const newColumn = {
         id: `col_${Date.now()}_${columnCount + 1}`,
         width: newWidth,
@@ -587,8 +542,6 @@ export default defineComponent({
       if (confirm('确定要删除这一列吗？')) {
         const row = layout.value.rows[rowIndex];
         row.columns.splice(colIndex, 1);
-
-        // 重新分配宽度
         const columnCount = row.columns.length;
         if (columnCount > 0) {
           const newWidth = 100 / columnCount;
@@ -621,16 +574,11 @@ export default defineComponent({
       const newWidth = Math.min(90, Math.max(5, parseInt(width) || 0));
       const oldWidth = row.columns[colIndex].width;
       const widthDiff = newWidth - oldWidth;
-
-      // 更新当前列宽度
       row.columns[colIndex].width = newWidth;
-
-      // 重新分配剩余宽度
       const totalColumns = row.columns.length;
       if (totalColumns > 1 && widthDiff !== 0) {
         const remainingWidth = -widthDiff;
         const distributePerColumn = remainingWidth / (totalColumns - 1);
-
         row.columns.forEach((col, idx) => {
           if (idx !== colIndex) {
             col.width = Math.max(5, Math.min(90, col.width + distributePerColumn));
@@ -642,8 +590,6 @@ export default defineComponent({
     const updateColumnStyle = (rowIndex, colIndex) => {
       layout.value.rows[rowIndex].columns = [...layout.value.rows[rowIndex].columns];
     };
-
-    // 组件操作
     const draggableOptions = (type) => {
       const icons = {
         div: 'fas fa-square',
@@ -717,7 +663,6 @@ export default defineComponent({
       selectedComponentId.value = componentId;
     };
 
-    // 辅助方法
     const resetSelection = () => {
       selectedRowId.value = '';
       selectedRowIndex.value = -1;
@@ -725,8 +670,6 @@ export default defineComponent({
       selectedColumnIndex.value = -1;
       selectedComponentId.value = '';
     };
-
-    // 计算属性 - 获取选中的行、列、组件
     const selectedRow = computed(() => {
       return layout.value.rows.find(row => row.id === selectedRowId.value) || null;
     });
@@ -755,7 +698,6 @@ export default defineComponent({
       };
     };
 
-    // 其他方法
     const toggleSidebar = () => {
       sidebarActive.value = !sidebarActive.value;
     };
@@ -779,11 +721,9 @@ export default defineComponent({
     };
 
     const previewReport = () => {
-      // 预览报表逻辑
       alert('报表预览功能即将上线');
     };
 
-    // 页面挂载时初始化布局
     onMounted(() => {
       initLayout();
     });
@@ -803,8 +743,6 @@ export default defineComponent({
       selectedColumn,
       selectedComponent,
       storageType,
-
-      // 方法
       addRow,
       removeRow,
       selectRow,
@@ -835,7 +773,6 @@ export default defineComponent({
 </script>
 
 <style>
-/* 全局样式重置与基础设置 */
 * {
   margin: 0;
   padding: 0;
@@ -859,7 +796,6 @@ input, textarea {
   outline: none;
 }
 
-/* 主题颜色变量 - 与builder.vue保持一致 */
 :root {
   --primary-color: #ff8326; /* 主色调：橙色 */
   --primary-dark: #e07010;  /* 主色调深色 */
@@ -874,7 +810,6 @@ input, textarea {
   --card-bg: #ffffff;       /* 卡片背景色 */
 }
 
-/* 容器样式 */
 .container {
   display: flex;
   flex-direction: column;
@@ -882,7 +817,6 @@ input, textarea {
   overflow: hidden;
 }
 
-/* 顶部导航栏 - 与builder.vue风格一致 */
 .header {
   display: flex;
   align-items: center;
@@ -961,14 +895,12 @@ input, textarea {
   font-size: 14px;
 }
 
-/* 主内容区 */
 .main-content {
   display: flex;
   flex: 1;
   overflow: hidden;
 }
 
-/* 左侧组件面板 - 与builder.vue风格一致 */
 .sidebar {
   width: 220px;
   background-color: var(--card-bg);
@@ -1018,7 +950,6 @@ input, textarea {
   text-align: center;
 }
 
-/* 中间工作区 */
 .workspace {
   flex: 1;
   display: flex;
@@ -1072,7 +1003,6 @@ input, textarea {
   transition: all 0.2s;
 }
 
-/* 主按钮样式 - 与builder.vue一致的橙色 */
 .control-btn.primary {
   background-color: var(--primary-color);
   color: white;
@@ -1119,7 +1049,6 @@ input, textarea {
   overflow: hidden;
 }
 
-/* 行样式 */
 .layout-row {
   width: 100%;
   display: flex;
@@ -1181,7 +1110,6 @@ input, textarea {
   height: 100%;
 }
 
-/* 列样式 */
 .layout-column {
   min-height: 100px;
   border-right: 1px dashed #ccc;
@@ -1250,7 +1178,6 @@ input, textarea {
   overflow: auto;
 }
 
-/* 组件样式 */
 .canvas-component {
   background-color: white;
   border: 1px solid var(--border-color);
@@ -1308,7 +1235,6 @@ input, textarea {
   padding: 10px;
 }
 
-/* 空状态提示 */
 .empty-cell-hint {
   height: 100%;
   display: flex;
@@ -1348,7 +1274,6 @@ input, textarea {
   color: var(--primary-color);
 }
 
-/* 右侧属性面板 - 与builder.vue风格一致 */
 .properties-panel {
   width: 300px;
   background-color: var(--card-bg);
@@ -1477,7 +1402,6 @@ textarea.form-control {
   resize: vertical;
 }
 
-/* 模态框样式 - 与builder.vue风格一致 */
 .modal-overlay {
   position: fixed;
   top: 0;
