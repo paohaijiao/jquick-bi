@@ -1,6 +1,7 @@
 const { defineConfig } = require('@vue/cli-service')
 module.exports = defineConfig({
   transpileDependencies: true, // 保留原有配置，不改动
+  lintOnSave: false ,
   devServer: {
     proxy: {
       // 匹配规则设为 "/"：拦截前端所有请求（因后端无统一前缀，需全量转发）
