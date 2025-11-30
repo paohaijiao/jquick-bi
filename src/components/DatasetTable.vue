@@ -1,15 +1,12 @@
 <!-- DatasetTable.vue -->
 <template>
   <div class="dataset-table">
-    <!-- 表头 -->
     <div class="table-header" :class="getHeaderClass()">
       <div v-for="column in columns" :key="column.key">
         {{ column.label }} <span class="column-type">{{ column.type }}</span>
       </div>
       <div v-if="showOperations">操作</div>
     </div>
-    
-    <!-- 数据行 -->
     <div 
       class="table-row" 
       :class="getRowClass()"
@@ -28,8 +25,6 @@
         </button>
       </div>
     </div>
-    
-    <!-- 空状态 -->
     <div class="empty-state" v-if="data.length === 0">
       <i class="fas fa-inbox"></i>
       <p>暂无数据</p>
@@ -51,7 +46,7 @@ const props = defineProps({
   },
   dataType: {
     type: String,
-    default: 'users' // 'users', 'orders', 'joined'
+    default: 'users'
   },
   showOperations: {
     type: Boolean,
@@ -66,36 +61,23 @@ const props = defineProps({
     default: 10
   }
 });
-
-
-// 分页数据
 const paginatedData = computed(() => {
   const start = (props.currentPage - 1) * props.pageSize;
   const end = start + props.pageSize;
   return props.data.slice(start, end);
 });
-
-// 获取行唯一键
 const getRowKey = (item, index) => {
   if (props.dataType === 'users') return item.id;
   if (props.dataType === 'orders') return item.order_id;
   if (props.dataType === 'joined') return `${item.id}-${item.order_id}`;
   return index;
 };
-
-// 获取表头样式类
 const getHeaderClass = () => {
   return `${props.dataType}-header`;
 };
-
-// 获取行样式类
 const getRowClass = () => {
   return `${props.dataType}-row`;
 };
-
-
-
-
 </script>
 
 <style scoped>
