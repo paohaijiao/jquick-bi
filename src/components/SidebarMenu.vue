@@ -1,16 +1,13 @@
 <template>
   <aside class="sidebar">
-    <!-- 第一级：menu-section（可展开/折叠） -->
     <div 
       class="menu-section" 
       v-for="(section, sectionIndex) in menus" 
       :key="sectionIndex"
       :class="{ 'active': isSectionActive(section) }"
     >
-      <!-- 第一级标题（点击展开/折叠） -->
       <div class="menu-section-title text-align-left" @click.stop="toggleSection(section)">
         {{ section.title }}
-        <!-- 第一级箭头 -->
         <i 
           class="fas fa-chevron-down" 
           style="font-size: 12px; transition: transform 0.3s; margin-left: 8px;"
@@ -18,8 +15,6 @@
           :class="{ 'rotate-180': expandedSections.includes(section.id) }"
         ></i>
       </div>
-      
-      <!-- 第二级容器（原一级菜单，放在section内） -->
       <div 
         class="level2-container" 
         v-if="section.children && expandedSections.includes(section.id)"
@@ -33,16 +28,13 @@
         >
           <i :class="level2.icon"></i>
           <span class="text-align-left">{{ level2.title }}</span>
-          
-          <!-- 第二级箭头 -->
+
           <i 
             class="fas fa-chevron-down" 
             style="font-size: 12px; transition: transform 0.3s;"
             v-if="level2.children && level2.children.length > 0"
             :class="{ 'rotate-180': expandedLevel2[section.id]?.includes(level2.id) }"
           ></i>
-          
-          <!-- 第三级容器（原二级菜单，放在level2内） -->
           <div 
             class="level3-container" 
             v-if="level2.children && expandedLevel2[section.id]?.includes(level2.id)"
@@ -70,7 +62,6 @@ import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 
 const router = useRouter();
-// 定义组件参数
 const props = defineProps({
   activeSection: {
     type: String,
@@ -90,32 +81,19 @@ const props = defineProps({
   }
 });
 
-// 定义事件
 const emit = defineEmits(['section-click', 'menu-click', 'submenu-click']);
-
-// 菜单数据
 const menus = ref([]);
-
-// 展开状态管理
-const expandedSections = ref([]); // 第一级（section）展开状态
-const expandedLevel2 = ref({}); // 第二级展开状态 { sectionId: [level2Id1, level2Id2] }
-
-// 第一级（section）展开/折叠
+const expandedSections = ref([]);
+const expandedLevel2 = ref({});
 const toggleSection = (section) => {
-  // 触发section点击事件
   emit('section-click', section.id);
-  
-  // 没有子菜单时不需要展开/折叠
   if (!section.children || section.children.length === 0) {
     return;
   }
-
-  // 切换展开状态
   if (expandedSections.value.includes(section.id)) {
     expandedSections.value = expandedSections.value.filter(id => id !== section.id);
   } else {
     expandedSections.value.push(section.id);
-    // 初始化二级菜单展开状态
     if (!expandedLevel2.value[section.id]) {
       expandedLevel2.value[section.id] = [];
     }
@@ -135,18 +113,12 @@ const toggleLevel2 = (section, level2) => {
       router.push(section.route);
   }
   emit('menu-click', section.id, level2.id);
-  
-  // 没有子菜单时不需要展开/折叠
   if (!level2.children || level2.children.length === 0) {
     return;
   }
-
-  // 确保当前section的二级状态数组存在
   if (!expandedLevel2.value[section.id]) {
     expandedLevel2.value[section.id] = [];
   }
-
-  // 切换展开状态
   const level2Index = expandedLevel2.value[section.id].indexOf(level2.id);
   if (level2Index > -1) {
     expandedLevel2.value[section.id].splice(level2Index, 1);
@@ -154,42 +126,25 @@ const toggleLevel2 = (section, level2) => {
     expandedLevel2.value[section.id].push(level2.id);
   }
 };
-
-// 第三级点击处理
-//const handleLevel3Click = (section, level2, level3) => {
- // emit('submenu-click', section.id, level2.id, level3.id);
-//};
-
-// 检查第一级（section）是否激活
 const isSectionActive = (section) => {
   return props.activeSection === section.id;
 };
-
-// 检查第二级是否激活
 const isLevel2Active = (section, level2) => {
   return props.activeSection === section.id && props.activeMenu === level2.id;
 };
-
-// 检查第三级是否激活
 const isLevel3Active = (section, level2, level3) => {
   return props.activeSection === section.id && 
          props.activeMenu === level2.id &&
          props.activeSubmenu[level2.id] === level3.id;
 };
-
-// 监听外部激活状态变化
 watch(() => [props.activeSection, props.activeMenu, props.activeSubmenu], 
   ([newActiveSection, newActiveMenu, newActiveSubmenu]) => {
     console.log(newActiveSubmenu)
-    // 自动展开当前激活菜单的父级
     menus.value.forEach(section => {
       if (section.id === newActiveSection) {
-        // 展开当前section
         if (!expandedSections.value.includes(section.id)) {
           expandedSections.value.push(section.id);
         }
-        
-        // 展开当前二级菜单
         if (newActiveMenu && section.children) {
           const targetLevel2 = section.children.find(item => item.id === newActiveMenu);
           if (targetLevel2 && targetLevel2.children) {
@@ -204,27 +159,19 @@ watch(() => [props.activeSection, props.activeMenu, props.activeSubmenu],
       }
     });
   }, { deep: true });
-
-// 初始化菜单数据（为section添加id）
 const initMenu = () => {
 request.get('/api/menus/getMenus')
   .then(response => {
     console.log(response)
     if(response.code==200){
       menus.value=response.data;
-       // 初始化展开所有section和二级菜单
         menus.value.forEach(section => {
-          // 展开所有第一级菜单
           if (!expandedSections.value.includes(section.id)) {
             expandedSections.value.push(section.id);
           }
-          
-          // 初始化当前section的二级菜单展开状态数组
           if (!expandedLevel2.value[section.id]) {
             expandedLevel2.value[section.id] = [];
           }
-          
-          // 展开所有二级菜单
           if (section.children && section.children.length > 0) {
             section.children.forEach(level2 => {
               if (!expandedLevel2.value[section.id].includes(level2.id)) {
@@ -260,8 +207,6 @@ onMounted(() => {
 .text-align-left {
   text-align: left;
 }
-
-/* 第一级：menu-section */
 .menu-section {
   border-bottom: 1px solid #f3f4f6;
   transition: all 0.2s;
@@ -285,8 +230,6 @@ onMounted(() => {
 .menu-section.active .menu-section-title {
   color: #f97316;
 }
-
-/* 第二级容器 */
 .level2-container {
   width: 100%;
   box-sizing: border-box;
@@ -296,7 +239,6 @@ onMounted(() => {
 .menu-item {
   display: block ;
 }
-/* 第二级菜单项 */
 .menu-item.level2-item {
   align-items: center;
   padding: 12px 20px 12px 36px; /* 缩进区分层级 */
@@ -324,20 +266,16 @@ onMounted(() => {
   margin-right: 12px;
   text-align: center;
 }
-
-/* 第三级容器 */
 .level3-container {
   width: 100%;
   box-sizing: border-box;
   overflow: hidden;
   transition: max-height 0.3s ease-out;
 }
-
-/* 第三级菜单项 */
 .submenu-item.level3-item {
   display: flex;
   align-items: center;
-  padding: 10px 20px 10px 20px; /* 更深缩进 */
+  padding: 10px 20px 10px 20px;
   color: #666;
   cursor: pointer;
   font-size: 13px;
@@ -357,8 +295,6 @@ onMounted(() => {
   color: #f97316;
   font-weight: 500;
 }
-
-/* 箭头旋转动画 */
 .rotate-180 {
   transform: rotate(180deg);
 }

@@ -15,9 +15,7 @@
         </div>
       </div>
       <div class="modal-body preview-body">
-        <!-- 预览内容 -->
         <div class="preview-container" :style="previewStyle">
-          <!-- 预览画布 -->
           <div class="preview-canvas">
             <div 
               v-for="component in components" 
@@ -33,8 +31,6 @@
                 {{ getComponentPreviewContent(component) }}
               </div>
             </div>
-            
-            <!-- 空状态 -->
             <div 
               v-if="components.length === 0"
               class="preview-empty"
@@ -57,8 +53,6 @@ export default {
 
 <script setup>
 import { computed,defineProps,defineEmits } from 'vue'
-
-// 使用 defineProps 和 defineEmits
 const props = defineProps({
   modelValue: {
     type: Boolean,
@@ -79,14 +73,10 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue', 'print'])
-
-// 计算预览容器样式
 const previewStyle = computed(() => {
   const styles = {
     backgroundColor: props.reportStyle.bgColor || '#fff'
   }
-  
-  // 根据报表尺寸设置样式
   if (props.reportStyle.size === 'A4 (横向)') {
     styles.width = '297mm'
     styles.height = '210mm'
@@ -97,8 +87,6 @@ const previewStyle = computed(() => {
   
   return styles
 })
-
-// 获取组件图标
 const getComponentIcon = (type) => {
   const icons = {
     'chart': 'fas fa-chart-line',
@@ -110,16 +98,12 @@ const getComponentIcon = (type) => {
   }
   return icons[type] || 'fas fa-cube'
 }
-
-// 获取组件样式
 const getComponentStyle = (component) => {
   return {
     height: component.height ? `${component.height}px` : 'auto',
     minHeight: component.type === 'chart' || component.type === 'table' ? '200px' : '100px'
   }
 }
-
-// 获取组件预览内容
 const getComponentPreviewContent = (component) => {
   if (component.content) {
     return component.content
@@ -136,13 +120,9 @@ const getComponentPreviewContent = (component) => {
   
   return defaultContents[component.type] || '组件内容'
 }
-
-// 关闭预览
 const close = () => {
   emit('update:modelValue', false)
 }
-
-// 处理打印
 const handlePrint = () => {
   emit('print', {
     reportInfo: props.reportInfo,
@@ -150,16 +130,11 @@ const handlePrint = () => {
     style: props.reportStyle
   })
 }
-
-// 导出PDF（模拟）
 const downloadPDF = () => {
-  // 这里可以集成实际的PDF导出库
   console.log('导出PDF功能', {
     reportInfo: props.reportInfo,
     components: props.components
   })
-  
-  // 模拟下载
   alert('PDF导出功能开发中...')
 }
 </script>

@@ -53,8 +53,6 @@ const iconList = [
   font-size: 12px;
   color: #666;
 }
-
-/* 图标选择器样式 */
 .icon-selector {
   display: flex;
   flex-wrap: wrap;
