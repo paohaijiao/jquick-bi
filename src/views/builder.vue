@@ -1,5 +1,6 @@
 <template>
   <div class="container">
+    <!-- 头部保持不变 -->
     <header class="header">
       <button class="mobile-menu-toggle" @click="toggleSidebar">
         <i class="fas fa-bars"></i>
@@ -9,25 +10,25 @@
         <span>JQuick BI</span>
       </div>
       <div class="header-main-actions">
-        <button class="action-btn">
-          <i class="fas fa-code"></i>导出
+        <button class="action-btn" @click="exportHtml">
+          <i class="fas fa-code"></i>导出HTML
         </button>
-        <button class="action-btn">
-          <i class="fas fa-file-import"></i>导入
-        </button>
-        <button class="action-btn">
+        <button class="action-btn" @click="previewHtml">
           <i class="fas fa-eye"></i>预览
         </button>
-        <button class="action-btn" @click="openModal('HTML编辑器')">
+        <button class="action-btn" @click="openHtmlEditor">
           <i class="fas fa-code"></i>编辑器
+        </button>
+        <button class="action-btn" @click="resetLayout">
+          <i class="fas fa-redo"></i>重置布局
         </button>
       </div>
       <div class="header-secondary-actions">
-        <button class="action-btn compact">
-          <i class="fas fa-cubes" title="组件"></i>
+        <button class="action-btn compact" @click="toggleGridLayout">
+          <i :class="useGridLayout ? 'fas fa-th' : 'fas fa-th-large'" :title="useGridLayout ? '网格布局' : '自由布局'"></i>
         </button>
-        <button class="action-btn compact">
-          <i class="fas fa-cog" title="设置"></i>
+        <button class="action-btn compact" @click="toggleGridLines">
+          <i :class="showGridLines ? 'fas fa-eye-slash' : 'fas fa-eye'" :title="showGridLines ? '隐藏网格' : '显示网格'"></i>
         </button>
         <div class="user-profile compact">
           <div class="user-avatar">
@@ -36,288 +37,128 @@
           <span class="username">管理员</span>
         </div>
       </div>
-
-      <div class="mobile-more-menu">
-        <button class="action-btn" @click="showMobileMenu = !showMobileMenu">
-          <i class="fas fa-ellipsis-v"></i>
-        </button>
-        <div class="mobile-menu-dropdown" v-if="showMobileMenu">
-          <button class="mobile-menu-item">
-            <i class="fas fa-cubes"></i>组件
-          </button>
-          <button class="mobile-menu-item">
-            <i class="fas fa-cog"></i>设置
-          </button>
-        </div>
-      </div>
     </header>
+
     <div class="main-content">
+      <!-- 侧边栏 -->
       <aside class="sidebar" :class="{ active: sidebarActive }">
+        <!-- 侧边栏内容保持不变 -->
         <div class="menu-section">
-          <div class="menu-section-title text-align-left">容器元素</div>
-          <div class="menu-item" v-draggable="draggableOptions('div')">
-            <i class="fas fa-square"></i>
-            <span>Div 容器</span>
+          <div class="menu-section-title text-align-left">布局元素</div>
+          <div class="menu-item" v-draggable="draggableOptions('row')">
+            <i class="fas fa-grip-horizontal"></i>
+            <span>行容器 (Row)</span>
           </div>
-          <div class="menu-item" v-draggable="draggableOptions('section')">
-            <i class="fas fa-square-full"></i>
-            <span>Section 分区</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('article')">
-            <i class="fas fa-newspaper"></i>
-            <span>Article 文章</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('header')">
-            <i class="fas fa-heading"></i>
-            <span>Header 头部</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('footer')">
-            <i class="fas fa-window-minimize"></i>
-            <span>Footer 页脚</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('nav')">
-            <i class="fas fa-bars"></i>
-            <span>Nav 导航</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('aside')">
+          <div class="menu-item" v-draggable="draggableOptions('col')">
             <i class="fas fa-columns"></i>
-            <span>Aside 侧边栏</span>
+            <span>列容器 (Col)</span>
           </div>
-          <div class="menu-item" v-draggable="draggableOptions('main')">
-            <i class="fas fa-home"></i>
-            <span>Main 主内容</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('details')">
-            <i class="fas fa-info-circle"></i>
-            <span>Details 详情</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('summary')">
-            <i class="fas fa-list-alt"></i>
-            <span>Summary 摘要</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('dialog')">
-            <i class="fas fa-window-restore"></i>
-            <span>Dialog 对话框</span>
-          </div>
-        </div>
-        <div class="menu-section">
-          <div class="menu-section-title text-align-left">标题元素</div>
-          <div class="menu-item" v-draggable="draggableOptions('h1')">
-            <i class="fas fa-heading"></i>
-            <span>H1 一级标题</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('h2')">
-            <i class="fas fa-heading"></i>
-            <span>H2 二级标题</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('h3')">
-            <i class="fas fa-heading"></i>
-            <span>H3 三级标题</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('h4')">
-            <i class="fas fa-heading"></i>
-            <span>H4 四级标题</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('h5')">
-            <i class="fas fa-heading"></i>
-            <span>H5 五级标题</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('h6')">
-            <i class="fas fa-heading"></i>
-            <span>H6 六级标题</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('heading')">
-            <i class="fas fa-heading"></i>
-            <span>Heading 标题</span>
-          </div>
-        </div>
-
-        <div class="menu-section">
-          <div class="menu-section-title text-align-left">文本内容元素</div>
-          <div class="menu-item" v-draggable="draggableOptions('p')">
-            <i class="fas fa-paragraph"></i>
-            <span>P 段落</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('span')">
-            <i class="fas fa-square"></i>
-            <span>Span 内联容器</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('a')">
-            <i class="fas fa-link"></i>
-            <span>A 链接</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('strong')">
-            <i class="fas fa-bold"></i>
-            <span>Strong 强调</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('em')">
-            <i class="fas fa-italic"></i>
-            <span>Em 强调</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('i')">
-            <i class="fas fa-italic"></i>
-            <span>I 斜体</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('b')">
-            <i class="fas fa-bold"></i>
-            <span>B 粗体</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('u')">
-            <i class="fas fa-underline"></i>
-            <span>U 下划线</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('pre')">
-            <i class="fas fa-code"></i>
-            <span>Pre 预格式文本</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('blockquote')">
-            <i class="fas fa-quote-right"></i>
-            <span>Blockquote 引用</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('mark')">
-            <i class="fas fa-highlighter"></i>
-            <span>Mark 标记</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('small')">
-            <i class="fas fa-text-height"></i>
-            <span>Small 小文本</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('time')">
-            <i class="fas fa-clock"></i>
-            <span>Time 时间</span>
-          </div>
-        </div>
-
-        <div class="menu-section">
-          <div class="menu-section-title text-align-left">列表元素</div>
-          <div class="menu-item" v-draggable="draggableOptions('ul')">
-            <i class="fas fa-list-ul"></i>
-            <span>Ul 无序列表</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('ol')">
-            <i class="fas fa-list-ol"></i>
-            <span>Ol 有序列表</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('li')">
-            <i class="fas fa-list"></i>
-            <span>Li 列表项</span>
-          </div>
-        </div>
-
-        <div class="menu-section">
-          <div class="menu-section-title text-align-left">表格元素</div>
-          <div class="menu-item" v-draggable="draggableOptions('table')">
-            <i class="fas fa-table"></i>
-            <span>Table 表格</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('thead')">
-            <i class="fas fa-table-header"></i>
-            <span>Thead 表头</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('tbody')">
-            <i class="fas fa-table-body"></i>
-            <span>Tbody 表体</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('tr')">
-            <i class="fas fa-grip-lines"></i>
-            <span>Tr 表格行</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('th')">
+          <div class="menu-item" v-draggable="draggableOptions('grid')">
             <i class="fas fa-th"></i>
-            <span>Th 表头单元格</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('td')">
-            <i class="fas fa-square"></i>
-            <span>Td 表格单元格</span>
+            <span>网格容器 (Grid)</span>
           </div>
         </div>
 
         <div class="menu-section">
-          <div class="menu-section-title text-align-left">表单元素</div>
-          <div class="menu-item" v-draggable="draggableOptions('form')">
-            <i class="fas fa-window-restore"></i>
-            <span>Form 表单</span>
+          <div class="menu-section-title text-align-left">内容元素</div>
+          <div class="menu-item" v-draggable="draggableOptions('card')">
+            <i class="fas fa-square"></i>
+            <span>卡片 (Card)</span>
           </div>
-          <div class="menu-item" v-draggable="draggableOptions('input')">
-            <i class="fas fa-edit"></i>
-            <span>Input 输入框</span>
+          <div class="menu-item" v-draggable="draggableOptions('panel')">
+            <i class="fas fa-window-maximize"></i>
+            <span>面板 (Panel)</span>
           </div>
-          <div class="menu-item" v-draggable="draggableOptions('textarea')">
-            <i class="fas fa-align-left"></i>
-            <span>Textarea 文本域</span>
+          <div class="menu-item" v-draggable="draggableOptions('widget')">
+            <i class="fas fa-cube"></i>
+            <span>组件 (Widget)</span>
+          </div>
+        </div>
+
+        <div class="menu-section">
+          <div class="menu-section-title text-align-left">基础元素</div>
+          <div class="menu-item" v-draggable="draggableOptions('text')">
+            <i class="fas fa-font"></i>
+            <span>文本 (Text)</span>
           </div>
           <div class="menu-item" v-draggable="draggableOptions('button')">
             <i class="fas fa-hand-pointer"></i>
-            <span>Button 按钮</span>
+            <span>按钮 (Button)</span>
+          </div>
+          <div class="menu-item" v-draggable="draggableOptions('input')">
+            <i class="fas fa-edit"></i>
+            <span>输入框 (Input)</span>
           </div>
           <div class="menu-item" v-draggable="draggableOptions('select')">
             <i class="fas fa-caret-square-down"></i>
-            <span>Select 下拉框</span>
+            <span>下拉框 (Select)</span>
           </div>
-          <div class="menu-item" v-draggable="draggableOptions('option')">
-            <i class="fas fa-caret-right"></i>
-            <span>Option 选项</span>
+          <div class="menu-item" v-draggable="draggableOptions('table')">
+            <i class="fas fa-table"></i>
+            <span>表格 (Table)</span>
           </div>
-          <div class="menu-item" v-draggable="draggableOptions('label')">
-            <i class="fas fa-tag"></i>
-            <span>Label 标签</span>
-          </div>
-        </div>
-        <div class="menu-section">
-          <div class="menu-section-title text-align-left">媒体元素</div>
-          <div class="menu-item" v-draggable="draggableOptions('img')">
-            <i class="fas fa-image"></i>
-            <span>Img 图片</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('svg')">
-            <i class="fas fa-draw-polygon"></i>
-            <span>SVG 矢量图</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('audio')">
-            <i class="fas fa-volume-up"></i>
-            <span>Audio 音频</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('video')">
-            <i class="fas fa-video"></i>
-            <span>Video 视频</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('iframe')">
-            <i class="fas fa-external-link-alt"></i>
-            <span>Iframe 内联框架</span>
+          <div class="menu-item" v-draggable="draggableOptions('chart')">
+            <i class="fas fa-chart-bar"></i>
+            <span>图表 (Chart)</span>
           </div>
         </div>
 
-        <!-- 其他元素 -->
         <div class="menu-section">
-          <div class="menu-section-title text-align-left">其他元素</div>
-          <div class="menu-item" v-draggable="draggableOptions('progress')">
-            <i class="fas fa-spinner"></i>
-            <span>Progress 进度条</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('br')">
-            <i class="fas fa-level-down-alt"></i>
-            <span>Br 换行</span>
-          </div>
-          <div class="menu-item" v-draggable="draggableOptions('hr')">
-            <i class="fas fa-minus"></i>
-            <span>Hr 水平线</span>
+          <div class="menu-section-title text-align-left">预设布局</div>
+          <div class="layout-presets">
+            <div class="layout-preset" @click="applyLayoutPreset('header-sidebar-main')">
+              <div class="preset-preview">
+                <div class="preset-header"></div>
+                <div class="preset-sidebar"></div>
+                <div class="preset-main"></div>
+              </div>
+              <span>头部+侧边栏</span>
+            </div>
+            <div class="layout-preset" @click="applyLayoutPreset('three-column')">
+              <div class="preset-preview">
+                <div class="preset-col" style="width:25%"></div>
+                <div class="preset-col" style="width:50%"></div>
+                <div class="preset-col" style="width:25%"></div>
+              </div>
+              <span>三栏布局</span>
+            </div>
+            <div class="layout-preset" @click="applyLayoutPreset('dashboard')">
+              <div class="preset-preview">
+                <div class="preset-row">
+                  <div class="preset-widget" style="width:33%"></div>
+                  <div class="preset-widget" style="width:33%"></div>
+                  <div class="preset-widget" style="width:33%"></div>
+                </div>
+                <div class="preset-row">
+                  <div class="preset-widget" style="width:50%"></div>
+                  <div class="preset-widget" style="width:50%"></div>
+                </div>
+              </div>
+              <span>仪表盘</span>
+            </div>
           </div>
         </div>
       </aside>
 
+      <!-- 工作区 -->
       <div class="workspace">
         <div class="workspace-header">
           <div>
             <h1 class="workspace-title text-align-left">我的报表</h1>
-            <p class="workspace-description">拖放HTML元素到画布中创建您的页面，使用右侧面板编辑属性</p>
+            <p class="workspace-description">拖放元素到画布中创建页面，支持响应式布局</p>
           </div>
           <div class="workspace-actions">
-            <button class="action-btn" @click="openModal('DOM关系')">
-              <i class="fas fa-project-diagram"></i>DOM关系
-            </button>
-            <button class="action-btn" @click="openModal('Head设置')">
-              <i class="fas fa-cog"></i>Head设置
-            </button>
+            <div class="layout-controls">
+              <select v-model="currentBreakpoint" class="breakpoint-select">
+                <option value="desktop">桌面 (≥1200px)</option>
+                <option value="tablet">平板 (768px-1199px)</option>
+                <option value="mobile">手机 (<768px)</option>
+              </select>
+              <button class="action-btn" @click="showGridLines = !showGridLines">
+                <i :class="showGridLines ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                {{ showGridLines ? '隐藏网格' : '显示网格' }}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -325,199 +166,505 @@
              @dragover.prevent="handleDragOver"
              @drop="handleDrop"
              @dragleave="handleDragLeave">
-          <div class="canvas-drag-area" :class="{ 'grid-layout': useGridLayout, 'dragover': isDraggingOver }">
-            <div
-                class="canvas-component"
-                :class="{
-                selected: selectedComponentId === component.id,
-                'inline-component': component.inline
-              }"
-                v-for="component in components"
-                :key="component.id"
-                @click="selectComponent(component.id)"
-                :style="getComponentStyle(component)"
-            >
-              <div class="component-header">
-                <div class="component-info">
-                  <i :class="component.icon"></i>
-                  <span>{{ component.name }}</span>
-                  <small class="component-id">#{{ component.id }}</small>
+          <div class="canvas-drag-area" :class="{
+            'grid-layout': useGridLayout,
+            'dragover': isDraggingOver,
+            'show-grid': showGridLines
+          }">
+            <!-- 布局容器渲染 -->
+            <template v-if="layoutContainers.length > 0">
+              <div
+                  v-for="container in layoutContainers"
+                  :key="container.id"
+                  class="layout-container"
+                  :class="[
+                  container.type,
+                  { 'selected': selectedComponentId === container.id },
+                  container.config.responsive[currentBreakpoint]?.className || ''
+                ]"
+                  :style="getContainerStyle(container)"
+                  @click="selectComponent(container.id)"
+              >
+                <div class="container-header">
+                  <div class="container-info">
+                    <i :class="container.icon"></i>
+                    <span>{{ container.name }}</span>
+                    <small class="container-id">#{{ container.id }}</small>
+                  </div>
+                  <div class="container-actions">
+                    <div class="container-hint">
+                      <span v-if="container.config.width">{{ container.config.width.value }}{{ container.config.width.unit }}</span>
+                      <span v-if="container.config.columns">×{{ container.config.columns }}</span>
+                    </div>
+                    <button class="delete-btn" title="删除容器" @click.stop="deleteContainer(container.id)">
+                      <i class="fas fa-trash-alt"></i>
+                    </button>
+                  </div>
                 </div>
-                <div class="component-actions">
-                  <div class="component-hint">双击编辑</div>
-                  <button class="delete-btn" title="删除组件" @click.stop="deleteComponent(component.id)">
-                    <i class="fas fa-trash-alt"></i>
-                  </button>
-                </div>
-              </div>
 
-              <div class="component-content">
-                <div v-html="component.content"></div>
+                <!-- 容器内组件 -->
+                <div class="container-content" :class="container.config.display">
+                  <div
+                      v-for="component in getComponentsInContainer(container.id)"
+                      :key="component.id"
+                      class="canvas-component"
+                      :class="{
+                      'selected': selectedComponentId === component.id,
+                      'inline-component': component.inline
+                    }"
+                      :style="getComponentStyle(component)"
+                      @click.stop="selectComponent(component.id)"
+                  >
+                    <div class="component-header">
+                      <div class="component-info">
+                        <i :class="component.icon"></i>
+                        <span>{{ component.name }}</span>
+                        <small class="component-id">#{{ component.id }}</small>
+                      </div>
+                      <div class="component-actions">
+                        <button class="delete-btn" title="删除组件" @click.stop="deleteComponent(component.id)">
+                          <i class="fas fa-trash-alt"></i>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="component-content" v-html="renderComponentContent(component)"></div>
+                  </div>
+
+                  <!-- 空容器提示 -->
+                  <div v-if="getComponentsInContainer(container.id).length === 0" class="empty-container-hint">
+                    <i class="fas fa-plus-circle"></i>
+                    <p>拖放组件到此区域</p>
+                  </div>
+                </div>
               </div>
+            </template>
+
+            <!-- 无容器时的组件 -->
+            <template v-else>
+              <div
+                  v-for="component in components.filter(c => !c.containerId)"
+                  :key="component.id"
+                  class="canvas-component"
+                  :class="{
+                  'selected': selectedComponentId === component.id,
+                  'inline-component': component.inline
+                }"
+                  :style="getComponentStyle(component)"
+                  @click="selectComponent(component.id)"
+              >
+                <div class="component-header">
+                  <div class="component-info">
+                    <i :class="component.icon"></i>
+                    <span>{{ component.name }}</span>
+                    <small class="component-id">#{{ component.id }}</small>
+                  </div>
+                  <div class="component-actions">
+                    <div class="component-hint">双击编辑</div>
+                    <button class="delete-btn" title="删除组件" @click.stop="deleteComponent(component.id)">
+                      <i class="fas fa-trash-alt"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="component-content" v-html="renderComponentContent(component)"></div>
+              </div>
+            </template>
+
+            <!-- 空画布提示 -->
+            <div v-if="layoutContainers.length === 0 && components.length === 0" class="empty-canvas-hint">
+              <i class="fas fa-magic"></i>
+              <h3>开始创建您的报表</h3>
+              <p>从左侧拖拽元素到此处，或选择预设布局开始</p>
+              <button class="btn btn-primary" @click="applyLayoutPreset('dashboard')">
+                使用仪表盘模板
+              </button>
             </div>
           </div>
         </div>
       </div>
 
+      <!-- 属性面板 -->
       <div class="properties-panel active" :class="{ active: propertiesPanelActive }">
         <div class="panel-title">
-          <i class="fas fa-sliders-h"></i>属性设置
+          <i class="fas fa-sliders-h"></i>
+          <span>属性设置</span>
+          <button v-if="selectedComponent" class="close-panel" @click="deselectComponent">
+            <i class="fas fa-times"></i>
+          </button>
         </div>
 
         <div class="panel-tabs">
-          <div class="tab-item" :class="{ active: activeTab === 'properties' }" @click="activeTab = 'properties'">
-            <i class="fas fa-tag"></i>属性
+          <div class="tab-item" :class="{ active: activeTab === 'layout' }" @click="activeTab = 'layout'">
+            <i class="fas fa-th"></i>布局
           </div>
           <div class="tab-item" :class="{ active: activeTab === 'style' }" @click="activeTab = 'style'">
             <i class="fas fa-paint-brush"></i>样式
           </div>
-          <div class="tab-item" :class="{ active: activeTab === 'relation' }" @click="activeTab = 'relation'">
-            <i class="fas fa-project-diagram"></i>关系
+          <div class="tab-item" :class="{ active: activeTab === 'content' }" @click="activeTab = 'content'">
+            <i class="fas fa-edit"></i>内容
+          </div>
+          <div class="tab-item" :class="{ active: activeTab === 'advanced' }" @click="activeTab = 'advanced'">
+            <i class="fas fa-cog"></i>高级
           </div>
         </div>
 
         <div class="tab-content" v-if="selectedComponent">
-          <div v-if="activeTab === 'properties'">
+          <!-- 布局设置 -->
+          <div v-if="activeTab === 'layout'">
             <div class="setting-group">
-              <div class="setting-title">元素属性</div>
-
-              <div class="setting-item">
-                <label>元素ID</label>
-                <input type="text" class="form-control" v-model="selectedComponent.id">
-              </div>
-
-              <div class="setting-item">
-                <label>元素名称</label>
-                <input type="text" class="form-control" v-model="selectedComponent.name">
-              </div>
-
-              <div class="setting-item">
-                <label>内容文本</label>
-                <textarea class="form-control" rows="3" v-model="selectedComponent.content"></textarea>
-              </div>
-            </div>
-
-            <div class="setting-group">
-              <div class="setting-title">页面属性</div>
-
-              <div class="setting-item">
-                <label>页面标题</label>
-                <input type="text" class="form-control" v-model="pageTitle">
-              </div>
-
-              <div class="setting-item">
-                <label>字符编码</label>
-                <select class="form-control" v-model="charset">
-                  <option value="UTF-8">UTF-8</option>
-                  <option value="GBK">GBK</option>
-                  <option value="ISO-8859-1">ISO-8859-1</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div v-if="activeTab === 'style'">
-            <div class="setting-group">
-              <div class="setting-title">样式设置</div>
-
-              <div class="setting-item">
-                <label>字体大小</label>
-                <input type="text" class="form-control" v-model="selectedComponent.style.fontSize">
-              </div>
-
-              <div class="setting-item">
-                <label>颜色</label>
-                <input type="text" class="form-control" v-model="selectedComponent.style.color">
-              </div>
-
-              <div class="setting-item">
-                <label>背景色</label>
-                <input type="text" class="form-control" v-model="selectedComponent.style.backgroundColor">
-              </div>
+              <div class="setting-title">尺寸设置</div>
 
               <div class="setting-item">
                 <label>宽度</label>
-                <input type="text" class="form-control" v-model="selectedComponent.style.width">
+                <div class="range-input">
+                  <input type="range" min="0" max="100" step="1" v-model="selectedComponent.config.width.value">
+                  <input type="text" class="form-control" v-model="selectedComponent.config.width.value">
+                  <select v-model="selectedComponent.config.width.unit">
+                    <option value="%">%</option>
+                    <option value="px">px</option>
+                    <option value="rem">rem</option>
+                    <option value="vw">vw</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="setting-item">
+                <label>高度</label>
+                <div class="range-input">
+                  <input type="range" min="0" max="1000" step="10" v-model="selectedComponent.config.height.value">
+                  <input type="text" class="form-control" v-model="selectedComponent.config.height.value">
+                  <select v-model="selectedComponent.config.height.unit">
+                    <option value="px">px</option>
+                    <option value="%">%</option>
+                    <option value="rem">rem</option>
+                    <option value="vh">vh</option>
+                    <option value="auto">auto</option>
+                  </select>
+                </div>
               </div>
 
               <div class="setting-item">
                 <label>显示方式</label>
-                <select class="form-control" v-model="selectedComponent.style.display">
-                  <option value="block">块级显示</option>
-                  <option value="inline-block">内联块</option>
-                  <option value="inline">内联</option>
+                <select class="form-control" v-model="selectedComponent.config.display">
+                  <option value="block">块级 (block)</option>
+                  <option value="inline-block">内联块 (inline-block)</option>
+                  <option value="inline">内联 (inline)</option>
+                  <option value="flex">弹性盒子 (flex)</option>
+                  <option value="grid">网格 (grid)</option>
+                </select>
+              </div>
+
+              <div v-if="selectedComponent.config.display === 'flex'" class="setting-item">
+                <label>Flex 方向</label>
+                <select class="form-control" v-model="selectedComponent.config.flexDirection">
+                  <option value="row">水平 (row)</option>
+                  <option value="column">垂直 (column)</option>
+                  <option value="row-reverse">水平反向</option>
+                  <option value="column-reverse">垂直反向</option>
+                </select>
+              </div>
+
+              <div v-if="selectedComponent.type === 'grid'" class="setting-item">
+                <label>网格列数</label>
+                <input type="number" class="form-control" v-model="selectedComponent.config.columns" min="1" max="12">
+              </div>
+            </div>
+
+            <div class="setting-group">
+              <div class="setting-title">边距与填充</div>
+
+              <div class="spacing-controls">
+                <div class="spacing-item">
+                  <label>上边距</label>
+                  <input type="text" class="form-control" v-model="selectedComponent.config.margin.top">
+                </div>
+                <div class="spacing-item">
+                  <label>右边距</label>
+                  <input type="text" class="form-control" v-model="selectedComponent.config.margin.right">
+                </div>
+                <div class="spacing-item">
+                  <label>下边距</label>
+                  <input type="text" class="form-control" v-model="selectedComponent.config.margin.bottom">
+                </div>
+                <div class="spacing-item">
+                  <label>左边距</label>
+                  <input type="text" class="form-control" v-model="selectedComponent.config.margin.left">
+                </div>
+              </div>
+
+              <div class="spacing-controls">
+                <div class="spacing-item">
+                  <label>上填充</label>
+                  <input type="text" class="form-control" v-model="selectedComponent.config.padding.top">
+                </div>
+                <div class="spacing-item">
+                  <label>右填充</label>
+                  <input type="text" class="form-control" v-model="selectedComponent.config.padding.right">
+                </div>
+                <div class="spacing-item">
+                  <label>下填充</label>
+                  <input type="text" class="form-control" v-model="selectedComponent.config.padding.bottom">
+                </div>
+                <div class="spacing-item">
+                  <label>左填充</label>
+                  <input type="text" class="form-control" v-model="selectedComponent.config.padding.left">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 样式设置 -->
+          <div v-if="activeTab === 'style'">
+            <div class="setting-group">
+              <div class="setting-title">文字样式</div>
+
+              <div class="setting-item">
+                <label>字体</label>
+                <select class="form-control" v-model="selectedComponent.config.fontFamily">
+                  <option value="">默认字体</option>
+                  <option value="Arial, sans-serif">Arial</option>
+                  <option value="'Microsoft YaHei', sans-serif">微软雅黑</option>
+                  <option value="'SimSun', serif">宋体</option>
+                  <option value="'Helvetica Neue', Helvetica, sans-serif">Helvetica</option>
+                  <option value="Georgia, serif">Georgia</option>
+                </select>
+              </div>
+
+              <div class="setting-item">
+                <label>字号</label>
+                <div class="range-input">
+                  <input type="range" min="8" max="72" step="1" v-model="selectedComponent.config.fontSize">
+                  <input type="text" class="form-control" v-model="selectedComponent.config.fontSize">
+                  <span>px</span>
+                </div>
+              </div>
+
+              <div class="setting-item">
+                <label>字重</label>
+                <select class="form-control" v-model="selectedComponent.config.fontWeight">
+                  <option value="normal">正常</option>
+                  <option value="bold">粗体</option>
+                  <option value="lighter">细体</option>
+                  <option value="bolder">特粗</option>
+                  <option value="100">100</option>
+                  <option value="300">300</option>
+                  <option value="400">400</option>
+                  <option value="500">500</option>
+                  <option value="700">700</option>
+                  <option value="900">900</option>
+                </select>
+              </div>
+
+              <div class="setting-item">
+                <label>行高</label>
+                <input type="text" class="form-control" v-model="selectedComponent.config.lineHeight">
+              </div>
+
+              <div class="setting-item">
+                <label>对齐方式</label>
+                <div class="align-buttons">
+                  <button class="align-btn" :class="{ active: selectedComponent.config.textAlign === 'left' }"
+                          @click="selectedComponent.config.textAlign = 'left'">
+                    <i class="fas fa-align-left"></i>
+                  </button>
+                  <button class="align-btn" :class="{ active: selectedComponent.config.textAlign === 'center' }"
+                          @click="selectedComponent.config.textAlign = 'center'">
+                    <i class="fas fa-align-center"></i>
+                  </button>
+                  <button class="align-btn" :class="{ active: selectedComponent.config.textAlign === 'right' }"
+                          @click="selectedComponent.config.textAlign = 'right'">
+                    <i class="fas fa-align-right"></i>
+                  </button>
+                  <button class="align-btn" :class="{ active: selectedComponent.config.textAlign === 'justify' }"
+                          @click="selectedComponent.config.textAlign = 'justify'">
+                    <i class="fas fa-align-justify"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="setting-item">
+                <label>文字颜色</label>
+                <div class="color-picker">
+                  <input type="color" v-model="selectedComponent.config.color">
+                  <input type="text" class="form-control" v-model="selectedComponent.config.color">
+                </div>
+              </div>
+            </div>
+
+            <div class="setting-group">
+              <div class="setting-title">背景样式</div>
+
+              <div class="setting-item">
+                <label>背景颜色</label>
+                <div class="color-picker">
+                  <input type="color" v-model="selectedComponent.config.backgroundColor">
+                  <input type="text" class="form-control" v-model="selectedComponent.config.backgroundColor">
+                </div>
+              </div>
+
+              <div class="setting-item">
+                <label>背景图片</label>
+                <input type="text" class="form-control" v-model="selectedComponent.config.backgroundImage"
+                       placeholder="输入图片URL">
+              </div>
+
+              <div v-if="selectedComponent.config.backgroundImage" class="setting-item">
+                <label>背景尺寸</label>
+                <select class="form-control" v-model="selectedComponent.config.backgroundSize">
+                  <option value="cover">覆盖 (cover)</option>
+                  <option value="contain">包含 (contain)</option>
+                  <option value="auto">自动 (auto)</option>
+                  <option value="100% 100%">拉伸</option>
+                </select>
+              </div>
+
+              <div class="setting-item">
+                <label>圆角</label>
+                <div class="range-input">
+                  <input type="range" min="0" max="50" step="1" v-model="selectedComponent.config.borderRadius">
+                  <input type="text" class="form-control" v-model="selectedComponent.config.borderRadius">
+                  <span>px</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="setting-group">
+              <div class="setting-title">边框样式</div>
+
+              <div class="setting-item">
+                <label>边框宽度</label>
+                <input type="text" class="form-control" v-model="selectedComponent.config.borderWidth" placeholder="1px">
+              </div>
+
+              <div class="setting-item">
+                <label>边框样式</label>
+                <select class="form-control" v-model="selectedComponent.config.borderStyle">
+                  <option value="none">无</option>
+                  <option value="solid">实线</option>
+                  <option value="dashed">虚线</option>
+                  <option value="dotted">点线</option>
+                  <option value="double">双线</option>
+                </select>
+              </div>
+
+              <div class="setting-item">
+                <label>边框颜色</label>
+                <div class="color-picker">
+                  <input type="color" v-model="selectedComponent.config.borderColor">
+                  <input type="text" class="form-control" v-model="selectedComponent.config.borderColor">
+                </div>
+              </div>
+
+              <div class="setting-item">
+                <label>阴影</label>
+                <input type="text" class="form-control" v-model="selectedComponent.config.boxShadow"
+                       placeholder="e.g. 0 2px 8px rgba(0,0,0,0.1)">
+              </div>
+            </div>
+          </div>
+
+          <!-- 内容设置 -->
+          <div v-if="activeTab === 'content'">
+            <div class="setting-group">
+              <div class="setting-title">内容编辑</div>
+
+              <div class="setting-item">
+                <label>文本内容</label>
+                <textarea class="form-control" rows="4" v-model="selectedComponent.content"></textarea>
+              </div>
+
+              <div class="setting-item">
+                <label>占位文本</label>
+                <input type="text" class="form-control" v-model="selectedComponent.config.placeholder">
+              </div>
+
+              <div v-if="selectedComponent.type === 'button'" class="setting-item">
+                <label>按钮类型</label>
+                <select class="form-control" v-model="selectedComponent.config.buttonType">
+                  <option value="button">普通按钮</option>
+                  <option value="submit">提交按钮</option>
+                  <option value="reset">重置按钮</option>
+                </select>
+              </div>
+
+              <div v-if="selectedComponent.type === 'input'" class="setting-item">
+                <label>输入类型</label>
+                <select class="form-control" v-model="selectedComponent.config.inputType">
+                  <option value="text">文本</option>
+                  <option value="number">数字</option>
+                  <option value="email">邮箱</option>
+                  <option value="password">密码</option>
+                  <option value="date">日期</option>
+                  <option value="tel">电话</option>
+                </select>
+              </div>
+
+              <div v-if="selectedComponent.type === 'chart'" class="setting-item">
+                <label>图表类型</label>
+                <select class="form-control" v-model="selectedComponent.config.chartType">
+                  <option value="bar">柱状图</option>
+                  <option value="line">折线图</option>
+                  <option value="pie">饼图</option>
+                  <option value="area">面积图</option>
                 </select>
               </div>
             </div>
           </div>
 
-          <div v-if="activeTab === 'relation'">
+          <!-- 高级设置 -->
+          <div v-if="activeTab === 'advanced'">
             <div class="setting-group">
-              <div class="setting-title">元素关系</div>
+              <div class="setting-title">响应式设置</div>
 
-              <div class="relation-item">
-                <input type="text" class="form-control" v-model="selectedComponent.id" readonly>
-                <span class="relation-arrow">-></span>
-                <input type="text" class="form-control" v-model="selectedComponent.relations" placeholder="目标元素ID（多个用逗号分隔）">
+              <div class="setting-item">
+                <label>桌面版样式 (≥1200px)</label>
+                <textarea class="form-control" rows="3"
+                          v-model="selectedComponent.config.responsive.desktop.css"
+                          placeholder="例如: width: 25%; margin: 10px;"></textarea>
+              </div>
+
+              <div class="setting-item">
+                <label>平板版样式 (768px-1199px)</label>
+                <textarea class="form-control" rows="3"
+                          v-model="selectedComponent.config.responsive.tablet.css"
+                          placeholder="例如: width: 50%; margin: 8px;"></textarea>
+              </div>
+
+              <div class="setting-item">
+                <label>手机版样式 (<768px)</label>
+                <textarea class="form-control" rows="3"
+                          v-model="selectedComponent.config.responsive.mobile.css"
+                          placeholder="例如: width: 100%; margin: 5px;"></textarea>
+              </div>
+            </div>
+
+            <div class="setting-group">
+              <div class="setting-title">自定义CSS</div>
+
+              <div class="setting-item">
+                <label>自定义样式</label>
+                <textarea class="form-control" rows="6"
+                          v-model="selectedComponent.config.customCss"
+                          placeholder="输入自定义CSS样式"></textarea>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
-    <div class="modal-overlay" :class="{ active: activeModal === 'Head设置' }" @click="closeModal">
-      <div class="modal large-modal" @click.stop>
-        <div class="modal-header">
-          <div class="modal-title">Head 设置</div>
-          <button class="modal-close" @click="closeModal">&times;</button>
-        </div>
-        <div class="modal-body">
-          <div class="head-settings">
-            <div class="setting-item">
-              <label>页面标题</label>
-              <input type="text" class="form-control" v-model="pageTitle">
-            </div>
 
-            <div class="setting-item">
-              <label>页面编码</label>
-              <select class="form-control" v-model="charset">
-                <option value="UTF-8">UTF-8</option>
-                <option value="GBK">GBK</option>
-                <option value="ISO-8859-1">ISO-8859-1</option>
-              </select>
-            </div>
-
-            <div class="setting-item">
-              <label>视口设置</label>
-              <input type="text" class="form-control" v-model="viewport" placeholder="width=device-width, initial-scale=1.0">
-            </div>
-          </div>
-
-          <div class="meta-items">
-            <div class="setting-title">Meta标签</div>
-            <div class="meta-item" v-for="(meta, index) in metaTags" :key="index">
-              <input type="text" class="form-control" v-model="meta.name" placeholder="name属性">
-              <input type="text" class="form-control" v-model="meta.content" placeholder="content属性">
-              <button class="remove-btn" @click="removeMeta(index)">
-                <i class="fas fa-times"></i>
-              </button>
-            </div>
-            <button class="btn btn-outline" @click="addMeta">
-              <i class="fas fa-plus"></i> 添加Meta标签
-            </button>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-outline" @click="closeModal">取消</button>
-          <button class="btn btn-primary" @click="saveHeadSettings">保存设置</button>
+        <!-- 无选中组件时的提示 -->
+        <div v-else class="no-selection">
+          <i class="fas fa-mouse-pointer"></i>
+          <p>点击画布中的元素进行编辑</p>
         </div>
       </div>
     </div>
 
+    <!-- HTML编辑器模态框 -->
     <div class="modal-overlay" :class="{ active: activeModal === 'HTML编辑器' }" @click="closeModal">
       <div class="modal large-modal" @click.stop>
         <div class="modal-header">
-          <div class="modal-title">JQuikHtml 编辑器</div>
+          <div class="modal-title">HTML 编辑器</div>
           <button class="modal-close" @click="closeModal">&times;</button>
         </div>
         <div class="modal-body">
@@ -526,14 +673,14 @@
               <button class="btn btn-primary" @click="parseHtml">
                 <i class="fas fa-play"></i> 解析
               </button>
-              <button class="btn btn-outline" @click="generateHtml">
-                <i class="fas fa-download"></i> 生成
+              <button class="btn btn-outline" @click="importHtml">
+                <i class="fas fa-file-import"></i> 导入
               </button>
               <button class="btn btn-outline" @click="clearHtml">
                 <i class="fas fa-trash"></i> 清空
               </button>
             </div>
-            <textarea class="html-editor" v-model="htmlCode" placeholder="在此输入JQuikHtml代码..."></textarea>
+            <textarea class="html-editor" v-model="htmlEditorContent" placeholder="在此输入HTML代码..." rows="20"></textarea>
           </div>
         </div>
         <div class="modal-footer">
@@ -542,39 +689,11 @@
         </div>
       </div>
     </div>
-
-    <div class="modal-overlay" :class="{ active: activeModal === 'DOM关系' }" @click="closeModal">
-      <div class="modal" @click.stop>
-        <div class="modal-header">
-          <div class="modal-title">DOM关系管理</div>
-          <button class="modal-close" @click="closeModal">&times;</button>
-        </div>
-        <div class="modal-body">
-          <div class="relations-editor">
-            <div class="relation-item" v-for="(relation, index) in domRelations" :key="index">
-              <input type="text" class="form-control" v-model="relation.source" placeholder="源元素ID">
-              <span class="relation-arrow">-></span>
-              <input type="text" class="form-control" v-model="relation.target" placeholder="目标元素ID（多个用逗号分隔）">
-              <button class="remove-btn" @click="removeRelation(index)">
-                <i class="fas fa-times"></i>
-              </button>
-            </div>
-            <button class="btn btn-outline" @click="addRelation">
-              <i class="fas fa-plus"></i> 添加关系
-            </button>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-outline" @click="closeModal">取消</button>
-          <button class="btn btn-primary" @click="saveRelations">保存关系</button>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
 <script>
-import { defineComponent, ref, computed } from 'vue';
+import { defineComponent, ref, computed, watch } from 'vue';
 
 const draggable = {
   mounted(el, binding) {
@@ -595,334 +714,297 @@ export default defineComponent({
     draggable
   },
   setup() {
+    // 响应式数据
     const sidebarActive = ref(false);
     const propertiesPanelActive = ref(true);
-    const activeTab = ref('properties');
+    const activeTab = ref('layout');
     const activeModal = ref('');
-    const selectedComponentId = ref('h1_1234');
+    const selectedComponentId = ref('');
     const useGridLayout = ref(true);
-    const showMobileMenu = ref(false);
+    const showGridLines = ref(true);
     const isDraggingOver = ref(false);
-    const pageTitle = ref('JQuick BI 报表');
-    const charset = ref('UTF-8');
-    const viewport = ref('width=device-width, initial-scale=1.0');
-    const metaTags = ref([
-      { name: 'description', content: 'JQuick BI 报表设计' },
-      { name: 'keywords', content: 'BI,报表,数据分析' }
+    const currentBreakpoint = ref('desktop');
+    const htmlEditorContent = ref('');
+
+    // 布局容器
+    const layoutContainers = ref([
+      {
+        id: 'row_1',
+        type: 'row',
+        name: '行容器',
+        icon: 'fas fa-grip-horizontal',
+        config: {
+          width: { value: 100, unit: '%' },
+          height: { value: 200, unit: 'px' },
+          display: 'flex',
+          flexDirection: 'row',
+          margin: { top: '10px', right: '0', bottom: '10px', left: '0' },
+          padding: { top: '20px', right: '20px', bottom: '20px', left: '20px' },
+          backgroundColor: '#ffffff',
+          columns: 2,
+          responsive: {
+            desktop: { className: 'desktop-layout', css: '' },
+            tablet: { className: 'tablet-layout', css: 'flex-direction: column;' },
+            mobile: { className: 'mobile-layout', css: 'flex-direction: column; width: 100%;' }
+          }
+        }
+      },
+      {
+        id: 'col_1',
+        type: 'col',
+        name: '列容器',
+        icon: 'fas fa-columns',
+        parentId: 'row_1',
+        config: {
+          width: { value: 50, unit: '%' },
+          height: { value: 'auto', unit: 'auto' },
+          display: 'block',
+          margin: { top: '0', right: '10px', bottom: '0', left: '0' },
+          padding: { top: '15px', right: '15px', bottom: '15px', left: '15px' },
+          backgroundColor: '#f8f9fa',
+          responsive: {
+            desktop: { className: '', css: '' },
+            tablet: { className: '', css: 'width: 100%; margin: 10px 0;' },
+            mobile: { className: '', css: 'width: 100%; margin: 10px 0;' }
+          }
+        }
+      }
     ]);
-    const domRelations = ref([
-      { source: 'div_1234', target: 'h1_1234, p_5678' }
-    ]);
-    const htmlCode = ref(`head: {
-  title: "JQuick BI 报表";
-  meta { charset: "UTF-8"; }
-  meta { name: "viewport"; content: "width=device-width, initial-scale=1.0"; }
-  meta { name: "description"; content: "JQuick BI 报表设计"; }
-  meta { name: "keywords"; content: "BI,报表,数据分析"; }
-};
 
-h1[h1_1234]: { style-fontSize: "24px"; style-color: "#333"; } :: "一级标题";
-p[p_5678]: { style-fontSize: "14px"; style-color: "#666"; } :: "这是一个段落文本";
-button[button_9012]: { style-padding: "8px 16px"; style-backgroundColor: "#ff8326"; style-color: "white"; } :: "按钮";
-input[input_3456]: { type: "text"; placeholder: "请输入内容"; style-padding: "8px"; style-border: "1px solid #ddd"; };`);
-
-    const inlineElements = ['span', 'a', 'strong', 'em', 'i', 'b', 'u', 'mark', 'small', 'time',
-      'input', 'button', 'label', 'img', 'br'];
-
+    // 组件数据
     const components = ref([
       {
-        id: 'h1_1234',
-        name: 'H1 标题',
-        icon: 'fas fa-heading',
-        content: '一级标题',
+        id: 'text_1',
+        type: 'text',
+        name: '标题文本',
+        icon: 'fas fa-font',
+        content: '欢迎使用JQuick BI',
+        containerId: 'col_1',
         inline: false,
-        style: {
+        config: {
+          width: { value: 100, unit: '%' },
+          height: { value: 'auto', unit: 'auto' },
+          display: 'block',
           fontSize: '24px',
-          color: '#333',
-          backgroundColor: '',
-          width: '100%',
-          display: 'block'
-        },
-        relations: ''
+          fontWeight: 'bold',
+          fontFamily: "'Microsoft YaHei', sans-serif",
+          color: '#333333',
+          textAlign: 'left',
+          lineHeight: '1.5',
+          margin: { top: '0', right: '0', bottom: '15px', left: '0' },
+          padding: { top: '0', right: '0', bottom: '0', left: '0' },
+          backgroundColor: 'transparent',
+          backgroundImage: '',
+          backgroundSize: 'cover',
+          borderWidth: '0',
+          borderStyle: 'solid',
+          borderColor: '#dddddd',
+          borderRadius: '0',
+          boxShadow: 'none',
+          customCss: '',
+          responsive: {
+            desktop: { className: '', css: '' },
+            tablet: { className: '', css: 'font-size: 20px;' },
+            mobile: { className: '', css: 'font-size: 18px;' }
+          }
+        }
       },
       {
-        id: 'p_5678',
-        name: 'P 段落',
-        icon: 'fas fa-paragraph',
-        content: '这是一个段落文本',
-        inline: false,
-        style: {
-          fontSize: '14px',
-          color: '#666',
-          backgroundColor: '',
-          width: '100%',
-          display: 'block'
-        },
-        relations: ''
-      },
-      {
-        id: 'button_9012',
-        name: 'Button 按钮',
+        id: 'button_1',
+        type: 'button',
+        name: '主要按钮',
         icon: 'fas fa-hand-pointer',
-        content: '按钮',
+        content: '点击我',
+        containerId: 'col_1',
         inline: true,
-        style: {
+        config: {
+          width: { value: 'auto', unit: 'auto' },
+          height: { value: 40, unit: 'px' },
+          display: 'inline-block',
           fontSize: '14px',
-          color: 'white',
+          fontWeight: 'normal',
+          fontFamily: '',
+          color: '#ffffff',
+          textAlign: 'center',
+          lineHeight: '40px',
+          margin: { top: '0', right: '10px', bottom: '0', left: '0' },
+          padding: { top: '0', right: '20px', bottom: '0', left: '20px' },
           backgroundColor: '#ff8326',
-          width: 'auto',
-          display: 'inline-block',
-          padding: '8px 16px',
-          margin: '4px'
-        },
-        relations: ''
-      },
-      {
-        id: 'input_3456',
-        name: 'Input 输入框',
-        icon: 'fas fa-edit',
-        content: '<input type="text" class="preview-input" placeholder="请输入内容" disabled>',
-        inline: true,
-        style: {
-          padding: '8px',
-          border: '1px solid #ddd',
-          width: '200px',
-          display: 'inline-block',
-          margin: '4px'
-        },
-        relations: ''
+          backgroundImage: '',
+          backgroundSize: 'cover',
+          borderWidth: '0',
+          borderStyle: 'solid',
+          borderColor: '#ff8326',
+          borderRadius: '4px',
+          boxShadow: '0 2px 4px rgba(255,131,38,0.3)',
+          buttonType: 'button',
+          customCss: '',
+          responsive: {
+            desktop: { className: '', css: '' },
+            tablet: { className: '', css: 'width: 100%; margin: 10px 0;' },
+            mobile: { className: '', css: 'width: 100%; margin: 10px 0;' }
+          }
+        }
       }
     ]);
 
+    // 计算属性
     const selectedComponent = computed(() => {
-      return components.value.find(c => c.id === selectedComponentId.value) || null;
+      const allItems = [...layoutContainers.value, ...components.value];
+      return allItems.find(item => item.id === selectedComponentId.value) || null;
     });
 
-    const getComponentStyle = (component) => {
-      return {
-        fontSize: component.style.fontSize,
-        color: component.style.color,
-        backgroundColor: component.style.backgroundColor,
-        width: component.style.width,
-        display: component.style.display,
-        padding: component.style.padding,
-        margin: component.style.margin,
-        border: component.style.border
+    // 方法
+    const getComponentsInContainer = (containerId) => {
+      return components.value.filter(component => component.containerId === containerId);
+    };
+
+    const getContainerStyle = (container) => {
+      const config = container.config;
+      const responsiveConfig = config.responsive[currentBreakpoint.value];
+
+      let style = {
+        width: config.width.value + config.width.unit,
+        height: config.height.value + (config.height.unit === 'auto' ? '' : config.height.unit),
+        display: config.display,
+        'margin-top': config.margin.top,
+        'margin-right': config.margin.right,
+        'margin-bottom': config.margin.bottom,
+        'margin-left': config.margin.left,
+        'padding-top': config.padding.top,
+        'padding-right': config.padding.right,
+        'padding-bottom': config.padding.bottom,
+        'padding-left': config.padding.left,
+        'background-color': config.backgroundColor,
+        'flex-direction': config.flexDirection || 'row'
       };
-    };
 
-    const toggleSidebar = () => {
-      sidebarActive.value = !sidebarActive.value;
-    };
+      // 添加响应式样式
+      if (responsiveConfig && responsiveConfig.css) {
+        const responsiveStyles = responsiveConfig.css.split(';').reduce((acc, rule) => {
+          const [prop, value] = rule.split(':').map(s => s.trim());
+          if (prop && value) {
+            acc[prop] = value;
+          }
+          return acc;
+        }, {});
 
-    const selectComponent = (id) => {
-      selectedComponentId.value = id;
-    };
-
-    const deleteComponent = (id) => {
-      components.value = components.value.filter(c => c.id !== id);
-      if (selectedComponentId.value === id) {
-        selectedComponentId.value = components.value.length > 0 ? components.value[0].id : '';
+        style = { ...style, ...responsiveStyles };
       }
+
+      return style;
     };
 
-    const openModal = (type) => {
-      activeModal.value = type;
+    const getComponentStyle = (component) => {
+      const config = component.config;
+      const responsiveConfig = config.responsive[currentBreakpoint.value];
+
+      let style = {
+        width: config.width.value + (config.width.unit === 'auto' ? '' : config.width.unit),
+        height: config.height.value + (config.height.unit === 'auto' ? '' : config.height.unit),
+        display: config.display,
+        'font-size': config.fontSize + 'px',
+        'font-weight': config.fontWeight,
+        'font-family': config.fontFamily,
+        color: config.color,
+        'text-align': config.textAlign,
+        'line-height': config.lineHeight,
+        'margin-top': config.margin.top,
+        'margin-right': config.margin.right,
+        'margin-bottom': config.margin.bottom,
+        'margin-left': config.margin.left,
+        'padding-top': config.padding.top,
+        'padding-right': config.padding.right,
+        'padding-bottom': config.padding.bottom,
+        'padding-left': config.padding.left,
+        'background-color': config.backgroundColor,
+        'background-image': config.backgroundImage ? `url(${config.backgroundImage})` : '',
+        'background-size': config.backgroundSize,
+        'border-width': config.borderWidth,
+        'border-style': config.borderStyle,
+        'border-color': config.borderColor,
+        'border-radius': config.borderRadius + 'px',
+        'box-shadow': config.boxShadow
+      };
+
+      // 添加响应式样式
+      if (responsiveConfig && responsiveConfig.css) {
+        const responsiveStyles = responsiveConfig.css.split(';').reduce((acc, rule) => {
+          const [prop, value] = rule.split(':').map(s => s.trim());
+          if (prop && value) {
+            acc[prop] = value;
+          }
+          return acc;
+        }, {});
+
+        style = { ...style, ...responsiveStyles };
+      }
+
+      // 添加自定义CSS
+      if (config.customCss) {
+        const customStyles = config.customCss.split(';').reduce((acc, rule) => {
+          const [prop, value] = rule.split(':').map(s => s.trim());
+          if (prop && value) {
+            acc[prop] = value;
+          }
+          return acc;
+        }, {});
+
+        style = { ...style, ...customStyles };
+      }
+
+      return style;
     };
 
-    const closeModal = () => {
-      activeModal.value = '';
+    const renderComponentContent = (component) => {
+      if (component.type === 'button') {
+        return `<button type="${component.config.buttonType}"
+                style="width:100%; height:100%; border:none; background:transparent; color:inherit; font:inherit;">
+                ${component.content}</button>`;
+      } else if (component.type === 'input') {
+        return `<input type="${component.config.inputType || 'text'}"
+                placeholder="${component.config.placeholder || ''}"
+                style="width:100%; height:100%; border:none; background:transparent; color:inherit; font:inherit;">`;
+      } else if (component.type === 'chart') {
+        return `<div class="chart-placeholder">
+                  <i class="fas fa-chart-${component.config.chartType || 'bar'}"></i>
+                  <span>${component.content}</span>
+                </div>`;
+      } else if (component.type === 'select') {
+        return `<select style="width:100%; height:100%; border:none; background:transparent; color:inherit; font:inherit;">
+                  <option>选项1</option>
+                  <option>选项2</option>
+                </select>`;
+      }
+      return component.content;
     };
 
-    const addMeta = () => {
-      metaTags.value.push({ name: '', content: '' });
-    };
-
-    const removeMeta = (index) => {
-      metaTags.value.splice(index, 1);
-    };
-
-    const saveHeadSettings = () => {
-      closeModal();
-    };
-
-    const addRelation = () => {
-      domRelations.value.push({ source: '', target: '' });
-    };
-
-    const removeRelation = (index) => {
-      domRelations.value.splice(index, 1);
-    };
-
-    const saveRelations = () => {
-      closeModal();
-    };
-
-    const parseHtml = () => {
-      console.log('解析HTML:', htmlCode.value);
-    };
-
-    const generateHtml = () => {
-      console.log('生成HTML');
-    };
-
-    const clearHtml = () => {
-      htmlCode.value = '';
-    };
-
-    const applyHtml = () => {
-      console.log('应用HTML:', htmlCode.value);
-      closeModal();
-    };
-    // 图标映射
+    // 拖拽相关方法
     const draggableOptions = (type) => {
-      const icons = {
-        // 容器元素
-        div: 'fas fa-square',
-        section: 'fas fa-square-full',
-        article: 'fas fa-newspaper',
-        header: 'fas fa-heading',
-        footer: 'fas fa-window-minimize',
-        nav: 'fas fa-bars',
-        aside: 'fas fa-columns',
-        main: 'fas fa-home',
-        details: 'fas fa-info-circle',
-        summary: 'fas fa-list-alt',
-        dialog: 'fas fa-window-restore',
-        // 标题元素
-        h1: 'fas fa-heading',
-        h2: 'fas fa-heading',
-        h3: 'fas fa-heading',
-        h4: 'fas fa-heading',
-        h5: 'fas fa-heading',
-        h6: 'fas fa-heading',
-        heading: 'fas fa-heading',
-        // 文本内容元素
-        p: 'fas fa-paragraph',
-        span: 'fas fa-square',
-        a: 'fas fa-link',
-        strong: 'fas fa-bold',
-        em: 'fas fa-italic',
-        i: 'fas fa-italic',
-        b: 'fas fa-bold',
-        u: 'fas fa-underline',
-        pre: 'fas fa-code',
-        blockquote: 'fas fa-quote-right',
-        mark: 'fas fa-highlighter',
-        small: 'fas fa-text-height',
-        time: 'fas fa-clock',
-        // 列表元素
-        ul: 'fas fa-list-ul',
-        ol: 'fas fa-list-ol',
-        li: 'fas fa-list',
-        // 表格元素
-        table: 'fas fa-table',
-        thead: 'fas fa-table-header',
-        tbody: 'fas fa-table-body',
-        tr: 'fas fa-grip-lines',
-        th: 'fas fa-th',
-        td: 'fas fa-square',
-        // 表单元素
-        form: 'fas fa-window-restore',
-        input: 'fas fa-edit',
-        textarea: 'fas fa-align-left',
-        button: 'fas fa-hand-pointer',
-        select: 'fas fa-caret-square-down',
-        option: 'fas fa-caret-right',
-        label: 'fas fa-tag',
-        // 媒体元素
-        img: 'fas fa-image',
-        svg: 'fas fa-draw-polygon',
-        audio: 'fas fa-volume-up',
-        video: 'fas fa-video',
-        iframe: 'fas fa-external-link-alt',
-        // 其他元素
-        progress: 'fas fa-spinner',
-        br: 'fas fa-level-down-alt',
-        hr: 'fas fa-minus'
+      const elementTypes = {
+        row: { name: '行容器', icon: 'fas fa-grip-horizontal' },
+        col: { name: '列容器', icon: 'fas fa-columns' },
+        grid: { name: '网格容器', icon: 'fas fa-th' },
+        card: { name: '卡片', icon: 'fas fa-square' },
+        panel: { name: '面板', icon: 'fas fa-window-maximize' },
+        widget: { name: '组件', icon: 'fas fa-cube' },
+        text: { name: '文本', icon: 'fas fa-font' },
+        button: { name: '按钮', icon: 'fas fa-hand-pointer' },
+        input: { name: '输入框', icon: 'fas fa-edit' },
+        select: { name: '下拉框', icon: 'fas fa-caret-square-down' },
+        table: { name: '表格', icon: 'fas fa-table' },
+        chart: { name: '图表', icon: 'fas fa-chart-bar' }
       };
 
-      // 名称映射
-      const names = {
-        div: 'Div 容器',
-        section: 'Section 分区',
-        article: 'Article 文章',
-        header: 'Header 头部',
-        footer: 'Footer 页脚',
-        nav: 'Nav 导航',
-        aside: 'Aside 侧边栏',
-        main: 'Main 主内容',
-        details: 'Details 详情',
-        summary: 'Summary 摘要',
-        dialog: 'Dialog 对话框',
-        h1: 'H1 一级标题',
-        h2: 'H2 二级标题',
-        h3: 'H3 三级标题',
-        h4: 'H4 四级标题',
-        h5: 'H5 五级标题',
-        h6: 'H6 六级标题',
-        heading: 'Heading 标题',
-        p: 'P 段落',
-        span: 'Span 内联容器',
-        a: 'A 链接',
-        strong: 'Strong 强调',
-        em: 'Em 强调',
-        i: 'I 斜体',
-        b: 'B 粗体',
-        u: 'U 下划线',
-        pre: 'Pre 预格式文本',
-        blockquote: 'Blockquote 引用',
-        mark: 'Mark 标记',
-        small: 'Small 小文本',
-        time: 'Time 时间',
-        ul: 'Ul 无序列表',
-        ol: 'Ol 有序列表',
-        li: 'Li 列表项',
-        table: 'Table 表格',
-        thead: 'Thead 表头',
-        tbody: 'Tbody 表体',
-        tr: 'Tr 表格行',
-        th: 'Th 表头单元格',
-        td: 'Td 表格单元格',
-        form: 'Form 表单',
-        input: 'Input 输入框',
-        textarea: 'Textarea 文本域',
-        button: 'Button 按钮',
-        select: 'Select 下拉框',
-        option: 'Option 选项',
-        label: 'Label 标签',
-        img: 'Img 图片',
-        svg: 'SVG 矢量图',
-        audio: 'Audio 音频',
-        video: 'Video 视频',
-        iframe: 'Iframe 内联框架',
-        progress: 'Progress 进度条',
-        br: 'Br 换行',
-        hr: 'Hr 水平线'
-      };
-      const defaultContent = {
-        input: '<input type="text" class="preview-input" placeholder="请输入内容" disabled>',
-        button: '按钮',
-        img: '<img src="..." alt="图片" class="preview-image">',
-        select: '<select class="preview-select" disabled><option>选项1</option></select>',
-        textarea: '<textarea class="preview-textarea" placeholder="请输入内容" disabled></textarea>',
-        a: '<a href="#" class="preview-link">链接</a>',
-        audio: '<audio controls class="preview-audio"><source src="..." type="audio/mpeg"></audio>',
-        video: '<video controls class="preview-video"><source src="..." type="video/mp4"></video>',
-        iframe: '<iframe src="..." class="preview-iframe" frameborder="0"></iframe>'
-      };
-
-      const isInline = inlineElements.includes(type);
-      const name = names[type] || `${type.charAt(0).toUpperCase() + type.slice(1)} 元素`;
-      const icon = icons[type] || 'fas fa-cube';
-      const content = defaultContent[type] || `${name} 内容`;
+      const elementType = elementTypes[type] || { name: `${type}元素`, icon: 'fas fa-cube' };
+      const isInline = ['button', 'input', 'text'].includes(type);
 
       return {
         type,
-        name,
-        icon,
+        name: elementType.name,
+        icon: elementType.icon,
         inline: isInline,
-        content
+        isContainer: ['row', 'col', 'grid', 'card', 'panel'].includes(type)
       };
     };
 
@@ -943,29 +1025,80 @@ input[input_3456]: { type: "text"; placeholder: "请输入内容"; style-padding
 
       try {
         const data = JSON.parse(e.dataTransfer.getData('text/plain'));
-        const newId = `${data.type}_${Math.floor(Math.random() * 10000)}`;
-        const defaultStyle = data.inline ? {
-          width: 'auto',
-          display: 'inline-block',
-          padding: '8px 16px',
-          margin: '4px',
-          fontSize: '14px'
-        } : {
-          width: '100%',
-          display: 'block',
-          margin: '10px 0',
-          fontSize: '14px'
-        };
+        const newId = `${data.type}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
 
-        components.value.push({
-          id: newId,
-          name: data.name,
-          icon: data.icon,
-          content: data.content,
-          inline: data.inline,
-          style: { ...defaultStyle },
-          relations: ''
-        });
+        if (data.isContainer) {
+          // 创建容器
+          const containerConfig = {
+            width: { value: data.type === 'col' ? 50 : 100, unit: '%' },
+            height: { value: data.type === 'col' ? 'auto' : 200, unit: data.type === 'col' ? 'auto' : 'px' },
+            display: data.type === 'row' ? 'flex' : 'block',
+            flexDirection: 'row',
+            margin: { top: '10px', right: '0', bottom: '10px', left: '0' },
+            padding: { top: '20px', right: '20px', bottom: '20px', left: '20px' },
+            backgroundColor: data.type === 'col' ? '#f8f9fa' : '#ffffff',
+            columns: 2,
+            responsive: {
+              desktop: { className: '', css: '' },
+              tablet: { className: '', css: '' },
+              mobile: { className: '', css: '' }
+            }
+          };
+
+          layoutContainers.value.push({
+            id: newId,
+            type: data.type,
+            name: data.name,
+            icon: data.icon,
+            config: containerConfig
+          });
+        } else {
+          // 创建组件
+          const componentConfig = {
+            width: { value: data.inline ? 'auto' : 100, unit: data.inline ? 'auto' : '%' },
+            height: { value: data.type === 'button' ? 40 : 'auto', unit: 'px' },
+            display: data.inline ? 'inline-block' : 'block',
+            fontSize: data.type === 'text' ? '16px' : '14px',
+            fontWeight: 'normal',
+            fontFamily: '',
+            color: data.type === 'button' ? '#ffffff' : '#333333',
+            textAlign: 'left',
+            lineHeight: '1.5',
+            margin: { top: '0', right: data.inline ? '10px' : '0', bottom: '0', left: '0' },
+            padding: { top: data.type === 'button' ? '0' : '10px',
+              right: data.type === 'button' ? '20px' : '10px',
+              bottom: data.type === 'button' ? '0' : '10px',
+              left: data.type === 'button' ? '20px' : '10px' },
+            backgroundColor: data.type === 'button' ? '#ff8326' : 'transparent',
+            backgroundImage: '',
+            backgroundSize: 'cover',
+            borderWidth: '0',
+            borderStyle: 'solid',
+            borderColor: '#dddddd',
+            borderRadius: data.type === 'button' ? '4px' : '0',
+            boxShadow: data.type === 'button' ? '0 2px 4px rgba(255,131,38,0.3)' : 'none',
+            placeholder: '',
+            buttonType: 'button',
+            inputType: 'text',
+            chartType: 'bar',
+            customCss: '',
+            responsive: {
+              desktop: { className: '', css: '' },
+              tablet: { className: '', css: '' },
+              mobile: { className: '', css: '' }
+            }
+          };
+
+          components.value.push({
+            id: newId,
+            type: data.type,
+            name: data.name,
+            icon: data.icon,
+            content: data.name,
+            inline: data.inline,
+            config: componentConfig
+          });
+        }
 
         selectComponent(newId);
       } catch (error) {
@@ -973,37 +1106,340 @@ input[input_3456]: { type: "text"; placeholder: "请输入内容"; style-padding
       }
     };
 
+    // 布局预设
+    const applyLayoutPreset = (presetType) => {
+      layoutContainers.value = [];
+      components.value = [];
+
+      switch (presetType) {
+        case 'header-sidebar-main':
+          layoutContainers.value = [
+            {
+              id: 'header_1',
+              type: 'row',
+              name: '头部区域',
+              icon: 'fas fa-grip-horizontal',
+              config: {
+                width: { value: 100, unit: '%' },
+                height: { value: 80, unit: 'px' },
+                display: 'flex',
+                flexDirection: 'row',
+                margin: { top: '0', right: '0', bottom: '10px', left: '0' },
+                padding: { top: '0', right: '20px', bottom: '0', left: '20px' },
+                backgroundColor: '#ffffff',
+                columns: 2,
+                responsive: {
+                  desktop: { className: '', css: '' },
+                  tablet: { className: '', css: 'height: 60px;' },
+                  mobile: { className: '', css: 'height: 50px; padding: 0 10px;' }
+                }
+              }
+            },
+            {
+              id: 'main_row',
+              type: 'row',
+              name: '主要内容区',
+              icon: 'fas fa-grip-horizontal',
+              config: {
+                width: { value: 100, unit: '%' },
+                height: { value: 500, unit: 'px' },
+                display: 'flex',
+                flexDirection: 'row',
+                margin: { top: '0', right: '0', bottom: '0', left: '0' },
+                padding: { top: '0', right: '0', bottom: '0', left: '0' },
+                backgroundColor: '#f8f9fa',
+                columns: 2,
+                responsive: {
+                  desktop: { className: '', css: '' },
+                  tablet: { className: '', css: 'flex-direction: column;' },
+                  mobile: { className: '', css: 'flex-direction: column; height: auto;' }
+                }
+              }
+            }
+          ];
+          break;
+
+        case 'three-column':
+          layoutContainers.value = [
+            {
+              id: 'row_3col',
+              type: 'row',
+              name: '三栏布局',
+              icon: 'fas fa-grip-horizontal',
+              config: {
+                width: { value: 100, unit: '%' },
+                height: { value: 400, unit: 'px' },
+                display: 'flex',
+                flexDirection: 'row',
+                margin: { top: '10px', right: '0', bottom: '10px', left: '0' },
+                padding: { top: '0', right: '0', bottom: '0', left: '0' },
+                backgroundColor: '#f8f9fa',
+                columns: 3,
+                responsive: {
+                  desktop: { className: '', css: '' },
+                  tablet: { className: '', css: 'flex-wrap: wrap;' },
+                  mobile: { className: '', css: 'flex-direction: column; height: auto;' }
+                }
+              }
+            }
+          ];
+          break;
+
+        case 'dashboard':
+          layoutContainers.value = [
+            {
+              id: 'dashboard_row1',
+              type: 'row',
+              name: '仪表盘第一行',
+              icon: 'fas fa-grip-horizontal',
+              config: {
+                width: { value: 100, unit: '%' },
+                height: { value: 200, unit: 'px' },
+                display: 'flex',
+                flexDirection: 'row',
+                margin: { top: '10px', right: '0', bottom: '10px', left: '0' },
+                padding: { top: '0', right: '0', bottom: '0', left: '0' },
+                backgroundColor: '#f8f9fa',
+                columns: 3,
+                responsive: {
+                  desktop: { className: '', css: '' },
+                  tablet: { className: '', css: 'flex-wrap: wrap; height: auto;' },
+                  mobile: { className: '', css: 'flex-direction: column; height: auto;' }
+                }
+              }
+            },
+            {
+              id: 'dashboard_row2',
+              type: 'row',
+              name: '仪表盘第二行',
+              icon: 'fas fa-grip-horizontal',
+              config: {
+                width: { value: 100, unit: '%' },
+                height: { value: 300, unit: 'px' },
+                display: 'flex',
+                flexDirection: 'row',
+                margin: { top: '0', right: '0', bottom: '10px', left: '0' },
+                padding: { top: '0', right: '0', bottom: '0', left: '0' },
+                backgroundColor: '#f8f9fa',
+                columns: 2,
+                responsive: {
+                  desktop: { className: '', css: '' },
+                  tablet: { className: '', css: 'flex-direction: column; height: auto;' },
+                  mobile: { className: '', css: 'flex-direction: column; height: auto;' }
+                }
+              }
+            }
+          ];
+          break;
+      }
+
+      selectedComponentId.value = layoutContainers.value.length > 0 ? layoutContainers.value[0].id : '';
+    };
+
+    // 其他方法
+    const toggleSidebar = () => {
+      sidebarActive.value = !sidebarActive.value;
+    };
+
+    const toggleGridLines = () => {
+      showGridLines.value = !showGridLines.value;
+    };
+
+    const selectComponent = (id) => {
+      selectedComponentId.value = id;
+      activeTab.value = 'layout';
+    };
+
+    const deselectComponent = () => {
+      selectedComponentId.value = '';
+    };
+
+    const deleteComponent = (id) => {
+      components.value = components.value.filter(c => c.id !== id);
+      if (selectedComponentId.value === id) {
+        selectedComponentId.value = components.value.length > 0 ? components.value[0].id : '';
+      }
+    };
+
+    const deleteContainer = (id) => {
+      // 删除容器及其内部组件
+      components.value = components.value.filter(c => c.containerId !== id);
+      layoutContainers.value = layoutContainers.value.filter(c => c.id !== id);
+
+      if (selectedComponentId.value === id) {
+        selectedComponentId.value = layoutContainers.value.length > 0 ? layoutContainers.value[0].id :
+            components.value.length > 0 ? components.value[0].id : '';
+      }
+    };
+
+    const toggleGridLayout = () => {
+      useGridLayout.value = !useGridLayout.value;
+    };
+
+    const resetLayout = () => {
+      if (confirm('确定要重置布局吗？这将清除所有内容。')) {
+        layoutContainers.value = [];
+        components.value = [];
+        selectedComponentId.value = '';
+      }
+    };
+
+    const exportHtml = () => {
+      const htmlContent = generateHtml();
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'jquick-bi-report.html';
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    const previewHtml = () => {
+      const htmlContent = generateHtml();
+      const previewWindow = window.open();
+      previewWindow.document.write(htmlContent);
+      previewWindow.document.close();
+    };
+
+    const generateHtml = () => {
+      // 简化的HTML生成逻辑
+      return `
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JQuick BI 报表</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        ${layoutContainers.value.map(container => `
+        .${container.id} {
+            width: ${container.config.width.value}${container.config.width.unit};
+            height: ${container.config.height.value}${container.config.height.unit};
+            display: ${container.config.display};
+            margin: ${container.config.margin.top} ${container.config.margin.right} ${container.config.margin.bottom} ${container.config.margin.left};
+            padding: ${container.config.padding.top} ${container.config.padding.right} ${container.config.padding.bottom} ${container.config.padding.left};
+            background-color: ${container.config.backgroundColor};
+            flex-direction: ${container.config.flexDirection || 'row'};
+        }
+        `).join('\n')}
+
+        ${components.value.map(component => `
+        .${component.id} {
+            width: ${component.config.width.value}${component.config.width.unit};
+            height: ${component.config.height.value}${component.config.height.unit};
+            display: ${component.config.display};
+            font-size: ${component.config.fontSize}px;
+            color: ${component.config.color};
+            background-color: ${component.config.backgroundColor};
+            margin: ${component.config.margin.top} ${component.config.margin.right} ${component.config.margin.bottom} ${component.config.margin.left};
+            padding: ${component.config.padding.top} ${component.config.padding.right} ${component.config.padding.bottom} ${component.config.padding.left};
+            border-radius: ${component.config.borderRadius}px;
+            ${component.config.customCss}
+        }
+        `).join('\n')}
+
+        @media (max-width: 1199px) {
+            /* 平板样式 */
+        }
+
+        @media (max-width: 767px) {
+            /* 手机样式 */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        ${layoutContainers.value.map(container => `
+        <div class="${container.id}">
+            ${getComponentsInContainer(container.id).map(component => `
+            <div class="${component.id}">${component.content}</div>
+            `).join('')}
+        </div>
+        `).join('')}
+    </div>
+</body>
+</html>`;
+    };
+
+    // 模态框相关方法
+    const openHtmlEditor = () => {
+      htmlEditorContent.value = generateHtml();
+      activeModal.value = 'HTML编辑器';
+    };
+
+    const closeModal = () => {
+      activeModal.value = '';
+    };
+
+    const parseHtml = () => {
+      console.log('解析HTML:', htmlEditorContent.value);
+      alert('解析功能待实现');
+    };
+
+    const importHtml = () => {
+      htmlEditorContent.value = generateHtml();
+    };
+
+    const clearHtml = () => {
+      htmlEditorContent.value = '';
+    };
+
+    const applyHtml = () => {
+      console.log('应用HTML:', htmlEditorContent.value);
+      alert('应用功能待实现');
+      closeModal();
+    };
+
+    // 监听响应式断点变化
+    watch(currentBreakpoint, (newValue) => {
+      console.log('切换到断点:', newValue);
+    });
+
     return {
+      // 状态
       sidebarActive,
       propertiesPanelActive,
       activeTab,
       activeModal,
       selectedComponentId,
-      pageTitle,
-      charset,
-      viewport,
-      metaTags,
-      components,
-      domRelations,
-      htmlCode,
       useGridLayout,
-      showMobileMenu,
+      showGridLines,
       isDraggingOver,
+      currentBreakpoint,
+      htmlEditorContent,
+
+      // 数据
+      layoutContainers,
+      components,
+
+      // 计算属性
       selectedComponent,
-      getComponentStyle,
+
+      // 方法
       toggleSidebar,
+      toggleGridLines,
       selectComponent,
+      deselectComponent,
       deleteComponent,
-      openModal,
-      closeModal,
-      addMeta,
-      removeMeta,
-      saveHeadSettings,
-      addRelation,
-      removeRelation,
-      saveRelations,
-      parseHtml,
+      deleteContainer,
+      getComponentsInContainer,
+      getContainerStyle,
+      getComponentStyle,
+      renderComponentContent,
+      toggleGridLayout,
+      resetLayout,
+      applyLayoutPreset,
+      exportHtml,
+      previewHtml,
       generateHtml,
+      openHtmlEditor,
+      closeModal,
+      parseHtml,
+      importHtml,
       clearHtml,
       applyHtml,
       draggableOptions,
@@ -1016,7 +1452,315 @@ input[input_3456]: { type: "text"; placeholder: "请输入内容"; style-padding
 </script>
 
 <style>
+/* 扩展样式 */
+.layout-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
 
+.breakpoint-select {
+  padding: 6px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: white;
+  font-size: 14px;
+}
+
+.layout-presets {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  padding: 0 15px;
+}
+
+.layout-preset {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.layout-preset:hover {
+  border-color: var(--primary-color);
+  background-color: rgba(255, 131, 38, 0.05);
+}
+
+.preset-preview {
+  width: 100%;
+  height: 60px;
+  background: #f5f5f5;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+.preset-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 10px;
+  background: #ff8326;
+}
+
+.preset-sidebar {
+  position: absolute;
+  top: 15px;
+  left: 0;
+  width: 20px;
+  bottom: 0;
+  background: #e0e0e0;
+}
+
+.preset-main {
+  position: absolute;
+  top: 15px;
+  left: 25px;
+  right: 0;
+  bottom: 0;
+  background: white;
+}
+
+.preset-col, .preset-widget {
+  height: 100%;
+  background: #e0e0e0;
+  border-right: 1px solid white;
+}
+
+.preset-row {
+  display: flex;
+  height: 50%;
+}
+
+.layout-container {
+  margin-bottom: 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background: white;
+  transition: all 0.2s;
+}
+
+.layout-container.selected {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(255, 131, 38, 0.1);
+}
+
+.layout-container.row {
+  border-color: #4CAF50;
+}
+
+.layout-container.col {
+  border-color: #2196F3;
+}
+
+.layout-container.grid {
+  border-color: #9C27B0;
+}
+
+.container-header {
+  background: #f8f9fa;
+  padding: 10px 15px;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.container-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.container-id {
+  color: #999;
+  font-size: 12px;
+}
+
+.container-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.container-hint {
+  color: #666;
+  font-size: 12px;
+  background: white;
+  padding: 2px 8px;
+  border-radius: 3px;
+  border: 1px solid #ddd;
+}
+
+.container-content {
+  min-height: 100px;
+  padding: 15px;
+}
+
+.empty-container-hint {
+  height: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  border: 2px dashed #ddd;
+  border-radius: 6px;
+}
+
+.empty-container-hint i {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.empty-canvas-hint {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.empty-canvas-hint i {
+  font-size: 48px;
+  color: var(--primary-color);
+  margin-bottom: 20px;
+}
+
+.empty-canvas-hint h3 {
+  margin-bottom: 10px;
+  font-size: 20px;
+}
+
+.empty-canvas-hint p {
+  margin-bottom: 20px;
+  color: #999;
+}
+
+/* 属性面板扩展 */
+.range-input {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.range-input input[type="range"] {
+  flex: 1;
+}
+
+.range-input .form-control {
+  width: 70px;
+}
+
+.range-input select {
+  width: 60px;
+  padding: 6px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+}
+
+.spacing-controls {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.spacing-item {
+  margin-bottom: 8px;
+}
+
+.spacing-item label {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.align-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.align-btn {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid var(--border-color);
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.align-btn:hover {
+  background: #f5f5f5;
+}
+
+.align-btn.active {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.color-picker {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.color-picker input[type="color"] {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.close-panel {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 4px;
+  margin-left: auto;
+}
+
+.no-selection {
+  padding: 40px 20px;
+  text-align: center;
+  color: #999;
+}
+
+.no-selection i {
+  font-size: 36px;
+  margin-bottom: 15px;
+  color: #ddd;
+}
+
+/* 网格线 */
+.canvas-drag-area.show-grid {
+  background-image:
+      linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* 响应式样式 */
+@media (max-width: 768px) {
+  .layout-presets {
+    grid-template-columns: 1fr;
+  }
+
+  .spacing-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .range-input {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* 原有的样式保持不变 */
 :root {
   --primary-color: #ff8326;
   --secondary-color: #f5f5f5;
@@ -1081,6 +1825,7 @@ body {
 .logo i {
   font-size: 1.5rem;
 }
+
 .header-main-actions {
   display: flex;
   align-items: center;
@@ -1092,12 +1837,14 @@ body {
   overflow-x: auto;
   padding: 0 8px;
 }
+
 .header-secondary-actions {
   display: flex;
   align-items: center;
   gap: 4px;
   flex-shrink: 0;
 }
+
 .action-btn {
   display: flex;
   align-items: center;
@@ -1113,15 +1860,18 @@ body {
   flex-shrink: 0;
   height: 28px;
 }
+
 .action-btn.compact {
   padding: 4px 6px;
   width: 28px;
   justify-content: center;
 }
+
 .action-btn:hover {
   background-color: var(--secondary-color);
   border-color: var(--primary-color);
 }
+
 .action-btn i {
   font-size: 0.9rem;
 }
@@ -1520,48 +2270,6 @@ body {
   font-family: 'Courier New', monospace;
   font-size: 14px;
   resize: none;
-}
-
-.relations-editor {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.relation-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.relation-arrow {
-  color: var(--primary-color);
-  font-weight: bold;
-}
-
-.head-settings, .meta-items {
-  margin-bottom: 20px;
-}
-
-.meta-item {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
-  align-items: center;
-}
-
-.remove-btn {
-  background: none;
-  border: none;
-  color: #ff4d4f;
-  cursor: pointer;
-  padding: 5px;
-}
-
-@media (max-width: 1024px) {
-  .properties-panel {
-    width: 250px;
-  }
 }
 
 @media (max-width: 768px) {
