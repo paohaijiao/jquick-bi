@@ -225,7 +225,11 @@
                     <div class="component-content" v-html="renderComponentContent(component)"></div>
                   </div>
 
-                  <div v-if="getComponentsInContainer(container.id).length === 0" class="empty-container-hint">
+                  <div v-if="getComponentsInContainer(container.id).length === 0"
+                       class="empty-container-hint"
+                       @dragover.prevent="handleContainerDragOver($event, container.id)"
+                       @drop="handleContainerDrop($event, container.id)"
+                       @dragleave="handleContainerDragLeave($event, container.id)">
                     <i class="fas fa-plus-circle"></i>
                     <p>拖放组件到此区域</p>
                   </div>
@@ -689,6 +693,9 @@ export default defineComponent({
     const htmlEditorContent = ref('');
     const draggingElementType = ref('');
 
+    // 添加容器拖拽状态跟踪
+    const containerDragStates = ref({});
+
     const layoutContainers = ref([
       {
         id: 'row_1',
@@ -808,10 +815,12 @@ export default defineComponent({
         }
       }
     ]);
+
     const selectedComponent = computed(() => {
       const allItems = [...layoutContainers.value, ...components.value];
       return allItems.find(item => item.id === selectedComponentId.value) || null;
     });
+
     const getComponentsInContainer = (containerId) => {
       return components.value.filter(component => component.containerId === containerId);
     };
@@ -893,6 +902,7 @@ export default defineComponent({
         }, {});
         style = { ...style, ...responsiveStyles };
       }
+
       if (config.customCss) {
         const customStyles = config.customCss.split(';').reduce((acc, rule) => {
           const [prop, value] = rule.split(':').map(s => s.trim());
@@ -936,14 +946,82 @@ export default defineComponent({
       return component.content;
     };
 
+    // 处理容器区域的 dragover
+    const handleContainerDragOver = (e, containerId) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      // 设置容器拖拽状态
+      containerDragStates.value[containerId] = true;
+
+      // 设置拖放效果
+      e.dataTransfer.dropEffect = 'copy';
+
+      // 添加视觉反馈
+      const hintElement = e.target.closest('.empty-container-hint');
+      if (hintElement) {
+        hintElement.style.borderColor = 'var(--primary-color)';
+        hintElement.style.backgroundColor = 'rgba(255, 131, 38, 0.1)';
+      }
+    };
+
+    // 处理容器区域的 dragleave
+    const handleContainerDragLeave = (e, containerId) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      // 清除容器拖拽状态
+      if (containerDragStates.value[containerId]) {
+        containerDragStates.value[containerId] = false;
+      }
+
+      // 移除视觉反馈
+      const hintElement = e.target.closest('.empty-container-hint');
+      if (hintElement) {
+        hintElement.style.borderColor = '';
+        hintElement.style.backgroundColor = '';
+      }
+    };
+
+    // 处理容器区域的 drop
+    const handleContainerDrop = (e, containerId) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      // 清除容器拖拽状态
+      containerDragStates.value[containerId] = false;
+
+      // 移除视觉反馈
+      const hintElement = e.target.closest('.empty-container-hint');
+      if (hintElement) {
+        hintElement.style.borderColor = '';
+        hintElement.style.backgroundColor = '';
+      }
+
+      // 获取拖拽元素类型
+      let elementType = draggingElementType.value;
+      if (!elementType && e.dataTransfer.types.includes('text/plain')) {
+        elementType = e.dataTransfer.getData('text/plain');
+      }
+
+      if (!elementType) {
+        console.warn('未获取到拖拽元素类型');
+        return;
+      }
+
+      // 创建新的组件并放入指定容器
+      createComponent(elementType, containerId);
+    };
+
     const handleDragStart = (event, elementType) => {
       draggingElementType.value = elementType;
       event.dataTransfer.setData('text/plain', elementType);
       event.dataTransfer.effectAllowed = 'copy';
-      const element = event.target;
-      element.classList.add('dragging');
+
+      // 添加视觉反馈
+      event.target.classList.add('dragging');
       setTimeout(() => {
-        element.classList.remove('dragging');
+        event.target.classList.remove('dragging');
       }, 0);
     };
 
@@ -957,15 +1035,8 @@ export default defineComponent({
       isDraggingOver.value = false;
     };
 
-    const handleDrop = (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      isDraggingOver.value = false;
-
-      const elementType = draggingElementType.value || e.dataTransfer.getData('text/plain');
-
-      if (!elementType) return;
-
+    // 创建组件的通用函数
+    const createComponent = (elementType, containerId = null) => {
       const newId = `${elementType}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
       const elementTypes = {
         row: { name: '行容器', icon: 'fas fa-grip-horizontal', isContainer: true },
@@ -1067,16 +1138,31 @@ export default defineComponent({
           name: elementInfo.name,
           icon: elementInfo.icon,
           content: contentMap[elementType] || elementInfo.name,
+          containerId: containerId,
           inline: isInline,
           config: componentConfig
         });
 
-        console.log('创建组件:', elementType, newId);
+        console.log('创建组件:', elementType, newId, '放入容器:', containerId);
       }
 
       selectComponent(newId);
       draggingElementType.value = '';
     };
+
+    const handleDrop = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      isDraggingOver.value = false;
+
+      const elementType = draggingElementType.value || e.dataTransfer.getData('text/plain');
+
+      if (!elementType) return;
+
+      // 创建组件，不指定容器（直接放入画布）
+      createComponent(elementType);
+    };
+
     const applyLayoutPreset = (presetType) => {
       layoutContainers.value = [];
       components.value = [];
@@ -1205,6 +1291,7 @@ export default defineComponent({
 
       selectedComponentId.value = layoutContainers.value.length > 0 ? layoutContainers.value[0].id : '';
     };
+
     const toggleSidebar = () => {
       sidebarActive.value = !sidebarActive.value;
     };
@@ -1355,6 +1442,7 @@ export default defineComponent({
       alert('应用功能待实现');
       closeModal();
     };
+
     watch(currentBreakpoint, (newValue) => {
       console.log('切换到断点:', newValue);
     });
@@ -1373,6 +1461,7 @@ export default defineComponent({
       layoutContainers,
       components,
       selectedComponent,
+      containerDragStates,
       handleDragStart,
       toggleSidebar,
       toggleGridLines,
@@ -1398,7 +1487,11 @@ export default defineComponent({
       applyHtml,
       handleDragOver,
       handleDragLeave,
-      handleDrop
+      handleDrop,
+      handleContainerDragOver,
+      handleContainerDragLeave,
+      handleContainerDrop,
+      createComponent
     };
   }
 });
@@ -1561,6 +1654,19 @@ export default defineComponent({
   color: #999;
   border: 2px dashed #ddd;
   border-radius: 6px;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.empty-container-hint:hover {
+  border-color: var(--primary-color);
+  background-color: rgba(255, 131, 38, 0.05);
+}
+
+.empty-container-hint.dragover {
+  border-color: var(--primary-color);
+  background-color: rgba(255, 131, 38, 0.1);
+  box-shadow: 0 0 10px rgba(255, 131, 38, 0.2);
 }
 
 .empty-container-hint i {
