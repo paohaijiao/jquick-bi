@@ -2047,6 +2047,7 @@ body {
 .panel-tabs {
   display: flex;
   border-bottom: 1px solid var(--border-color);
+  white-space: nowrap;
 }
 
 .tab-item {
