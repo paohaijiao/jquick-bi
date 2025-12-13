@@ -8,32 +8,52 @@
         <i class="fas fa-chart-line"></i>
         <span>JQuick BI</span>
       </div>
-      <div class="header-main-actions">
-        <button class="action-btn" @click="exportHtml">
-          <i class="fas fa-code"></i>导出HTML
-        </button>
-        <button class="action-btn" @click="previewHtml">
-          <i class="fas fa-eye"></i>预览
-        </button>
-        <button class="action-btn" @click="openHtmlEditor">
-          <i class="fas fa-code"></i>编辑器
-        </button>
-        <button class="action-btn" @click="resetLayout">
-          <i class="fas fa-redo"></i>重置布局
-        </button>
-      </div>
-      <div class="header-secondary-actions">
-        <button class="action-btn compact" @click="toggleGridLayout">
-          <i :class="useGridLayout ? 'fas fa-th' : 'fas fa-th-large'" :title="useGridLayout ? '网格布局' : '自由布局'"></i>
-        </button>
-        <button class="action-btn compact" @click="toggleGridLines">
-          <i :class="showGridLines ? 'fas fa-eye-slash' : 'fas fa-eye'" :title="showGridLines ? '隐藏网格' : '显示网格'"></i>
-        </button>
-        <div class="user-profile compact">
-          <div class="user-avatar">
-            <i class="fas fa-user"></i>
+
+      <div class="header-actions">
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input placeholder="搜索报表、数据源或文档..." type="text">
+        </div>
+
+        <div class="action-buttons">
+          <button class="action-btn" @click="exportHtml">
+            <i class="fas fa-code"></i>导出HTML
+          </button>
+          <button class="action-btn" @click="previewHtml">
+            <i class="fas fa-eye"></i>预览
+          </button>
+          <button class="action-btn" @click="openHtmlEditor">
+            <i class="fas fa-code"></i>编辑器
+          </button>
+          <button class="action-btn" @click="saveLayout">
+            <i class="fas fa-save"></i>保存
+          </button>
+          <button class="action-btn" @click="loadLayout">
+            <i class="fas fa-folder-open"></i>加载
+          </button>
+        </div>
+
+        <div class="header-secondary-actions">
+          <div class="notification-icon">
+            <i class="far fa-bell"></i>
+            <span class="notification-badge">3</span>
           </div>
-          <span class="username">管理员</span>
+
+          <button class="action-btn compact" @click="toggleGridLayout">
+            <i :class="useGridLayout ? 'fas fa-th' : 'fas fa-th-large'"
+               :title="useGridLayout ? '网格布局' : '自由布局'"></i>
+          </button>
+
+          <button class="action-btn compact" @click="toggleGridLines">
+            <i :class="showGridLines ? 'fas fa-eye-slash' : 'fas fa-eye'"
+               :title="showGridLines ? '隐藏网格' : '显示网格'"></i>
+          </button>
+
+          <div class="user-info">
+            <div class="user-avatar">ZL</div>
+            <span class="user-name">张磊</span>
+            <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
+          </div>
         </div>
       </div>
     </header>
@@ -41,7 +61,7 @@
     <div class="main-content">
       <aside class="sidebar" :class="{ active: sidebarActive }">
         <div class="menu-section">
-          <div class="menu-section-title text-align-left">布局元素</div>
+          <div class="menu-section-title">布局元素</div>
           <div class="menu-item" draggable="true" @dragstart="handleDragStart($event, 'row')">
             <i class="fas fa-grip-horizontal"></i>
             <span>行容器 (Row)</span>
@@ -57,51 +77,51 @@
         </div>
 
         <div class="menu-section">
-          <div class="menu-section-title text-align-left">内容元素</div>
-          <div class="menu-item" draggable="true" @dragstart="handleDragStart($event, 'card')">
-            <i class="fas fa-square"></i>
-            <span>卡片 (Card)</span>
-          </div>
-          <div class="menu-item" draggable="true" @dragstart="handleDragStart($event, 'panel')">
-            <i class="fas fa-window-maximize"></i>
-            <span>面板 (Panel)</span>
-          </div>
-          <div class="menu-item" draggable="true" @dragstart="handleDragStart($event, 'widget')">
-            <i class="fas fa-cube"></i>
-            <span>组件 (Widget)</span>
+          <div class="menu-section-title">容器元素</div>
+          <div v-for="item in containerElements" :key="item.type"
+               class="menu-item"
+               draggable="true"
+               @dragstart="handleDomTypeDragStart($event, item.type)">
+            <i :class="item.icon"></i>
+            <span>{{ item.name }}</span>
           </div>
         </div>
 
         <div class="menu-section">
-          <div class="menu-section-title text-align-left">基础元素</div>
-          <div class="menu-item" draggable="true" @dragstart="handleDragStart($event, 'text')">
-            <i class="fas fa-font"></i>
-            <span>文本 (Text)</span>
-          </div>
-          <div class="menu-item" draggable="true" @dragstart="handleDragStart($event, 'button')">
-            <i class="fas fa-hand-pointer"></i>
-            <span>按钮 (Button)</span>
-          </div>
-          <div class="menu-item" draggable="true" @dragstart="handleDragStart($event, 'input')">
-            <i class="fas fa-edit"></i>
-            <span>输入框 (Input)</span>
-          </div>
-          <div class="menu-item" draggable="true" @dragstart="handleDragStart($event, 'select')">
-            <i class="fas fa-caret-square-down"></i>
-            <span>下拉框 (Select)</span>
-          </div>
-          <div class="menu-item" draggable="true" @dragstart="handleDragStart($event, 'table')">
-            <i class="fas fa-table"></i>
-            <span>表格 (Table)</span>
-          </div>
-          <div class="menu-item" draggable="true" @dragstart="handleDragStart($event, 'chart')">
-            <i class="fas fa-chart-bar"></i>
-            <span>图表 (Chart)</span>
+          <div class="menu-section-title">文本元素</div>
+          <div v-for="item in textElements" :key="item.type"
+               class="menu-item"
+               draggable="true"
+               @dragstart="handleDomTypeDragStart($event, item.type)">
+            <i :class="item.icon"></i>
+            <span>{{ item.name }}</span>
           </div>
         </div>
 
         <div class="menu-section">
-          <div class="menu-section-title text-align-left">预设布局</div>
+          <div class="menu-section-title">表单元素</div>
+          <div v-for="item in formElements" :key="item.type"
+               class="menu-item"
+               draggable="true"
+               @dragstart="handleDomTypeDragStart($event, item.type)">
+            <i :class="item.icon"></i>
+            <span>{{ item.name }}</span>
+          </div>
+        </div>
+
+        <div class="menu-section">
+          <div class="menu-section-title">多媒体元素</div>
+          <div v-for="item in mediaElements" :key="item.type"
+               class="menu-item"
+               draggable="true"
+               @dragstart="handleDomTypeDragStart($event, item.type)">
+            <i :class="item.icon"></i>
+            <span>{{ item.name }}</span>
+          </div>
+        </div>
+
+        <div class="menu-section">
+          <div class="menu-section-title">预设布局</div>
           <div class="layout-presets">
             <div class="layout-preset" @click="applyLayoutPreset('header-sidebar-main')">
               <div class="preset-preview">
@@ -138,23 +158,25 @@
       </aside>
 
       <div class="workspace">
-        <div class="workspace-header">
+        <div class="page-header">
           <div>
-            <h1 class="workspace-title text-align-left">我的报表</h1>
-            <p class="workspace-description">拖放元素到画布中创建页面，支持响应式布局</p>
+            <h1 class="page-title">报表设计器</h1>
+            <p class="page-description">拖放元素到画布中创建页面，支持响应式布局</p>
           </div>
-          <div class="workspace-actions">
-            <div class="layout-controls">
-              <select v-model="currentBreakpoint" class="breakpoint-select">
-                <option value="desktop">桌面 (≥1200px)</option>
-                <option value="tablet">平板 (768px-1199px)</option>
-                <option value="mobile">手机 (<768px)</option>
-              </select>
-              <button class="action-btn" @click="showGridLines = !showGridLines">
-                <i :class="showGridLines ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
-                {{ showGridLines ? '隐藏网格' : '显示网格' }}
-              </button>
-            </div>
+          <div class="layout-controls">
+            <select v-model="currentBreakpoint" class="breakpoint-select">
+              <option value="desktop">桌面 (≥1200px)</option>
+              <option value="tablet">平板 (768px-1199px)</option>
+              <option value="mobile">手机 (<768px)</option>
+            </select>
+            <button class="action-btn" @click="showGridLines = !showGridLines">
+              <i :class="showGridLines ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+              {{ showGridLines ? '隐藏网格' : '显示网格' }}
+            </button>
+            <button class="btn btn-outline" @click="resetLayout">
+              <i class="fas fa-redo"></i>
+              重置布局
+            </button>
           </div>
         </div>
 
@@ -167,19 +189,16 @@
             'dragover': isDraggingOver,
             'show-grid': showGridLines
           }">
-            <template v-if="layoutContainers.length > 0">
-              <div
-                  v-for="container in layoutContainers"
-                  :key="container.id"
-                  class="layout-container"
-                  :class="[
-                  container.type,
-                  { 'selected': selectedComponentId === container.id },
-                  container.config.responsive[currentBreakpoint]?.className || ''
-                ]"
-                  :style="getContainerStyle(container)"
-                  @click="selectComponent(container.id)"
-              >
+            <div v-for="container in layoutContainers" :key="container.id" class="container-content">
+              <div v-if="container.type !== 'grid'"
+                   :class="[
+                     container.type,
+                     { 'selected': selectedComponentId === container.id },
+                     container.config.responsive[currentBreakpoint]?.className || ''
+                   ]"
+                   :style="getContainerStyle(container)"
+                   class="layout-container"
+                   @click="selectComponent(container.id)">
                 <div class="container-header">
                   <div class="container-info">
                     <i :class="container.icon"></i>
@@ -191,24 +210,22 @@
                       <span v-if="container.config.width">{{ container.config.width.value }}{{ container.config.width.unit }}</span>
                       <span v-if="container.config.columns">×{{ container.config.columns }}</span>
                     </div>
-                    <button class="delete-btn" title="删除容器" @click.stop="deleteContainer(container.id)">
+                    <button class="operation-btn" title="删除容器" @click.stop="deleteContainer(container.id)">
                       <i class="fas fa-trash-alt"></i>
                     </button>
                   </div>
                 </div>
 
                 <div class="container-content" :class="container.config.display">
-                  <div
-                      v-for="component in getComponentsInContainer(container.id)"
-                      :key="component.id"
-                      class="canvas-component"
-                      :class="{
-                      'selected': selectedComponentId === component.id,
-                      'inline-component': component.inline
-                    }"
-                      :style="getComponentStyle(component)"
-                      @click.stop="selectComponent(component.id)"
-                  >
+                  <div v-for="component in getComponentsInContainer(container.id)"
+                       :key="component.id"
+                       :class="{
+                         'selected': selectedComponentId === component.id,
+                         'inline-component': component.config.inline
+                       }"
+                       :style="getComponentStyle(component)"
+                       class="canvas-component"
+                       @click.stop="selectComponent(component.id)">
                     <div class="component-header">
                       <div class="component-info">
                         <i :class="component.icon"></i>
@@ -216,12 +233,11 @@
                         <small class="component-id">#{{ component.id }}</small>
                       </div>
                       <div class="component-actions">
-                        <button class="delete-btn" title="删除组件" @click.stop="deleteComponent(component.id)">
+                        <button class="operation-btn" title="删除组件" @click.stop="deleteComponent(component.id)">
                           <i class="fas fa-trash-alt"></i>
                         </button>
                       </div>
                     </div>
-
                     <div class="component-content" v-html="renderComponentContent(component)"></div>
                   </div>
 
@@ -235,36 +251,133 @@
                   </div>
                 </div>
               </div>
-            </template>
-            <template v-else>
-              <div
-                  v-for="component in components.filter(c => !c.containerId)"
-                  :key="component.id"
-                  class="canvas-component"
-                  :class="{
-                  'selected': selectedComponentId === component.id,
-                  'inline-component': component.inline
-                }"
-                  :style="getComponentStyle(component)"
-                  @click="selectComponent(component.id)"
-              >
-                <div class="component-header">
-                  <div class="component-info">
-                    <i :class="component.icon"></i>
-                    <span>{{ component.name }}</span>
-                    <small class="component-id">#{{ component.id }}</small>
+
+              <div v-else
+                   :class="{ 'selected': selectedComponentId === container.id }"
+                   :style="getGridContainerStyle(container)"
+                   class="layout-container grid-container"
+                   @click="selectComponent(container.id)">
+                <div class="container-header">
+                  <div class="container-info">
+                    <i :class="container.icon"></i>
+                    <span>{{ container.name }}</span>
+                    <small class="container-id">#{{ container.id }}</small>
+                    <div class="grid-config">
+                      <span class="grid-size">
+                        {{ container.config.rows }}行 × {{ container.config.columns }}列
+                      </span>
+                      <button class="grid-action-btn" title="添加行" @click.stop="addGridRow(container.id)">
+                        <i class="fas fa-plus"></i>行
+                      </button>
+                      <button class="grid-action-btn" title="添加列" @click.stop="addGridColumn(container.id)">
+                        <i class="fas fa-plus"></i>列
+                      </button>
+                    </div>
                   </div>
-                  <div class="component-actions">
-                    <div class="component-hint">双击编辑</div>
-                    <button class="delete-btn" title="删除组件" @click.stop="deleteComponent(component.id)">
+                  <div class="container-actions">
+                    <button class="operation-btn" title="删除容器" @click.stop="deleteContainer(container.id)">
                       <i class="fas fa-trash-alt"></i>
                     </button>
                   </div>
                 </div>
 
-                <div class="component-content" v-html="renderComponentContent(component)"></div>
+                <div :style="getGridTemplateStyle(container)" class="grid-cells">
+                  <div v-for="cell in container.config.cells"
+                       :key="cell.id"
+                       :class="{
+                         'selected': selectedComponentId === cell.id,
+                         'merged': cell.merged,
+                         'span-col': cell.colSpan > 1,
+                         'span-row': cell.rowSpan > 1
+                       }"
+                       :style="getGridCellStyle(cell, container)"
+                       class="grid-cell"
+                       @dragleave="handleGridCellDragLeave($event, cell.id)"
+                       @drop="handleGridCellDrop($event, cell.id)"
+                       @click.stop="selectComponent(cell.id)"
+                       @dragover.prevent="handleGridCellDragOver($event, cell.id)">
+
+                    <div v-if="!cell.merged" class="cell-header">
+                      <div class="cell-info">
+                        <span class="cell-position">{{ cell.row }},{{ cell.col }}</span>
+                        <button v-if="cell.components.length > 0"
+                                class="cell-merge-btn"
+                                title="合并单元格"
+                                @click.stop="mergeGridCell(container.id, cell)">
+                          <i class="fas fa-compress"></i>
+                        </button>
+                      </div>
+                      <div class="cell-actions">
+                        <button class="operation-btn"
+                                title="清空单元格"
+                                @click.stop="deleteGridCellComponent(container.id, cell.id)">
+                          <i class="fas fa-times"></i>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="cell-content">
+                      <div v-for="component in getComponentsInGridCell(cell.id)"
+                           :key="component.id"
+                           :class="{
+                             'selected': selectedComponentId === component.id,
+                             'inline-component': component.config.inline
+                           }"
+                           :style="getComponentStyle(component)"
+                           class="canvas-component"
+                           @click.stop="selectComponent(component.id)">
+                        <div class="component-header">
+                          <div class="component-info">
+                            <i :class="component.icon"></i>
+                            <span>{{ component.name }}</span>
+                          </div>
+                          <div class="component-actions">
+                            <button class="operation-btn" title="删除组件" @click.stop="deleteComponent(component.id)">
+                              <i class="fas fa-trash-alt"></i>
+                            </button>
+                          </div>
+                        </div>
+                        <div class="component-content" v-html="renderComponentContent(component)"></div>
+                      </div>
+
+                      <div v-if="getComponentsInGridCell(cell.id).length === 0 && !cell.merged"
+                           class="empty-cell-hint"
+                           @dragleave="handleGridCellDragLeave($event, cell.id)"
+                           @drop="handleGridCellDrop($event, cell.id)"
+                           @dragover.prevent="handleGridCellDragOver($event, cell.id)">
+                        <i class="fas fa-plus-circle"></i>
+                        <p>拖放组件到此单元格</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </template>
+            </div>
+            <div v-for="component in components.filter(c => !c.containerId && !c.gridCellId)"
+                 :key="component.id"
+                 :class="{
+                   'selected': selectedComponentId === component.id,
+                   'inline-component': component.config.inline
+                 }"
+                 :style="getComponentStyle(component)"
+                 class="canvas-component"
+                 @click="selectComponent(component.id)">
+              <div class="component-header">
+                <div class="component-info">
+                  <i :class="component.icon"></i>
+                  <span>{{ component.name }}</span>
+                  <small class="component-id">#{{ component.id }}</small>
+                </div>
+                <div class="component-actions">
+                  <div class="component-hint">双击编辑</div>
+                  <button class="operation-btn" title="删除组件" @click.stop="deleteComponent(component.id)">
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="component-content" v-html="renderComponentContent(component)"></div>
+            </div>
+
             <div v-if="layoutContainers.length === 0 && components.length === 0" class="empty-canvas-hint">
               <i class="fas fa-magic"></i>
               <h3>开始创建您的报表</h3>
@@ -278,10 +391,12 @@
       </div>
 
       <div class="properties-panel active" :class="{ active: propertiesPanelActive }">
-        <div class="panel-title">
-          <i class="fas fa-sliders-h"></i>
-          <span>属性设置</span>
-          <button v-if="selectedComponent" class="close-panel" @click="deselectComponent">
+        <div class="panel-header">
+          <div class="panel-title">
+            <i class="fas fa-sliders-h"></i>
+            <span>属性设置</span>
+          </div>
+          <button v-if="selectedComponent" class="panel-close" @click="deselectComponent">
             <i class="fas fa-times"></i>
           </button>
         </div>
@@ -301,8 +416,8 @@
           </div>
         </div>
 
-        <div class="tab-content" v-if="selectedComponent">
-          <div v-if="activeTab === 'layout'">
+        <div v-if="selectedComponent" class="panel-content">
+          <div v-if="activeTab === 'layout'" class="setting-panel">
             <div class="setting-group">
               <div class="setting-title">尺寸设置</div>
 
@@ -405,7 +520,7 @@
             </div>
           </div>
 
-          <div v-if="activeTab === 'style'">
+          <div v-if="activeTab === 'style'" class="setting-panel">
             <div class="setting-group">
               <div class="setting-title">文字样式</div>
 
@@ -554,7 +669,7 @@
             </div>
           </div>
 
-          <div v-if="activeTab === 'content'">
+          <div v-if="activeTab === 'content'" class="setting-panel">
             <div class="setting-group">
               <div class="setting-title">内容编辑</div>
 
@@ -601,7 +716,7 @@
             </div>
           </div>
 
-          <div v-if="activeTab === 'advanced'">
+          <div v-if="activeTab === 'advanced'" class="setting-panel">
             <div class="setting-group">
               <div class="setting-title">响应式设置</div>
 
@@ -675,9 +790,8 @@
     </div>
   </div>
 </template>
-
 <script>
-import { defineComponent, ref, computed, watch } from 'vue';
+import {computed, defineComponent, onMounted, ref, watch} from 'vue';
 
 export default defineComponent({
   setup() {
@@ -692,237 +806,450 @@ export default defineComponent({
     const currentBreakpoint = ref('desktop');
     const htmlEditorContent = ref('');
     const draggingElementType = ref('');
-
-    // 添加容器拖拽状态跟踪
+    const layoutContainers = ref([]);
+    const components = ref([]);
     const containerDragStates = ref({});
-
-    const layoutContainers = ref([
-      {
-        id: 'row_1',
-        type: 'row',
-        name: '行容器',
-        icon: 'fas fa-grip-horizontal',
-        config: {
-          width: { value: 100, unit: '%' },
-          height: { value: 200, unit: 'px' },
-          display: 'flex',
-          flexDirection: 'row',
-          margin: { top: '10px', right: '0', bottom: '10px', left: '0' },
-          padding: { top: '20px', right: '20px', bottom: '20px', left: '20px' },
-          backgroundColor: '#ffffff',
-          columns: 2,
-          responsive: {
-            desktop: { className: 'desktop-layout', css: '' },
-            tablet: { className: 'tablet-layout', css: 'flex-direction: column;' },
-            mobile: { className: 'mobile-layout', css: 'flex-direction: column; width: 100%;' }
+    const initializeData = () => {
+      layoutContainers.value = [
+        {
+          id: 'row_1',
+          type: 'row',
+          name: '行容器',
+          icon: 'fas fa-grip-horizontal',
+          config: {
+            width: {value: 100, unit: '%'},
+            height: {value: 200, unit: 'px'},
+            display: 'flex',
+            flexDirection: 'row',
+            margin: {top: '10px', right: '0', bottom: '10px', left: '0'},
+            padding: {top: '20px', right: '20px', bottom: '20px', left: '20px'},
+            backgroundColor: '#ffffff',
+            columns: 2,
+            responsive: {
+              desktop: {className: 'desktop-layout', css: ''},
+              tablet: {className: 'tablet-layout', css: 'flex-direction: column; width: 100%;'},
+              mobile: {className: 'mobile-layout', css: 'flex-direction: column; width: 100%;'}
+            }
+          }
+        },
+        {
+          id: 'grid_1',
+          type: 'grid',
+          name: '网格容器',
+          icon: 'fas fa-th',
+          config: {
+            width: {value: 100, unit: '%'},
+            height: {value: 300, unit: 'px'},
+            display: 'grid',
+            rows: 3,
+            columns: 3,
+            gap: '10px',
+            margin: {top: '10px', right: '0', bottom: '10px', left: '0'},
+            padding: {top: '15px', right: '15px', bottom: '15px', left: '15px'},
+            backgroundColor: '#ffffff',
+            responsive: {
+              desktop: {className: '', css: ''},
+              tablet: {className: '', css: 'gap: 8px; width: 100%;'},
+              mobile: {className: '', css: 'gap: 5px; width: 100%;'}
+            },
+            cells: []
           }
         }
-      },
-      {
-        id: 'col_1',
-        type: 'col',
-        name: '列容器',
-        icon: 'fas fa-columns',
-        parentId: 'row_1',
-        config: {
-          width: { value: 50, unit: '%' },
-          height: { value: 'auto', unit: 'auto' },
-          display: 'block',
-          margin: { top: '0', right: '10px', bottom: '0', left: '0' },
-          padding: { top: '15px', right: '15px', bottom: '15px', left: '15px' },
-          backgroundColor: '#f8f9fa',
-          responsive: {
-            desktop: { className: '', css: '' },
-            tablet: { className: '', css: 'width: 100%; margin: 10px 0;' },
-            mobile: { className: '', css: 'width: 100%; margin: 10px 0;' }
+      ];
+
+      components.value = [
+        {
+          id: 'text_1',
+          type: 'text',
+          name: '标题文本',
+          icon: 'fas fa-font',
+          content: '欢迎使用JQuick BI',
+          containerId: 'row_1',
+          gridCellId: null,
+          config: {
+            width: {value: 100, unit: '%'},
+            height: {value: 'auto', unit: 'auto'},
+            display: 'block',
+            fontSize: '24px',
+            fontWeight: 'bold',
+            fontFamily: "'Microsoft YaHei', sans-serif",
+            color: '#333333',
+            textAlign: 'left',
+            lineHeight: '1.5',
+            margin: {top: '0', right: '0', bottom: '15px', left: '0'},
+            padding: {top: '0', right: '0', bottom: '0', left: '0'},
+            backgroundColor: 'transparent',
+            borderWidth: '0',
+            borderStyle: 'solid',
+            borderColor: '#dddddd',
+            borderRadius: '0',
+            boxShadow: 'none',
+            customCss: '',
+            inline: false,
+            responsive: {
+              desktop: {className: '', css: ''},
+              tablet: {className: '', css: 'font-size: 20px;'},
+              mobile: {className: '', css: 'font-size: 18px;'}
+            }
           }
+        }
+      ];
+      initializeGridCells('grid_1', 3, 3);
+    };
+    const initializeGridCells = (containerId, rows = 3, columns = 3) => {
+      const container = layoutContainers.value.find(c => c.id === containerId);
+      if (!container || container.type !== 'grid') return;
+
+      container.config.rows = rows;
+      container.config.columns = columns;
+      container.config.cells = [];
+
+      for (let row = 1; row <= rows; row++) {
+        for (let col = 1; col <= columns; col++) {
+          const cellId = `cell_${containerId}_${row}_${col}`;
+          container.config.cells.push({
+            id: cellId,
+            row,
+            col,
+            rowSpan: 1,
+            colSpan: 1,
+            merged: false,
+            components: []
+          });
         }
       }
-    ]);
+    };
+    const initializeExistingGrids = () => {
+      layoutContainers.value
+          .filter(c => c.type === 'grid')
+          .forEach(container => {
+            if (!container.config.cells || container.config.cells.length === 0) {
+              initializeGridCells(container.id,
+                  container.config.rows || 3,
+                  container.config.columns || 3);
+            }
+          });
+    };
+    onMounted(() => {
+      initializeData();
+      initializeExistingGrids();
+    });
+    const domTypeElements = {
+      div: {name: 'DIV容器', icon: 'fas fa-square', isContainer: true},
+      section: {name: '区块', icon: 'fas fa-square-full', isContainer: true},
+      header: {name: '页眉', icon: 'fas fa-heading', isContainer: true},
+      footer: {name: '页脚', icon: 'fas fa-shoe-prints', isContainer: true},
+      nav: {name: '导航', icon: 'fas fa-bars', isContainer: true},
+      aside: {name: '侧边栏', icon: 'fas fa-columns', isContainer: true},
+      main: {name: '主要内容', icon: 'fas fa-stream', isContainer: true},
+      h1: {name: '一级标题', icon: 'fas fa-heading', isContainer: false},
+      h2: {name: '二级标题', icon: 'fas fa-heading', isContainer: false},
+      h3: {name: '三级标题', icon: 'fas fa-heading', isContainer: false},
+      p: {name: '段落', icon: 'fas fa-paragraph', isContainer: false},
+      span: {name: '行内文本', icon: 'fas fa-font', isContainer: false, inline: true},
+      a: {name: '链接', icon: 'fas fa-link', isContainer: false, inline: true},
+      strong: {name: '加粗', icon: 'fas fa-bold', isContainer: false, inline: true},
+      em: {name: '强调', icon: 'fas fa-italic', isContainer: false, inline: true},
+      i: {name: '斜体', icon: 'fas fa-italic', isContainer: false, inline: true},
+      b: {name: '粗体', icon: 'fas fa-bold', isContainer: false, inline: true},
+      u: {name: '下划线', icon: 'fas fa-underline', isContainer: false, inline: true},
 
-    const components = ref([
-      {
-        id: 'text_1',
-        type: 'text',
-        name: '标题文本',
-        icon: 'fas fa-font',
-        content: '欢迎使用JQuick BI',
-        containerId: 'col_1',
-        inline: false,
-        config: {
-          width: { value: 100, unit: '%' },
-          height: { value: 'auto', unit: 'auto' },
-          display: 'block',
-          fontSize: '24px',
-          fontWeight: 'bold',
-          fontFamily: "'Microsoft YaHei', sans-serif",
-          color: '#333333',
-          textAlign: 'left',
-          lineHeight: '1.5',
-          margin: { top: '0', right: '0', bottom: '15px', left: '0' },
-          padding: { top: '0', right: '0', bottom: '0', left: '0' },
-          backgroundColor: 'transparent',
-          backgroundImage: '',
-          backgroundSize: 'cover',
-          borderWidth: '0',
-          borderStyle: 'solid',
-          borderColor: '#dddddd',
-          borderRadius: '0',
-          boxShadow: 'none',
-          customCss: '',
-          responsive: {
-            desktop: { className: '', css: '' },
-            tablet: { className: '', css: 'font-size: 20px;' },
-            mobile: { className: '', css: 'font-size: 18px;' }
-          }
-        }
-      },
-      {
-        id: 'button_1',
-        type: 'button',
-        name: '主要按钮',
-        icon: 'fas fa-hand-pointer',
-        content: '点击我',
-        containerId: 'col_1',
-        inline: true,
-        config: {
-          width: { value: 'auto', unit: 'auto' },
-          height: { value: 40, unit: 'px' },
-          display: 'inline-block',
-          fontSize: '14px',
-          fontWeight: 'normal',
-          fontFamily: '',
-          color: '#ffffff',
-          textAlign: 'center',
-          lineHeight: '40px',
-          margin: { top: '0', right: '10px', bottom: '0', left: '0' },
-          padding: { top: '0', right: '20px', bottom: '0', left: '20px' },
-          backgroundColor: '#ff8326',
-          backgroundImage: '',
-          backgroundSize: 'cover',
-          borderWidth: '0',
-          borderStyle: 'solid',
-          borderColor: '#ff8326',
-          borderRadius: '4px',
-          boxShadow: '0 2px 4px rgba(255,131,38,0.3)',
-          buttonType: 'button',
-          customCss: '',
-          responsive: {
-            desktop: { className: '', css: '' },
-            tablet: { className: '', css: 'width: 100%; margin: 10px 0;' },
-            mobile: { className: '', css: 'width: 100%; margin: 10px 0;' }
-          }
-        }
-      }
-    ]);
+      // 表单元素
+      form: {name: '表单', icon: 'fas fa-wpforms', isContainer: true},
+      input: {name: '输入框', icon: 'fas fa-edit', isContainer: false, inline: true},
+      textarea: {name: '文本域', icon: 'fas fa-align-left', isContainer: false},
+      button: {name: '按钮', icon: 'fas fa-hand-pointer', isContainer: false, inline: true},
+      select: {name: '下拉框', icon: 'fas fa-caret-square-down', isContainer: false},
+      label: {name: '标签', icon: 'fas fa-tag', isContainer: false, inline: true},
+
+      // 多媒体元素
+      img: {name: '图片', icon: 'fas fa-image', isContainer: false, inline: true},
+      audio: {name: '音频', icon: 'fas fa-volume-up', isContainer: false},
+      video: {name: '视频', icon: 'fas fa-video', isContainer: false},
+      iframe: {name: '内嵌框架', icon: 'fas fa-window-restore', isContainer: false},
+
+      // 列表元素
+      ul: {name: '无序列表', icon: 'fas fa-list-ul', isContainer: true},
+      ol: {name: '有序列表', icon: 'fas fa-list-ol', isContainer: true},
+      li: {name: '列表项', icon: 'fas fa-list', isContainer: false},
+
+      // 表格元素
+      table: {name: '表格', icon: 'fas fa-table', isContainer: true},
+      tr: {name: '表格行', icon: 'fas fa-grip-lines', isContainer: false},
+      th: {name: '表头', icon: 'fas fa-heading', isContainer: false},
+      td: {name: '表格数据', icon: 'fas fa-square', isContainer: false},
+
+      // 其他元素
+      br: {name: '换行', icon: 'fas fa-level-down-alt', isContainer: false, inline: true},
+      hr: {name: '水平线', icon: 'fas fa-minus', isContainer: false},
+      progress: {name: '进度条', icon: 'fas fa-tasks', isContainer: false},
+    };
+
+    // 按类别分组
+    const containerElements = computed(() =>
+        Object.entries(domTypeElements)
+            .filter(([key, value]) => value.isContainer)
+            .map(([key, value]) => ({type: key, ...value}))
+    );
+
+    const textElements = computed(() =>
+        ['h1', 'h2', 'h3', 'p', 'span', 'a', 'strong', 'em', 'i', 'b', 'u']
+            .filter(key => domTypeElements[key])
+            .map(key => ({type: key, ...domTypeElements[key]}))
+    );
+
+    const formElements = computed(() =>
+        ['form', 'input', 'textarea', 'button', 'select', 'label']
+            .filter(key => domTypeElements[key])
+            .map(key => ({type: key, ...domTypeElements[key]}))
+    );
+
+    const mediaElements = computed(() =>
+        ['img', 'audio', 'video', 'iframe']
+            .filter(key => domTypeElements[key])
+            .map(key => ({type: key, ...domTypeElements[key]}))
+    );
 
     const selectedComponent = computed(() => {
       const allItems = [...layoutContainers.value, ...components.value];
+      layoutContainers.value.forEach(container => {
+        if (container.type === 'grid' && container.config.cells) {
+          container.config.cells.forEach(cell => {
+            if (cell.id === selectedComponentId.value) {
+              allItems.push(cell);
+            }
+          });
+        }
+      });
       return allItems.find(item => item.id === selectedComponentId.value) || null;
     });
 
     const getComponentsInContainer = (containerId) => {
+      if (!components.value) return [];
       return components.value.filter(component => component.containerId === containerId);
     };
 
+    const getComponentsInGridCell = (cellId) => {
+      if (!components.value) return [];
+      return components.value.filter(component => component.gridCellId === cellId);
+    };
+    const getFreeComponents = computed(() => {
+      if (!components.value) return [];
+      return components.value.filter(c => !c.containerId && !c.gridCellId);
+    });
+
     const getContainerStyle = (container) => {
+      if (!container || !container.config) return {};
       const config = container.config;
-      const responsiveConfig = config.responsive[currentBreakpoint.value];
+      const responsiveConfig = config.responsive && config.responsive[currentBreakpoint.value];
+      let width = (config.width?.value || 100) + (config.width?.unit || '%');
+      if (container.type === 'row' || container.type === 'grid') {
+        if (config.width?.unit === '%' && config.width?.value < 100) {
+          width = '100%';
+        }
+      }
+
       let style = {
-        width: config.width.value + config.width.unit,
-        height: config.height.value + (config.height.unit === 'auto' ? '' : config.height.unit),
-        display: config.display,
-        'margin-top': config.margin.top,
-        'margin-right': config.margin.right,
-        'margin-bottom': config.margin.bottom,
-        'margin-left': config.margin.left,
-        'padding-top': config.padding.top,
-        'padding-right': config.padding.right,
-        'padding-bottom': config.padding.bottom,
-        'padding-left': config.padding.left,
-        'background-color': config.backgroundColor,
+        width: width,
+        height: (config.height?.value || 'auto') + (config.height?.unit === 'auto' ? '' : config.height?.unit || 'px'),
+        display: config.display || (container.type === 'row' ? 'flex' : 'block'),
+        'margin-top': config.margin?.top || '0',
+        'margin-right': config.margin?.right || '0',
+        'margin-bottom': config.margin?.bottom || '0',
+        'margin-left': config.margin?.left || '0',
+        'padding-top': config.padding?.top || '0',
+        'padding-right': config.padding?.right || '0',
+        'padding-bottom': config.padding?.bottom || '0',
+        'padding-left': config.padding?.left || '0',
+        'background-color': config.backgroundColor || 'transparent',
         'flex-direction': config.flexDirection || 'row'
       };
-
-      // 添加响应式样式
+      if (container.type === 'row') {
+        style['flex-wrap'] = 'nowrap';
+        style['align-items'] = 'flex-start';
+        style['justify-content'] = 'flex-start';
+      }
       if (responsiveConfig && responsiveConfig.css) {
-        const responsiveStyles = responsiveConfig.css.split(';').reduce((acc, rule) => {
-          const [prop, value] = rule.split(':').map(s => s.trim());
-          if (prop && value) {
-            acc[prop] = value;
-          }
-          return acc;
-        }, {});
+        try {
+          const responsiveStyles = responsiveConfig.css.split(';').reduce((acc, rule) => {
+            const [prop, value] = rule.split(':').map(s => s.trim());
+            if (prop && value) {
+              acc[prop] = value;
+            }
+            return acc;
+          }, {});
 
-        style = { ...style, ...responsiveStyles };
+          style = {...style, ...responsiveStyles};
+        } catch (e) {
+          console.warn('解析响应式CSS失败:', e);
+        }
+      }
+
+      return style;
+    };
+
+    const getGridContainerStyle = (container) => {
+      if (!container || !container.config) return {};
+      const config = container.config;
+      const responsiveConfig = config.responsive && config.responsive[currentBreakpoint.value];
+      const rows = config.rows || 3; // 根据行列数量动态计算建议高度
+      const suggestedHeight = Math.max(rows * 100, 300); // 每行至少100px，最小300px
+      let width = '100%'; // 网格容器应该占满宽度
+      if (config.width?.unit === '%' && config.width?.value) {
+        width = config.width.value + '%';
+      }
+      let style = {
+        width: width,
+        height: (config.height?.value || suggestedHeight) + (config.height?.unit || 'px'),
+        margin: `${config.margin?.top || '0'} ${config.margin?.right || '0'} ${config.margin?.bottom || '0'} ${config.margin?.left || '0'}`,
+        padding: `${config.padding?.top || '0'} ${config.padding?.right || '0'} ${config.padding?.bottom || '0'} ${config.padding?.left || '0'}`,
+        'background-color': config.backgroundColor || '#ffffff',
+        'overflow': 'visible',
+        'box-sizing': 'border-box',
+      };
+
+      if (responsiveConfig && responsiveConfig.css) {
+        try {
+          const responsiveStyles = responsiveConfig.css.split(';').reduce((acc, rule) => {
+            const [prop, value] = rule.split(':').map(s => s.trim());
+            if (prop && value) {
+              acc[prop] = value;
+            }
+            return acc;
+          }, {});
+
+          style = {...style, ...responsiveStyles};
+        } catch (e) {
+          console.warn('解析响应式CSS失败:', e);
+        }
+      }
+
+      return style;
+    };
+
+    const getGridTemplateStyle = (container) => {
+      if (!container || !container.config) return {};
+
+      const config = container.config;
+      const responsiveConfig = config.responsive && config.responsive[currentBreakpoint.value];
+
+      let style = {
+        display: 'grid',
+        'grid-template-rows': `repeat(${config.rows || 3}, minmax(80px, 1fr))`, // 添加最小高度约束
+        'grid-template-columns': `repeat(${config.columns || 3}, minmax(100px, 1fr))`, // 添加最小宽度约束
+        gap: config.gap || '10px',
+        'min-height': '200px', // 确保网格容器有最小高度
+      };
+      if (responsiveConfig && responsiveConfig.css) {
+        try {
+          const responsiveStyles = responsiveConfig.css.split(';').reduce((acc, rule) => {
+            const [prop, value] = rule.split(':').map(s => s.trim());
+            if (prop && value) {
+              acc[prop] = value;
+            }
+            return acc;
+          }, {});
+          style = {...style, ...responsiveStyles};
+        } catch (e) {
+          console.warn('解析响应式CSS失败:', e);
+        }
+      }
+
+      return style;
+    };
+
+    const getGridCellStyle = (cell, container) => {
+      if (!cell || !container) return {};
+      const style = {
+        'grid-row': `${cell.row || 1} / span ${cell.rowSpan || 1}`,
+        'grid-column': `${cell.col || 1} / span ${cell.colSpan || 1}`,
+        'min-height': '80px',
+        'min-width': '100px',
+      };
+
+      if (cell.merged) {
+        style.backgroundColor = '#f0f0f0';
+        style.border = '2px dashed #ccc';
       }
 
       return style;
     };
 
     const getComponentStyle = (component) => {
+      if (!component || !component.config) return {};
+
       const config = component.config;
-      const responsiveConfig = config.responsive[currentBreakpoint.value];
+      const responsiveConfig = config.responsive && config.responsive[currentBreakpoint.value];
 
       let style = {
-        width: config.width.value + (config.width.unit === 'auto' ? '' : config.width.unit),
-        height: config.height.value + (config.height.unit === 'auto' ? '' : config.height.unit),
-        display: config.display,
-        'font-size': config.fontSize + 'px',
-        'font-weight': config.fontWeight,
-        'font-family': config.fontFamily,
-        color: config.color,
-        'text-align': config.textAlign,
-        'line-height': config.lineHeight,
-        'margin-top': config.margin.top,
-        'margin-right': config.margin.right,
-        'margin-bottom': config.margin.bottom,
-        'margin-left': config.margin.left,
-        'padding-top': config.padding.top,
-        'padding-right': config.padding.right,
-        'padding-bottom': config.padding.bottom,
-        'padding-left': config.padding.left,
-        'background-color': config.backgroundColor,
+        width: (config.width?.value || 100) + (config.width?.unit === 'auto' ? '' : config.width?.unit || '%'),
+        height: (config.height?.value || 'auto') + (config.height?.unit === 'auto' ? '' : config.height?.unit || 'px'),
+        display: config.display || 'block',
+        'font-size': (config.fontSize || '14') + 'px',
+        'font-weight': config.fontWeight || 'normal',
+        'font-family': config.fontFamily || '',
+        color: config.color || '#333333',
+        'text-align': config.textAlign || 'left',
+        'line-height': config.lineHeight || '1.5',
+        'margin-top': config.margin?.top || '0',
+        'margin-right': config.margin?.right || '0',
+        'margin-bottom': config.margin?.bottom || '0',
+        'margin-left': config.margin?.left || '0',
+        'padding-top': config.padding?.top || '0',
+        'padding-right': config.padding?.right || '0',
+        'padding-bottom': config.padding?.bottom || '0',
+        'padding-left': config.padding?.left || '0',
+        'background-color': config.backgroundColor || 'transparent',
         'background-image': config.backgroundImage ? `url(${config.backgroundImage})` : '',
-        'background-size': config.backgroundSize,
-        'border-width': config.borderWidth,
-        'border-style': config.borderStyle,
-        'border-color': config.borderColor,
-        'border-radius': config.borderRadius + 'px',
-        'box-shadow': config.boxShadow
+        'background-size': config.backgroundSize || 'cover',
+        'border-width': config.borderWidth || '0',
+        'border-style': config.borderStyle || 'solid',
+        'border-color': config.borderColor || '#dddddd',
+        'border-radius': (config.borderRadius || '0') + 'px',
+        'box-shadow': config.boxShadow || 'none'
       };
 
       if (responsiveConfig && responsiveConfig.css) {
-        const responsiveStyles = responsiveConfig.css.split(';').reduce((acc, rule) => {
-          const [prop, value] = rule.split(':').map(s => s.trim());
-          if (prop && value) {
-            acc[prop] = value;
-          }
-          return acc;
-        }, {});
-        style = { ...style, ...responsiveStyles };
+        try {
+          const responsiveStyles = responsiveConfig.css.split(';').reduce((acc, rule) => {
+            const [prop, value] = rule.split(':').map(s => s.trim());
+            if (prop && value) {
+              acc[prop] = value;
+            }
+            return acc;
+          }, {});
+          style = {...style, ...responsiveStyles};
+        } catch (e) {
+          console.warn('解析响应式CSS失败:', e);
+        }
       }
 
       if (config.customCss) {
-        const customStyles = config.customCss.split(';').reduce((acc, rule) => {
-          const [prop, value] = rule.split(':').map(s => s.trim());
-          if (prop && value) {
-            acc[prop] = value;
-          }
-          return acc;
-        }, {});
+        try {
+          const customStyles = config.customCss.split(';').reduce((acc, rule) => {
+            const [prop, value] = rule.split(':').map(s => s.trim());
+            if (prop && value) {
+              acc[prop] = value;
+            }
+            return acc;
+          }, {});
 
-        style = { ...style, ...customStyles };
+          style = {...style, ...customStyles};
+        } catch (e) {
+          console.warn('解析自定义CSS失败:', e);
+        }
       }
 
       return style;
     };
 
     const renderComponentContent = (component) => {
+      if (!component) return '';
+
       if (component.type === 'button') {
-        return `<button type="${component.config.buttonType}"
+        return `<button type="${component.config.buttonType || 'button'}"
                 style="width:100%; height:100%; border:none; background:transparent; color:inherit; font:inherit;">
-                ${component.content}</button>`;
+                ${component.content || '按钮'}</button>`;
       } else if (component.type === 'input') {
         return `<input type="${component.config.inputType || 'text'}"
                 placeholder="${component.config.placeholder || ''}"
@@ -930,7 +1257,7 @@ export default defineComponent({
       } else if (component.type === 'chart') {
         return `<div class="chart-placeholder">
                   <i class="fas fa-chart-${component.config.chartType || 'bar'}"></i>
-                  <span>${component.content}</span>
+                  <span>${component.content || '图表'}</span>
                 </div>`;
       } else if (component.type === 'select') {
         return `<select style="width:100%; height:100%; border:none; background:transparent; color:inherit; font:inherit;">
@@ -940,65 +1267,68 @@ export default defineComponent({
       } else if (component.type === 'table') {
         return `<div class="table-placeholder">
                   <i class="fas fa-table"></i>
-                  <span>${component.content}</span>
+                  <span>${component.content || '表格'}</span>
                 </div>`;
+      } else if (component.type === 'img') {
+        return `<img src="${component.config.src || ''}"
+                alt="${component.content || ''}"
+                style="max-width:100%; max-height:100%; object-fit: contain;">`;
+      } else if (component.type === 'audio') {
+        return `<audio controls style="width:100%;">
+                  <source src="${component.config.src || ''}" type="audio/mpeg">
+                  您的浏览器不支持音频元素
+                </audio>`;
+      } else if (component.type === 'video') {
+        return `<video controls style="width:100%;">
+                  <source src="${component.config.src || ''}" type="video/mp4">
+                  您的浏览器不支持视频元素
+                </video>`;
       }
-      return component.content;
+      return component.content || '';
     };
 
-    // 处理容器区域的 dragover
-    const handleContainerDragOver = (e, containerId) => {
+    const handleDomTypeDragStart = (event, domType) => {
+      draggingElementType.value = domType;
+      event.dataTransfer.setData('text/plain', domType);
+      event.dataTransfer.effectAllowed = 'copy';
+
+      event.target.classList.add('dragging');
+      setTimeout(() => {
+        event.target.classList.remove('dragging');
+      }, 0);
+    };
+    const handleGridCellDragOver = (e, cellId) => {
       e.preventDefault();
       e.stopPropagation();
-
-      // 设置容器拖拽状态
-      containerDragStates.value[containerId] = true;
-
-      // 设置拖放效果
       e.dataTransfer.dropEffect = 'copy';
-
-      // 添加视觉反馈
-      const hintElement = e.target.closest('.empty-container-hint');
-      if (hintElement) {
-        hintElement.style.borderColor = 'var(--primary-color)';
-        hintElement.style.backgroundColor = 'rgba(255, 131, 38, 0.1)';
+      const cellElement = e.target.closest('.grid-cell');
+      if (cellElement && !cellElement.classList.contains('merged')) {
+        cellElement.style.borderColor = 'var(--primary-color)';
+        cellElement.style.backgroundColor = 'rgba(255, 131, 38, 0.1)';
       }
     };
 
-    // 处理容器区域的 dragleave
-    const handleContainerDragLeave = (e, containerId) => {
+    const handleGridCellDragLeave = (e, cellId) => {
       e.preventDefault();
       e.stopPropagation();
 
-      // 清除容器拖拽状态
-      if (containerDragStates.value[containerId]) {
-        containerDragStates.value[containerId] = false;
-      }
-
-      // 移除视觉反馈
-      const hintElement = e.target.closest('.empty-container-hint');
-      if (hintElement) {
-        hintElement.style.borderColor = '';
-        hintElement.style.backgroundColor = '';
+      const cellElement = e.target.closest('.grid-cell');
+      if (cellElement) {
+        cellElement.style.borderColor = '';
+        cellElement.style.backgroundColor = '';
       }
     };
 
-    // 处理容器区域的 drop
-    const handleContainerDrop = (e, containerId) => {
+    const handleGridCellDrop = (e, cellId) => {
       e.preventDefault();
       e.stopPropagation();
 
-      // 清除容器拖拽状态
-      containerDragStates.value[containerId] = false;
-
-      // 移除视觉反馈
-      const hintElement = e.target.closest('.empty-container-hint');
-      if (hintElement) {
-        hintElement.style.borderColor = '';
-        hintElement.style.backgroundColor = '';
+      const cellElement = e.target.closest('.grid-cell');
+      if (cellElement) {
+        cellElement.style.borderColor = '';
+        cellElement.style.backgroundColor = '';
       }
 
-      // 获取拖拽元素类型
       let elementType = draggingElementType.value;
       if (!elementType && e.dataTransfer.types.includes('text/plain')) {
         elementType = e.dataTransfer.getData('text/plain');
@@ -1008,9 +1338,339 @@ export default defineComponent({
         console.warn('未获取到拖拽元素类型');
         return;
       }
+      createComponent(elementType, null, cellId);
+    };
+    const createComponent = (elementType, containerId = null, gridCellId = null) => {
+      const newId = `${elementType}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+      const elementInfo = domTypeElements[elementType] || {
+        name: `${elementType}元素`,
+        icon: 'fas fa-cube',
+        isContainer: false,
+        inline: false
+      };
 
-      // 创建新的组件并放入指定容器
-      createComponent(elementType, containerId);
+      const isDomTypeElement = domTypeElements[elementType];
+
+      if (isDomTypeElement) {
+        const contentMap = {
+          h1: '一级标题',
+          h2: '二级标题',
+          h3: '三级标题',
+          p: '段落文本',
+          span: '行内文本',
+          a: '链接文本',
+          button: '按钮',
+          input: '输入框',
+          textarea: '多行文本',
+          select: '下拉选择',
+          img: '图片',
+          audio: '音频',
+          video: '视频',
+          iframe: '内嵌内容',
+        };
+
+        const componentConfig = {
+          width: {value: elementInfo.inline ? 'auto' : 100, unit: elementInfo.inline ? 'auto' : '%'},
+          height: {value: 'auto', unit: 'auto'},
+          display: elementInfo.inline ? 'inline-block' : 'block',
+          fontSize: ['h1', 'h2', 'h3'].includes(elementType) ?
+              (elementType === 'h1' ? '32px' : elementType === 'h2' ? '24px' : '18px') : '14px',
+          fontWeight: ['h1', 'h2', 'h3', 'strong', 'b'].includes(elementType) ? 'bold' : 'normal',
+          fontFamily: '',
+          color: '#333333',
+          textAlign: 'left',
+          lineHeight: '1.5',
+          margin: {top: '0', right: elementInfo.inline ? '5px' : '0', bottom: '0', left: '0'},
+          padding: {top: '8px', right: '8px', bottom: '8px', left: '8px'},
+          backgroundColor: 'transparent',
+          backgroundImage: '',
+          backgroundSize: 'cover',
+          borderWidth: ['input', 'textarea', 'select'].includes(elementType) ? '1px' : '0',
+          borderStyle: 'solid',
+          borderColor: '#dddddd',
+          borderRadius: ['button', 'input', 'textarea', 'select'].includes(elementType) ? '4px' : '0',
+          boxShadow: 'none',
+          placeholder: ['input', 'textarea'].includes(elementType) ? '请输入内容' : '',
+          buttonType: 'button',
+          inputType: 'text',
+          src: ['img', 'audio', 'video', 'iframe'].includes(elementType) ? '' : undefined,
+          inline: elementInfo.inline || false,
+          customCss: '',
+          responsive: {
+            desktop: {className: '', css: ''},
+            tablet: {className: '', css: ''},
+            mobile: {className: '', css: ''}
+          }
+        };
+
+        components.value.push({
+          id: newId,
+          type: elementType,
+          name: elementInfo.name,
+          icon: elementInfo.icon,
+          content: contentMap[elementType] || elementInfo.name,
+          containerId: containerId,
+          gridCellId: gridCellId,
+          config: componentConfig
+        });
+        if (gridCellId) {
+          const container = layoutContainers.value.find(c =>
+              c.type === 'grid' && c.config.cells && c.config.cells.some(cell => cell.id === gridCellId)
+          );
+          if (container) {
+            const cell = container.config.cells.find(c => c.id === gridCellId);
+            if (cell && !cell.merged) {
+              if (!cell.components) cell.components = [];
+              cell.components.push(newId);
+            }
+          }
+        }
+
+        console.log('创建组件:', elementType, newId, '容器:', containerId, '网格单元格:', gridCellId);
+      } else {
+        const elementTypes = {
+          row: {name: '行容器', icon: 'fas fa-grip-horizontal', isContainer: true},
+          col: {name: '列容器', icon: 'fas fa-columns', isContainer: true},
+          grid: {name: '网格容器', icon: 'fas fa-th', isContainer: true},
+          card: {name: '卡片', icon: 'fas fa-square', isContainer: true},
+          panel: {name: '面板', icon: 'fas fa-window-maximize', isContainer: true},
+          widget: {name: '组件', icon: 'fas fa-cube', isContainer: false},
+          text: {name: '文本', icon: 'fas fa-font', isContainer: false},
+          button: {name: '按钮', icon: 'fas fa-hand-pointer', isContainer: false},
+          input: {name: '输入框', icon: 'fas fa-edit', isContainer: false},
+          select: {name: '下拉框', icon: 'fas fa-caret-square-down', isContainer: false},
+          table: {name: '表格', icon: 'fas fa-table', isContainer: false},
+          chart: {name: '图表', icon: 'fas fa-chart-bar', isContainer: false}
+        };
+
+        const elementTypeInfo = elementTypes[elementType] || {
+          name: `${elementType}元素`,
+          icon: 'fas fa-cube',
+          isContainer: false
+        };
+
+        const isInline = ['button', 'input'].includes(elementType);
+
+        if (elementTypeInfo.isContainer) {
+          const containerConfig = {
+            width: {value: elementType === 'col' ? 50 : 100, unit: '%'},
+            height: {value: elementType === 'col' ? 'auto' : 200, unit: elementType === 'col' ? 'auto' : 'px'},
+            display: elementType === 'row' ? 'flex' : elementType === 'grid' ? 'grid' : 'block',
+            flexDirection: 'row',
+            margin: {top: '10px', right: '0', bottom: '10px', left: '0'},
+            padding: {top: '20px', right: '20px', bottom: '20px', left: '20px'},
+            backgroundColor: elementType === 'col' ? '#f8f9fa' : '#ffffff',
+            columns: elementType === 'grid' ? 3 : 2,
+            responsive: {
+              desktop: {className: '', css: ''},
+              tablet: {className: '', css: 'width: 100%;'},
+              mobile: {className: '', css: 'width: 100%;'}
+            }
+          };
+
+          if (elementType === 'grid') {
+            containerConfig.rows = 3;
+            containerConfig.columns = 3;
+            containerConfig.gap = '10px';
+            containerConfig.cells = [];
+          }
+
+          layoutContainers.value.push({
+            id: newId,
+            type: elementType,
+            name: elementTypeInfo.name,
+            icon: elementTypeInfo.icon,
+            config: containerConfig
+          });
+
+          if (elementType === 'grid') {
+            initializeGridCells(newId, 3, 3);
+          }
+
+          console.log('创建容器:', elementType, newId);
+        } else {
+          const contentMap = {
+            text: '文本内容',
+            button: '按钮',
+            input: '输入框',
+            select: '下拉框',
+            table: '表格数据',
+            chart: '图表'
+          };
+
+          const componentConfig = {
+            width: {value: isInline ? 'auto' : 100, unit: isInline ? 'auto' : '%'},
+            height: {value: elementType === 'button' ? 40 : elementType === 'input' ? 35 : 'auto', unit: 'px'},
+            display: isInline ? 'inline-block' : 'block',
+            fontSize: elementType === 'text' ? '16px' : '14px',
+            fontWeight: 'normal',
+            fontFamily: '',
+            color: elementType === 'button' ? '#ffffff' : '#333333',
+            textAlign: 'left',
+            lineHeight: elementType === 'button' ? '40px' : '1.5',
+            margin: {top: '0', right: isInline ? '10px' : '0', bottom: '0', left: '0'},
+            padding: {
+              top: elementType === 'button' ? '0' : elementType === 'input' ? '8px' : '10px',
+              right: elementType === 'button' ? '20px' : elementType === 'input' ? '12px' : '10px',
+              bottom: elementType === 'button' ? '0' : elementType === 'input' ? '8px' : '10px',
+              left: elementType === 'button' ? '20px' : elementType === 'input' ? '12px' : '10px'
+            },
+            backgroundColor: elementType === 'button' ? '#ff8326' : 'transparent',
+            backgroundImage: '',
+            backgroundSize: 'cover',
+            borderWidth: elementType === 'input' ? '1px' : '0',
+            borderStyle: 'solid',
+            borderColor: elementType === 'input' ? '#dddddd' : '#ff8326',
+            borderRadius: elementType === 'button' ? '4px' : elementType === 'input' ? '4px' : '0',
+            boxShadow: elementType === 'button' ? '0 2px 4px rgba(255,131,38,0.3)' : 'none',
+            placeholder: elementType === 'input' ? '请输入内容' : '',
+            buttonType: 'button',
+            inputType: 'text',
+            chartType: 'bar',
+            inline: isInline,
+            customCss: '',
+            responsive: {
+              desktop: {className: '', css: ''},
+              tablet: {className: '', css: ''},
+              mobile: {className: '', css: ''}
+            }
+          };
+
+          components.value.push({
+            id: newId,
+            type: elementType,
+            name: elementTypeInfo.name,
+            icon: elementTypeInfo.icon,
+            content: contentMap[elementType] || elementTypeInfo.name,
+            containerId: containerId,
+            gridCellId: gridCellId,
+            config: componentConfig
+          });
+
+          console.log('创建组件:', elementType, newId, '放入容器:', containerId);
+        }
+      }
+
+      selectComponent(newId);
+      draggingElementType.value = '';
+    };
+
+    // 网格容器相关方法
+    const addGridRow = (containerId) => {
+      const container = layoutContainers.value.find(c => c.id === containerId);
+      if (!container || container.type !== 'grid') return;
+
+      const newRow = (container.config.rows || 3) + 1;
+      container.config.rows = newRow;
+      if (!container.config.cells) container.config.cells = [];
+      for (let col = 1; col <= (container.config.columns || 3); col++) {
+        const cellId = `cell_${containerId}_${newRow}_${col}`;
+        container.config.cells.push({
+          id: cellId,
+          row: newRow,
+          col,
+          rowSpan: 1,
+          colSpan: 1,
+          merged: false,
+          components: []
+        });
+      }
+    };
+
+    const addGridColumn = (containerId) => {
+      const container = layoutContainers.value.find(c => c.id === containerId);
+      if (!container || container.type !== 'grid') return;
+
+      const newCol = (container.config.columns || 3) + 1;
+      container.config.columns = newCol;
+      if (!container.config.cells) container.config.cells = [];
+      for (let row = 1; row <= (container.config.rows || 3); row++) {
+        const cellId = `cell_${containerId}_${row}_${newCol}`;
+        container.config.cells.push({
+          id: cellId,
+          row,
+          col: newCol,
+          rowSpan: 1,
+          colSpan: 1,
+          merged: false,
+          components: []
+        });
+      }
+    };
+
+    const mergeGridCell = (containerId, cell) => {
+      const container = layoutContainers.value.find(c => c.id === containerId);
+      if (!container || container.type !== 'grid') return;
+      cell.merged = true;
+      if (cell.components && cell.components.length > 0) {
+        cell.components.forEach(componentId => {
+          deleteComponent(componentId);
+        });
+        cell.components = [];
+      }
+    };
+
+    const deleteGridCellComponent = (containerId, cellId) => {
+      const container = layoutContainers.value.find(c => c.id === containerId);
+      if (!container || container.type !== 'grid') return;
+
+      const cell = container.config.cells.find(c => c.id === cellId);
+      if (!cell) return;
+      if (cell.components && cell.components.length > 0) {
+        cell.components.forEach(componentId => {
+          deleteComponent(componentId);
+        });
+        cell.components = [];
+      }
+    };
+    const saveLayout = () => {
+      const layoutData = {
+        layoutContainers: layoutContainers.value,
+        components: components.value,
+        timestamp: new Date().toISOString()
+      };
+
+      const jsonStr = JSON.stringify(layoutData, null, 2);
+      const blob = new Blob([jsonStr], {type: 'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `jquick-bi-layout-${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      alert('布局已保存！');
+    };
+
+    const loadLayout = () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const layoutData = JSON.parse(e.target.result);
+            if (!layoutData.layoutContainers || !layoutData.components) {
+              throw new Error('无效的布局文件格式');
+            }
+            layoutContainers.value = layoutData.layoutContainers;
+            components.value = layoutData.components;
+            selectedComponentId.value = '';
+            initializeExistingGrids();
+
+            alert('布局加载成功！');
+          } catch (error) {
+            console.error('加载布局失败:', error);
+            alert('加载布局失败，请检查文件格式是否正确');
+          }
+        };
+        reader.readAsText(file);
+      };
+      input.click();
     };
 
     const handleDragStart = (event, elementType) => {
@@ -1018,7 +1678,6 @@ export default defineComponent({
       event.dataTransfer.setData('text/plain', elementType);
       event.dataTransfer.effectAllowed = 'copy';
 
-      // 添加视觉反馈
       event.target.classList.add('dragging');
       setTimeout(() => {
         event.target.classList.remove('dragging');
@@ -1035,121 +1694,6 @@ export default defineComponent({
       isDraggingOver.value = false;
     };
 
-    // 创建组件的通用函数
-    const createComponent = (elementType, containerId = null) => {
-      const newId = `${elementType}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-      const elementTypes = {
-        row: { name: '行容器', icon: 'fas fa-grip-horizontal', isContainer: true },
-        col: { name: '列容器', icon: 'fas fa-columns', isContainer: true },
-        grid: { name: '网格容器', icon: 'fas fa-th', isContainer: true },
-        card: { name: '卡片', icon: 'fas fa-square', isContainer: true },
-        panel: { name: '面板', icon: 'fas fa-window-maximize', isContainer: true },
-        widget: { name: '组件', icon: 'fas fa-cube', isContainer: false },
-        text: { name: '文本', icon: 'fas fa-font', isContainer: false },
-        button: { name: '按钮', icon: 'fas fa-hand-pointer', isContainer: false },
-        input: { name: '输入框', icon: 'fas fa-edit', isContainer: false },
-        select: { name: '下拉框', icon: 'fas fa-caret-square-down', isContainer: false },
-        table: { name: '表格', icon: 'fas fa-table', isContainer: false },
-        chart: { name: '图表', icon: 'fas fa-chart-bar', isContainer: false }
-      };
-
-      const elementInfo = elementTypes[elementType] || {
-        name: `${elementType}元素`,
-        icon: 'fas fa-cube',
-        isContainer: false
-      };
-
-      const isInline = ['button', 'input'].includes(elementType);
-
-      if (elementInfo.isContainer) {
-        const containerConfig = {
-          width: { value: elementType === 'col' ? 50 : 100, unit: '%' },
-          height: { value: elementType === 'col' ? 'auto' : 200, unit: elementType === 'col' ? 'auto' : 'px' },
-          display: elementType === 'row' ? 'flex' : elementType === 'grid' ? 'grid' : 'block',
-          flexDirection: 'row',
-          margin: { top: '10px', right: '0', bottom: '10px', left: '0' },
-          padding: { top: '20px', right: '20px', bottom: '20px', left: '20px' },
-          backgroundColor: elementType === 'col' ? '#f8f9fa' : '#ffffff',
-          columns: elementType === 'grid' ? 3 : 2,
-          responsive: {
-            desktop: { className: '', css: '' },
-            tablet: { className: '', css: '' },
-            mobile: { className: '', css: '' }
-          }
-        };
-
-        layoutContainers.value.push({
-          id: newId,
-          type: elementType,
-          name: elementInfo.name,
-          icon: elementInfo.icon,
-          config: containerConfig
-        });
-
-        console.log('创建容器:', elementType, newId);
-      } else {
-        const contentMap = {
-          text: '文本内容',
-          button: '按钮',
-          input: '输入框',
-          select: '下拉框',
-          table: '表格数据',
-          chart: '图表'
-        };
-
-        const componentConfig = {
-          width: { value: isInline ? 'auto' : 100, unit: isInline ? 'auto' : '%' },
-          height: { value: elementType === 'button' ? 40 : elementType === 'input' ? 35 : 'auto', unit: 'px' },
-          display: isInline ? 'inline-block' : 'block',
-          fontSize: elementType === 'text' ? '16px' : '14px',
-          fontWeight: 'normal',
-          fontFamily: '',
-          color: elementType === 'button' ? '#ffffff' : '#333333',
-          textAlign: 'left',
-          lineHeight: elementType === 'button' ? '40px' : '1.5',
-          margin: { top: '0', right: isInline ? '10px' : '0', bottom: '0', left: '0' },
-          padding: { top: elementType === 'button' ? '0' : elementType === 'input' ? '8px' : '10px',
-            right: elementType === 'button' ? '20px' : elementType === 'input' ? '12px' : '10px',
-            bottom: elementType === 'button' ? '0' : elementType === 'input' ? '8px' : '10px',
-            left: elementType === 'button' ? '20px' : elementType === 'input' ? '12px' : '10px' },
-          backgroundColor: elementType === 'button' ? '#ff8326' : 'transparent',
-          backgroundImage: '',
-          backgroundSize: 'cover',
-          borderWidth: elementType === 'input' ? '1px' : '0',
-          borderStyle: 'solid',
-          borderColor: elementType === 'input' ? '#dddddd' : '#ff8326',
-          borderRadius: elementType === 'button' ? '4px' : elementType === 'input' ? '4px' : '0',
-          boxShadow: elementType === 'button' ? '0 2px 4px rgba(255,131,38,0.3)' : 'none',
-          placeholder: elementType === 'input' ? '请输入内容' : '',
-          buttonType: 'button',
-          inputType: 'text',
-          chartType: 'bar',
-          customCss: '',
-          responsive: {
-            desktop: { className: '', css: '' },
-            tablet: { className: '', css: '' },
-            mobile: { className: '', css: '' }
-          }
-        };
-
-        components.value.push({
-          id: newId,
-          type: elementType,
-          name: elementInfo.name,
-          icon: elementInfo.icon,
-          content: contentMap[elementType] || elementInfo.name,
-          containerId: containerId,
-          inline: isInline,
-          config: componentConfig
-        });
-
-        console.log('创建组件:', elementType, newId, '放入容器:', containerId);
-      }
-
-      selectComponent(newId);
-      draggingElementType.value = '';
-    };
-
     const handleDrop = (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -1159,13 +1703,13 @@ export default defineComponent({
 
       if (!elementType) return;
 
-      // 创建组件，不指定容器（直接放入画布）
       createComponent(elementType);
     };
 
     const applyLayoutPreset = (presetType) => {
       layoutContainers.value = [];
       components.value = [];
+      selectedComponentId.value = '';
 
       switch (presetType) {
         case 'header-sidebar-main':
@@ -1186,8 +1730,8 @@ export default defineComponent({
                 columns: 2,
                 responsive: {
                   desktop: { className: '', css: '' },
-                  tablet: { className: '', css: 'height: 60px;' },
-                  mobile: { className: '', css: 'height: 50px; padding: 0 10px;' }
+                  tablet: {className: '', css: 'height: 60px; width: 100%;'},
+                  mobile: {className: '', css: 'height: 50px; padding: 0 10px; width: 100%;'}
                 }
               }
             },
@@ -1207,8 +1751,8 @@ export default defineComponent({
                 columns: 2,
                 responsive: {
                   desktop: { className: '', css: '' },
-                  tablet: { className: '', css: 'flex-direction: column;' },
-                  mobile: { className: '', css: 'flex-direction: column; height: auto;' }
+                  tablet: {className: '', css: 'flex-direction: column; width: 100%;'},
+                  mobile: {className: '', css: 'flex-direction: column; height: auto; width: 100%;'}
                 }
               }
             }
@@ -1233,8 +1777,8 @@ export default defineComponent({
                 columns: 3,
                 responsive: {
                   desktop: { className: '', css: '' },
-                  tablet: { className: '', css: 'flex-wrap: wrap;' },
-                  mobile: { className: '', css: 'flex-direction: column; height: auto;' }
+                  tablet: {className: '', css: 'flex-wrap: wrap; width: 100%;'},
+                  mobile: {className: '', css: 'flex-direction: column; height: auto; width: 100%;'}
                 }
               }
             }
@@ -1259,8 +1803,8 @@ export default defineComponent({
                 columns: 3,
                 responsive: {
                   desktop: { className: '', css: '' },
-                  tablet: { className: '', css: 'flex-wrap: wrap; height: auto;' },
-                  mobile: { className: '', css: 'flex-direction: column; height: auto;' }
+                  tablet: {className: '', css: 'flex-wrap: wrap; height: auto; width: 100%;'},
+                  mobile: {className: '', css: 'flex-direction: column; height: auto; width: 100%;'}
                 }
               }
             },
@@ -1280,8 +1824,8 @@ export default defineComponent({
                 columns: 2,
                 responsive: {
                   desktop: { className: '', css: '' },
-                  tablet: { className: '', css: 'flex-direction: column; height: auto;' },
-                  mobile: { className: '', css: 'flex-direction: column; height: auto;' }
+                  tablet: {className: '', css: 'flex-direction: column; height: auto; width: 100%;'},
+                  mobile: {className: '', css: 'flex-direction: column; height: auto; width: 100%;'}
                 }
               }
             }
@@ -1290,6 +1834,7 @@ export default defineComponent({
       }
 
       selectedComponentId.value = layoutContainers.value.length > 0 ? layoutContainers.value[0].id : '';
+      initializeExistingGrids();
     };
 
     const toggleSidebar = () => {
@@ -1310,18 +1855,41 @@ export default defineComponent({
     };
 
     const deleteComponent = (id) => {
+      layoutContainers.value.forEach(container => {
+        if (container.type === 'grid' && container.config.cells) {
+          container.config.cells.forEach(cell => {
+            if (cell.components) {
+              const index = cell.components.indexOf(id);
+              if (index > -1) {
+                cell.components.splice(index, 1);
+              }
+            }
+          });
+        }
+      });
+
       components.value = components.value.filter(c => c.id !== id);
       if (selectedComponentId.value === id) {
-        selectedComponentId.value = components.value.length > 0 ? components.value[0].id : '';
+        selectedComponentId.value = '';
       }
     };
 
     const deleteContainer = (id) => {
-      components.value = components.value.filter(c => c.containerId !== id);
+      const container = layoutContainers.value.find(c => c.id === id);
+      if (container && container.type === 'grid' && container.config.cells) {
+        container.config.cells.forEach(cell => {
+          if (cell.components && cell.components.length > 0) {
+            cell.components.forEach(componentId => {
+              deleteComponent(componentId);
+            });
+          }
+        });
+      } else {
+        components.value = components.value.filter(c => c.containerId !== id);
+      }
       layoutContainers.value = layoutContainers.value.filter(c => c.id !== id);
-
       if (selectedComponentId.value === id) {
-        selectedComponentId.value = layoutContainers.value.length > 0 ? layoutContainers.value[0].id : components.value.length > 0 ? components.value[0].id : '';
+        selectedComponentId.value = '';
       }
     };
 
@@ -1443,6 +2011,51 @@ export default defineComponent({
       closeModal();
     };
 
+    const handleContainerDragOver = (e, containerId) => {
+      e.preventDefault();
+      e.stopPropagation();
+      containerDragStates.value[containerId] = true;
+      e.dataTransfer.dropEffect = 'copy';
+      const hintElement = e.target.closest('.empty-container-hint');
+      if (hintElement) {
+        hintElement.style.borderColor = 'var(--primary-color)';
+        hintElement.style.backgroundColor = 'rgba(255, 131, 38, 0.1)';
+      }
+    };
+
+    const handleContainerDragLeave = (e, containerId) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (containerDragStates.value[containerId]) {
+        containerDragStates.value[containerId] = false;
+      }
+      const hintElement = e.target.closest('.empty-container-hint');
+      if (hintElement) {
+        hintElement.style.borderColor = '';
+        hintElement.style.backgroundColor = '';
+      }
+    };
+
+    const handleContainerDrop = (e, containerId) => {
+      e.preventDefault();
+      e.stopPropagation();
+      containerDragStates.value[containerId] = false;
+      const hintElement = e.target.closest('.empty-container-hint');
+      if (hintElement) {
+        hintElement.style.borderColor = '';
+        hintElement.style.backgroundColor = '';
+      }
+      let elementType = draggingElementType.value;
+      if (!elementType && e.dataTransfer.types.includes('text/plain')) {
+        elementType = e.dataTransfer.getData('text/plain');
+      }
+      if (!elementType) {
+        console.warn('未获取到拖拽元素类型');
+        return;
+      }
+      createComponent(elementType, containerId);
+    };
+
     watch(currentBreakpoint, (newValue) => {
       console.log('切换到断点:', newValue);
     });
@@ -1462,7 +2075,13 @@ export default defineComponent({
       components,
       selectedComponent,
       containerDragStates,
+      containerElements,
+      textElements,
+      formElements,
+      mediaElements,
+      getFreeComponents,
       handleDragStart,
+      handleDomTypeDragStart,
       toggleSidebar,
       toggleGridLines,
       selectComponent,
@@ -1470,7 +2089,11 @@ export default defineComponent({
       deleteComponent,
       deleteContainer,
       getComponentsInContainer,
+      getComponentsInGridCell,
       getContainerStyle,
+      getGridContainerStyle,
+      getGridTemplateStyle,
+      getGridCellStyle,
       getComponentStyle,
       renderComponentContent,
       toggleGridLayout,
@@ -1491,45 +2114,1069 @@ export default defineComponent({
       handleContainerDragOver,
       handleContainerDragLeave,
       handleContainerDrop,
-      createComponent
+      handleGridCellDragOver,
+      handleGridCellDragLeave,
+      handleGridCellDrop,
+      createComponent,
+      addGridRow,
+      addGridColumn,
+      mergeGridCell,
+      deleteGridCellComponent,
+      saveLayout,
+      loadLayout
     };
   }
 });
 </script>
 
 <style>
+:root {
+  --primary-color: #ff8326;
+  --secondary-color: #fff5eb;
+  --border-color: #ffd5b8;
+  --text-color: #2d3e50;
+  --light-bg: #f9f9f9;
+  --card-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  --sidebar-width: 260px;
+  --header-height: 60px;
+  --properties-panel-width: 300px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  color: var(--text-color);
+  background-color: var(--light-bg);
+  height: 100vh;
+  overflow: hidden;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.header {
+  height: var(--header-height);
+  background-color: white;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  z-index: 10;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  color: var(--primary-color);
+  font-size: 22px;
+  margin-right: 40px;
+}
+
+.logo i {
+  margin-right: 10px;
+  font-size: 26px;
+}
+
+.mobile-menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  color: var(--text-color);
+  margin-right: 12px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+}
+
+.search-box {
+  position: relative;
+  width: 280px;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 8px 12px 8px 36px;
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(255, 131, 38, 0.2);
+}
+
+.search-box i {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background-color: white;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 14px;
+  color: #666;
+  white-space: nowrap;
+}
+
+.action-btn:hover {
+  background-color: var(--secondary-color);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.action-btn.compact {
+  padding: 6px;
+  width: 36px;
+  height: 36px;
+  justify-content: center;
+}
+
+.header-secondary-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.notification-icon {
+  position: relative;
+  font-size: 18px;
+  color: #666;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.notification-icon:hover {
+  color: var(--primary-color);
+}
+
+.notification-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: #ff4d4f;
+  color: white;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 20px;
+  transition: background-color 0.2s;
+}
+
+.user-info:hover {
+  background-color: var(--secondary-color);
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+}
+
+.user-name {
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.main-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+.sidebar {
+  width: var(--sidebar-width);
+  background-color: white;
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  height: calc(100vh - var(--header-height));
+  transition: transform 0.3s;
+}
+
+.menu-section {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.menu-section-title {
+  padding: 0 20px;
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  color: #666;
+  text-decoration: none;
+  transition: all 0.2s;
+  cursor: pointer;
+  user-select: none;
+}
+
+.menu-item:hover {
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
+}
+
+.menu-item.dragging {
+  opacity: 0.5;
+  background-color: rgba(255, 131, 38, 0.1);
+}
+
+.menu-item i {
+  width: 20px;
+  margin-right: 12px;
+  text-align: center;
+  color: var(--primary-color);
+}
+
+.workspace {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: var(--light-bg);
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  background-color: white;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 4px;
+}
+
+.page-description {
+  font-size: 14px;
+  color: #666;
+}
+
 .layout-controls {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   align-items: center;
 }
 
 .breakpoint-select {
-  padding: 6px 12px;
+  padding: 8px 12px;
   border: 1px solid var(--border-color);
-  border-radius: 4px;
+  border-radius: 8px;
   background: white;
   font-size: 14px;
+  color: var(--text-color);
+  cursor: pointer;
 }
 
+.breakpoint-select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.canvas-container {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.canvas-drag-area {
+  min-height: calc(100% - 48px);
+  padding: 24px;
+  border: 2px dashed var(--border-color);
+  border-radius: 12px;
+  transition: all 0.2s;
+  background-color: white;
+  box-shadow: var(--card-shadow);
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.canvas-drag-area.dragover {
+  border-color: var(--primary-color);
+  background-color: rgba(255, 131, 38, 0.1);
+}
+
+.canvas-drag-area.grid-layout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.canvas-drag-area.show-grid {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+  linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.layout-container {
+  margin-bottom: 20px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  background: white;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  width: 100% !important;
+  box-sizing: border-box;
+}
+
+.layout-container.selected {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(255, 131, 38, 0.1);
+}
+
+.layout-container.row {
+  border-color: #4CAF50;
+  display: flex !important;
+  flex-direction: row !important;
+}
+
+.layout-container.col {
+  border-color: #2196F3;
+}
+
+.layout-container.grid {
+  border-color: #9C27B0;
+  display: grid !important;
+}
+
+.container-header {
+  background: #f8f9fa;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 10px 10px 0 0;
+}
+
+.container-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.container-id {
+  color: #999;
+  font-size: 12px;
+  background: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.container-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.container-hint {
+  color: #666;
+  font-size: 12px;
+  background: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+.operation-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.operation-btn:hover {
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
+}
+
+.container-content {
+  min-height: 100px;
+  padding: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.empty-container-hint {
+  height: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  transition: all 0.2s;
+  cursor: pointer;
+  margin: 10px 0;
+  width: 100%;
+}
+
+.empty-container-hint:hover {
+  border-color: var(--primary-color);
+  background-color: rgba(255, 131, 38, 0.05);
+}
+
+.empty-container-hint.dragover {
+  border-color: var(--primary-color);
+  background-color: rgba(255, 131, 38, 0.1);
+  box-shadow: 0 0 10px rgba(255, 131, 38, 0.2);
+}
+
+.empty-container-hint i {
+  font-size: 28px;
+  margin-bottom: 8px;
+  color: var(--primary-color);
+}
+
+.canvas-component {
+  margin: 8px 0;
+  padding: 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background-color: white;
+  transition: all 0.2s;
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.canvas-component.selected {
+  border: 2px solid var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(255, 131, 38, 0.1);
+}
+
+.canvas-component.inline-component {
+  display: inline-block;
+  vertical-align: top;
+  min-width: 100px;
+  margin-right: 8px;
+}
+
+.canvas-component:not(.inline-component) {
+  width: 100%;
+}
+
+.component-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.component-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.component-id {
+  color: #999;
+  font-size: 12px;
+  background: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.component-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.component-hint {
+  color: #999;
+  font-size: 12px;
+  margin-right: 8px;
+}
+
+.component-content {
+  min-height: 40px;
+  background-color: #f9f9f9;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  overflow: hidden;
+  padding: 12px;
+}
+
+/* 网格容器样式 */
+.grid-container {
+  border-color: #9C27B0;
+  width: 100% !important;
+}
+
+.grid-cells {
+  min-height: 200px;
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 0 0 10px 10px;
+  width: 100%;
+  box-sizing: border-box;
+  display: grid !important;
+}
+
+.grid-cell {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: white;
+  min-height: 80px;
+  min-width: 100px;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.grid-cell.selected {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(255, 131, 38, 0.2);
+}
+
+.grid-cell.merged {
+  background-color: #f5f5f5;
+  border-style: dashed;
+}
+
+.grid-cell.span-col {
+  background-color: rgba(255, 131, 38, 0.05);
+}
+
+.grid-cell.span-row {
+  background-color: rgba(76, 175, 80, 0.05);
+}
+
+.cell-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 8px;
+  background: #f8f9fa;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 12px;
+}
+
+.cell-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cell-position {
+  color: #666;
+  font-family: monospace;
+  font-size: 11px;
+}
+
+.cell-merge-btn {
+  background: none;
+  border: none;
+  color: #2196F3;
+  cursor: pointer;
+  padding: 2px;
+  font-size: 12px;
+  border-radius: 3px;
+}
+
+.cell-merge-btn:hover {
+  background: rgba(33, 150, 243, 0.1);
+  color: #1976D2;
+}
+
+.cell-content {
+  padding: 10px;
+  min-height: 50px;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.empty-cell-hint {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  border: 2px dashed #ddd;
+  border-radius: 4px;
+  padding: 12px;
+  text-align: center;
+  transition: all 0.2s;
+  cursor: pointer;
+  min-height: 60px;
+  width: 100%;
+}
+
+.empty-cell-hint:hover {
+  border-color: var(--primary-color);
+  background-color: rgba(255, 131, 38, 0.05);
+}
+
+.empty-cell-hint i {
+  font-size: 20px;
+  margin-bottom: 6px;
+  color: var(--primary-color);
+}
+
+.empty-cell-hint p {
+  font-size: 12px;
+  margin: 0;
+}
+
+.grid-config {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 16px;
+}
+
+.grid-size {
+  font-size: 12px;
+  color: #666;
+  background: #f0f0f0;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.grid-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.grid-action-btn:hover {
+  background: #f5f5f5;
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.empty-canvas-hint {
+  text-align: center;
+  padding: 80px 20px;
+  color: #666;
+}
+
+.empty-canvas-hint i {
+  font-size: 64px;
+  color: var(--primary-color);
+  margin-bottom: 24px;
+  opacity: 0.8;
+}
+
+.empty-canvas-hint h3 {
+  margin-bottom: 12px;
+  font-size: 24px;
+  color: var(--text-color);
+}
+
+.empty-canvas-hint p {
+  margin-bottom: 24px;
+  color: #999;
+  font-size: 16px;
+}
+
+.properties-panel {
+  width: var(--properties-panel-width);
+  background-color: white;
+  border-left: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panel-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.panel-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.panel-close {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 4px;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.panel-close:hover {
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
+}
+
+.panel-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border-color);
+  background: #fafafa;
+}
+
+.tab-item {
+  flex: 1;
+  padding: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #666;
+  border-bottom: 2px solid transparent;
+}
+
+.tab-item:hover {
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
+}
+
+.tab-item.active {
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
+}
+
+.panel-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.setting-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.setting-group {
+  margin-bottom: 20px;
+}
+
+.setting-title {
+  font-weight: 600;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-color);
+  font-size: 15px;
+}
+
+.setting-item {
+  margin-bottom: 16px;
+}
+
+.setting-item label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: #666;
+  font-weight: 500;
+}
+
+.form-control {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--text-color);
+  transition: all 0.3s;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(255, 131, 38, 0.1);
+}
+
+textarea.form-control {
+  resize: vertical;
+  min-height: 80px;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+}
+
+.range-input {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.range-input input[type="range"] {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: #f0f0f0;
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.range-input input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  cursor: pointer;
+}
+
+.range-input .form-control {
+  width: 70px;
+}
+
+.range-input select {
+  width: 60px;
+  padding: 6px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: white;
+  font-size: 13px;
+  color: var(--text-color);
+}
+
+.spacing-controls {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.spacing-item {
+  margin-bottom: 8px;
+}
+
+.spacing-item label {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.align-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.align-btn {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-radius: 6px;
+  color: #666;
+}
+
+.align-btn:hover {
+  background: #f5f5f5;
+  border-color: var(--border-color);
+}
+
+.align-btn.active {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.color-picker {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.color-picker input[type="color"] {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background: transparent;
+}
+
+.color-picker input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.color-picker input[type="color"]::-webkit-color-swatch {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.no-selection {
+  padding: 60px 20px;
+  text-align: center;
+  color: #999;
+}
+
+.no-selection i {
+  font-size: 48px;
+  margin-bottom: 16px;
+  color: #e0e0e0;
+}
+
+.no-selection p {
+  font-size: 14px;
+  color: #999;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  border: none;
+  gap: 6px;
+}
+
+.btn-primary {
+  background: linear-gradient(to right, #ff8326, #ff6a00);
+  color: white;
+  box-shadow: 0 2px 5px rgba(255, 131, 38, 0.3);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(to right, #ff6a00, #ff8326);
+  box-shadow: 0 4px 8px rgba(255, 131, 38, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-outline {
+  background-color: white;
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+}
+
+.btn-outline:hover {
+  background-color: var(--secondary-color);
+  border-color: var(--primary-color);
+}
+
+/* 预设布局样式 */
 .layout-presets {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  padding: 0 15px;
+  gap: 12px;
+  padding: 0 16px;
 }
 
 .layout-preset {
   border: 1px solid var(--border-color);
-  border-radius: 6px;
-  padding: 10px;
+  border-radius: 8px;
+  padding: 12px;
   cursor: pointer;
   transition: all 0.2s;
+  text-align: center;
 }
 
 .layout-preset:hover {
   border-color: var(--primary-color);
   background-color: rgba(255, 131, 38, 0.05);
+  transform: translateY(-2px);
+  box-shadow: var(--card-shadow);
 }
 
 .preset-preview {
@@ -1548,7 +3195,7 @@ export default defineComponent({
   left: 0;
   right: 0;
   height: 10px;
-  background: #ff8326;
+  background: var(--primary-color);
 }
 
 .preset-sidebar {
@@ -1580,665 +3227,13 @@ export default defineComponent({
   height: 50%;
 }
 
-.layout-container {
-  margin-bottom: 15px;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  background: white;
-  transition: all 0.2s;
-}
-
-.layout-container.selected {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(255, 131, 38, 0.1);
-}
-
-.layout-container.row {
-  border-color: #4CAF50;
-}
-
-.layout-container.col {
-  border-color: #2196F3;
-}
-
-.layout-container.grid {
-  border-color: #9C27B0;
-}
-
-.container-header {
-  background: #f8f9fa;
-  padding: 10px 15px;
-  border-bottom: 1px solid #e0e0e0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.container-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.container-id {
-  color: #999;
+.layout-preset span {
   font-size: 12px;
-}
-
-.container-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.container-hint {
-  color: #666;
-  font-size: 12px;
-  background: white;
-  padding: 2px 8px;
-  border-radius: 3px;
-  border: 1px solid #ddd;
-}
-
-.container-content {
-  min-height: 100px;
-  padding: 15px;
-}
-
-.empty-container-hint {
-  height: 100px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #999;
-  border: 2px dashed #ddd;
-  border-radius: 6px;
-  transition: all 0.2s;
-  cursor: pointer;
-}
-
-.empty-container-hint:hover {
-  border-color: var(--primary-color);
-  background-color: rgba(255, 131, 38, 0.05);
-}
-
-.empty-container-hint.dragover {
-  border-color: var(--primary-color);
-  background-color: rgba(255, 131, 38, 0.1);
-  box-shadow: 0 0 10px rgba(255, 131, 38, 0.2);
-}
-
-.empty-container-hint i {
-  font-size: 24px;
-  margin-bottom: 8px;
-}
-
-.empty-canvas-hint {
-  text-align: center;
-  padding: 60px 20px;
-  color: #666;
-}
-
-.empty-canvas-hint i {
-  font-size: 48px;
-  color: var(--primary-color);
-  margin-bottom: 20px;
-}
-
-.empty-canvas-hint h3 {
-  margin-bottom: 10px;
-  font-size: 20px;
-}
-
-.empty-canvas-hint p {
-  margin-bottom: 20px;
-  color: #999;
-}
-.range-input {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.range-input input[type="range"] {
-  flex: 1;
-}
-
-.range-input .form-control {
-  width: 70px;
-}
-
-.range-input select {
-  width: 60px;
-  padding: 6px;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-}
-
-.spacing-controls {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-}
-
-.spacing-item {
-  margin-bottom: 8px;
-}
-
-.spacing-item label {
-  display: block;
-  font-size: 12px;
-  color: #666;
-  margin-bottom: 4px;
-}
-
-.align-buttons {
-  display: flex;
-  gap: 4px;
-}
-
-.align-btn {
-  flex: 1;
-  padding: 8px;
-  border: 1px solid var(--border-color);
-  background: white;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.align-btn:hover {
-  background: #f5f5f5;
-}
-
-.align-btn.active {
-  background: var(--primary-color);
-  color: white;
-  border-color: var(--primary-color);
-}
-
-.color-picker {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.color-picker input[type="color"] {
-  width: 40px;
-  height: 40px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.close-panel {
-  background: none;
-  border: none;
-  color: #666;
-  cursor: pointer;
-  padding: 4px;
-  margin-left: auto;
-}
-
-.no-selection {
-  padding: 40px 20px;
-  text-align: center;
-  color: #999;
-}
-
-.no-selection i {
-  font-size: 36px;
-  margin-bottom: 15px;
-  color: #ddd;
-}
-.canvas-drag-area.show-grid {
-  background-image:
-      linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
-  background-size: 20px 20px;
-}
-.menu-item.dragging {
-  opacity: 0.5;
-  background-color: rgba(255, 131, 38, 0.1);
-}
-@media (max-width: 768px) {
-  .layout-presets {
-    grid-template-columns: 1fr;
-  }
-
-  .spacing-controls {
-    grid-template-columns: 1fr;
-  }
-
-  .range-input {
-    flex-direction: column;
-    align-items: stretch;
-  }
-}
-
-:root {
-  --primary-color: #ff8326;
-  --secondary-color: #f5f5f5;
-  --border-color: #ddd;
-  --text-color: #333;
-  --bg-color: #f9f9f9;
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-body {
-  background-color: #f0f2f5;
   color: var(--text-color);
-  line-height: 1.6;
+  font-weight: 500;
 }
 
-.container {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 16px;
-  background-color: white;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  z-index: 100;
-  min-height: 48px;
-  max-height: 48px;
-  flex-shrink: 0;
-}
-
-.mobile-menu-toggle {
-  display: none;
-  background: none;
-  border: none;
-  font-size: 1rem;
-  cursor: pointer;
-  color: var(--text-color);
-  padding: 4px;
-  margin-right: 8px;
-}
-
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: bold;
-  font-size: 1rem;
-  color: var(--primary-color);
-  flex-shrink: 0;
-}
-
-.logo i {
-  font-size: 1.5rem;
-}
-
-.header-main-actions {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  flex: 1;
-  justify-content: center;
-  max-width: 400px;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  padding: 0 8px;
-}
-
-.header-secondary-actions {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  flex-shrink: 0;
-}
-
-.action-btn {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  background-color: white;
-  border: 1px solid var(--border-color);
-  border-radius: 3px;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-size: 0.8rem;
-  white-space: nowrap;
-  flex-shrink: 0;
-  height: 28px;
-}
-
-.action-btn.compact {
-  padding: 4px 6px;
-  width: 28px;
-  justify-content: center;
-}
-
-.action-btn:hover {
-  background-color: var(--secondary-color);
-  border-color: var(--primary-color);
-}
-
-.action-btn i {
-  font-size: 0.9rem;
-}
-
-.user-profile {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 2px 6px;
-  border-radius: 3px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  flex-shrink: 0;
-  height: 28px;
-}
-
-.user-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background-color: var(--primary-color);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-}
-
-.main-content {
-  display: flex;
-  flex: 1;
-  overflow: hidden;
-}
-
-.sidebar {
-  width: 250px;
-  background-color: white;
-  border-right: 1px solid var(--border-color);
-  overflow-y: auto;
-  transition: transform 0.3s;
-}
-
-.menu-section {
-  padding: 15px 0;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.menu-section-title {
-  padding: 0 15px 10px;
-  font-weight: bold;
-  color: #666;
-  font-size: 0.9rem;
-}
-
-.menu-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 15px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  user-select: none;
-}
-
-.menu-item:hover {
-  background-color: var(--secondary-color);
-}
-
-.menu-item.dragging {
-  opacity: 0.5;
-  background-color: rgba(255, 131, 38, 0.1);
-}
-
-.menu-item i {
-  width: 20px;
-  color: var(--primary-color);
-}
-
-.workspace {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.workspace-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px 20px;
-  background-color: white;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.workspace-title {
-  margin-bottom: 5px;
-}
-
-.workspace-description {
-  color: #666;
-  font-size: 0.9rem;
-}
-
-.workspace-actions {
-  display: flex;
-  gap: 10px;
-}
-
-.canvas-container {
-  flex: 1;
-  padding: 20px;
-  overflow-y: auto;
-  background-color: var(--bg-color);
-}
-
-.canvas-drag-area {
-  min-height: 100%;
-  padding: 20px;
-  border: 2px dashed #ccc;
-  border-radius: 8px;
-  transition: all 0.2s;
-}
-
-.canvas-drag-area.dragover {
-  border-color: var(--primary-color);
-  background-color: rgba(255, 131, 38, 0.1);
-}
-
-.canvas-drag-area.grid-layout {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 10px;
-}
-
-.canvas-component {
-  margin: 0;
-  padding: 15px;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  background-color: white;
-  transition: all 0.2s;
-  box-sizing: border-box;
-}
-
-.canvas-component.selected {
-  border: 2px solid var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(255, 131, 38, 0.2);
-}
-
-.canvas-component.inline-component {
-  display: inline-block;
-  vertical-align: top;
-  min-width: 100px;
-}
-
-.canvas-component:not(.inline-component) {
-  width: 100%;
-}
-
-.component-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.component-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.component-id {
-  color: #999;
-  font-size: 12px;
-}
-
-.component-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.component-hint {
-  color: #999;
-  font-size: 12px;
-}
-
-.delete-btn {
-  background: none;
-  border: none;
-  color: #ff4d4f;
-  cursor: pointer;
-  padding: 5px;
-}
-
-.component-content {
-  min-height: 40px;
-  background-color: #f9f9f9;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #666;
-  overflow: hidden;
-}
-
-.properties-panel {
-  width: 300px;
-  background-color: white;
-  border-left: 1px solid var(--border-color);
-  overflow-y: auto;
-}
-
-.panel-title {
-  padding: 15px;
-  font-weight: bold;
-  border-bottom: 1px solid var(--border-color);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.panel-tabs {
-  display: flex;
-  border-bottom: 1px solid var(--border-color);
-  white-space: nowrap;
-}
-
-.tab-item {
-  flex: 1;
-  padding: 12px;
-  text-align: center;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-}
-
-.tab-item.active {
-  background-color: var(--secondary-color);
-  border-bottom: 2px solid var(--primary-color);
-}
-
-.tab-item:hover {
-  background-color: var(--secondary-color);
-}
-
-.tab-content {
-  padding: 15px;
-}
-
-.setting-group {
-  margin-bottom: 20px;
-}
-
-.setting-title {
-  font-weight: bold;
-  margin-bottom: 10px;
-  padding-bottom: 5px;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.setting-item {
-  margin-bottom: 15px;
-}
-
-.setting-item label {
-  display: block;
-  margin-bottom: 5px;
-  font-size: 0.9rem;
-  color: #666;
-}
-
-.form-control {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  font-size: 0.9rem;
-}
-
-.btn {
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.2s;
-  border: none;
-}
-
-.btn-primary {
-  background-color: var(--primary-color);
-  color: white;
-}
-
-.btn-primary:hover {
-  background-color: #e6731f;
-}
-
-.btn-outline {
-  background-color: white;
-  border: 1px solid var(--border-color);
-  color: var(--text-color);
-}
-
-.btn-outline:hover {
-  background-color: var(--secondary-color);
-}
-
+/* 模态框样式 */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -2249,22 +3244,44 @@ body {
   display: none;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 2000;
 }
 
 .modal-overlay.active {
   display: flex;
 }
 
+.grid-container {
+  border-color: #9C27B0;
+  width: 100% !important;
+  max-height: 500px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.grid-cells {
+  min-height: 200px;
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 0 0 10px 10px;
+  width: 100%;
+  box-sizing: border-box;
+  display: grid !important;
+  overflow-y: auto;
+  flex: 1;
+  max-height: calc(100% - 60px);
+}
 .modal {
   background-color: white;
-  border-radius: 8px;
-  width: 500px;
+  border-radius: 12px;
+  width: 600px;
   max-width: 90vw;
   max-height: 90vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
 .large-modal {
@@ -2275,21 +3292,36 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 20px;
+  padding: 20px;
   border-bottom: 1px solid var(--border-color);
+  background: #fafafa;
+  border-radius: 12px 12px 0 0;
 }
 
 .modal-title {
-  font-weight: bold;
-  font-size: 1.1rem;
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--text-color);
 }
 
 .modal-close {
   background: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: 20px;
   cursor: pointer;
   color: #666;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.modal-close:hover {
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
 }
 
 .modal-body {
@@ -2299,11 +3331,13 @@ body {
 }
 
 .modal-footer {
-  padding: 15px 20px;
+  padding: 20px;
   border-top: 1px solid var(--border-color);
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
+  gap: 12px;
+  background: #fafafa;
+  border-radius: 0 0 12px 12px;
 }
 
 .editor-container {
@@ -2314,33 +3348,57 @@ body {
 
 .editor-toolbar {
   display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
+  gap: 8px;
+  margin-bottom: 12px;
 }
 
 .html-editor {
   flex: 1;
   width: 100%;
-  padding: 12px;
+  padding: 16px;
   border: 1px solid var(--border-color);
-  border-radius: 6px;
+  border-radius: 8px;
   font-family: 'Courier New', monospace;
   font-size: 14px;
   resize: none;
+  line-height: 1.5;
+  color: var(--text-color);
 }
 
-@media (max-width: 768px) {
-  .mobile-menu-toggle {
-    display: block;
+.html-editor:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(255, 131, 38, 0.1);
+}
+
+@media (max-width: 1200px) {
+  .sidebar {
+    width: 240px;
   }
 
+  .properties-panel {
+    width: 280px;
+  }
+
+  .header-actions {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .search-box {
+    width: 200px;
+  }
+}
+
+@media (max-width: 992px) {
   .sidebar {
     position: fixed;
-    top: 60px;
+    top: var(--header-height);
     left: 0;
     bottom: 0;
     transform: translateX(-100%);
-    z-index: 99;
+    z-index: 100;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
   }
 
   .sidebar.active {
@@ -2349,15 +3407,111 @@ body {
 
   .properties-panel {
     position: fixed;
-    top: 60px;
+    top: var(--header-height);
     right: 0;
     bottom: 0;
     transform: translateX(100%);
-    z-index: 99;
+    z-index: 100;
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
   }
 
   .properties-panel.active {
     transform: translateX(0);
+  }
+
+  .mobile-menu-toggle {
+    display: block;
+  }
+
+  .search-box {
+    width: 180px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    padding: 0 16px;
+  }
+
+  .header-actions {
+    justify-content: flex-end;
+  }
+
+  .search-box {
+    display: none;
+  }
+
+  .action-buttons {
+    display: none;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .layout-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .layout-presets {
+    grid-template-columns: 1fr;
+  }
+
+  .canvas-container {
+    padding: 16px;
+  }
+
+  .canvas-drag-area {
+    padding: 16px;
+  }
+
+  .modal {
+    width: 95vw;
+  }
+
+  .large-modal {
+    width: 95vw;
+  }
+
+  .modal-footer {
+    flex-direction: column;
+  }
+
+  .modal-footer .btn {
+    width: 100%;
+  }
+
+  .container-content {
+    width: 100%
+  }
+}
+
+@media (max-width: 576px) {
+  :root {
+    --header-height: 56px;
+  }
+
+  .logo {
+    font-size: 18px;
+  }
+
+  .logo i {
+    font-size: 22px;
+  }
+
+  .user-name {
+    display: none;
+  }
+
+  .notification-icon {
+    display: none;
+  }
+
+  .canvas-component {
+    padding: 12px;
   }
 
   .component-header {
@@ -2370,27 +3524,27 @@ body {
     align-self: flex-end;
   }
 
-  .workspace-header {
+  .layout-presets {
+    grid-template-columns: 1fr;
+  }
+
+  .spacing-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .range-input {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .workspace-actions {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .canvas-drag-area.grid-layout {
+    align-items: stretch;
     gap: 8px;
   }
 
-  .canvas-component {
-    padding: 12px;
+  .range-input .form-control {
+    width: 100%;
   }
 
-  .canvas-component.inline-component {
-    min-width: 80px;
+  .range-input select {
+    width: 100%;
   }
+
 }
 </style>
