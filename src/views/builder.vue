@@ -54,62 +54,153 @@
     <div class="main-content">
       <aside class="sidebar" :class="{ active: sidebarActive }">
         <div class="menu-section">
-          <div class="menu-section-title text-align-left">HTML元素</div>
+          <div class="menu-section-title text-align-left">容器元素</div>
           <div class="menu-item" v-draggable="draggableOptions('div')">
             <i class="fas fa-square"></i>
             <span>Div 容器</span>
+          </div>
+          <div class="menu-item" v-draggable="draggableOptions('section')">
+            <i class="fas fa-square-full"></i>
+            <span>Section 分区</span>
+          </div>
+          <div class="menu-item" v-draggable="draggableOptions('article')">
+            <i class="fas fa-newspaper"></i>
+            <span>Article 文章</span>
           </div>
           <div class="menu-item" v-draggable="draggableOptions('header')">
             <i class="fas fa-heading"></i>
             <span>Header 头部</span>
           </div>
+          <div class="menu-item" v-draggable="draggableOptions('footer')">
+            <i class="fas fa-window-minimize"></i>
+            <span>Footer 页脚</span>
+          </div>
           <div class="menu-item" v-draggable="draggableOptions('nav')">
             <i class="fas fa-bars"></i>
             <span>Nav 导航</span>
+          </div>
+          <div class="menu-item" v-draggable="draggableOptions('aside')">
+            <i class="fas fa-columns"></i>
+            <span>Aside 侧边栏</span>
           </div>
           <div class="menu-item" v-draggable="draggableOptions('main')">
             <i class="fas fa-home"></i>
             <span>Main 主内容</span>
           </div>
+          <div class="menu-item" v-draggable="draggableOptions('details')">
+            <i class="fas fa-info-circle"></i>
+            <span>Details 详情</span>
+          </div>
+          <div class="menu-item" v-draggable="draggableOptions('summary')">
+            <i class="fas fa-list-alt"></i>
+            <span>Summary 摘要</span>
+          </div>
+          <div class="menu-item" v-draggable="draggableOptions('dialog')">
+            <i class="fas fa-window-restore"></i>
+            <span>Dialog 对话框</span>
+          </div>
+        </div>
+        <div class="menu-section">
+          <div class="menu-section-title text-align-left">标题元素</div>
+          <div class="menu-item" v-draggable="draggableOptions('h1')">
+            <i class="fas fa-heading"></i>
+            <span>H1 一级标题</span>
+          </div>
+          <div class="menu-item" v-draggable="draggableOptions('h2')">
+            <i class="fas fa-heading"></i>
+            <span>H2 二级标题</span>
+          </div>
+          <div class="menu-item" v-draggable="draggableOptions('h3')">
+            <i class="fas fa-heading"></i>
+            <span>H3 三级标题</span>
+          </div>
+          <div class="menu-item" v-draggable="draggableOptions('h4')">
+            <i class="fas fa-heading"></i>
+            <span>H4 四级标题</span>
+          </div>
+          <div class="menu-item" v-draggable="draggableOptions('h5')">
+            <i class="fas fa-heading"></i>
+            <span>H5 五级标题</span>
+          </div>
+          <div class="menu-item" v-draggable="draggableOptions('h6')">
+            <i class="fas fa-heading"></i>
+            <span>H6 六级标题</span>
+          </div>
+          <div class="menu-item" v-draggable="draggableOptions('heading')">
+            <i class="fas fa-heading"></i>
+            <span>Heading 标题</span>
+          </div>
         </div>
 
         <div class="menu-section">
-          <div class="menu-section-title text-align-left">表单元素</div>
-          <div class="menu-item" v-draggable="draggableOptions('input')">
-            <i class="fas fa-edit"></i>
-            <span>Input 输入框</span>
+          <div class="menu-section-title text-align-left">文本内容元素</div>
+          <div class="menu-item" v-draggable="draggableOptions('p')">
+            <i class="fas fa-paragraph"></i>
+            <span>P 段落</span>
           </div>
-          <div class="menu-item" v-draggable="draggableOptions('button')">
-            <i class="fas fa-hand-pointer"></i>
-            <span>Button 按钮</span>
+          <div class="menu-item" v-draggable="draggableOptions('span')">
+            <i class="fas fa-square"></i>
+            <span>Span 内联容器</span>
           </div>
-          <div class="menu-item" v-draggable="draggableOptions('select')">
-            <i class="fas fa-caret-square-down"></i>
-            <span>Select 下拉框</span>
+          <div class="menu-item" v-draggable="draggableOptions('a')">
+            <i class="fas fa-link"></i>
+            <span>A 链接</span>
           </div>
-          <div class="menu-item" v-draggable="draggableOptions('label')">
-            <i class="fas fa-tag"></i>
-            <span>Label 标签</span>
+          <div class="menu-item" v-draggable="draggableOptions('strong')">
+            <i class="fas fa-bold"></i>
+            <span>Strong 强调</span>
           </div>
-          <div class="menu-item" v-draggable="draggableOptions('textarea')">
-            <i class="fas fa-align-left"></i>
-            <span>Textarea 文本域</span>
+          <div class="menu-item" v-draggable="draggableOptions('em')">
+            <i class="fas fa-italic"></i>
+            <span>Em 强调</span>
+          </div>
+          <div class="menu-item" v-draggable="draggableOptions('i')">
+            <i class="fas fa-italic"></i>
+            <span>I 斜体</span>
+          </div>
+          <div class="menu-item" v-draggable="draggableOptions('b')">
+            <i class="fas fa-bold"></i>
+            <span>B 粗体</span>
+          </div>
+          <div class="menu-item" v-draggable="draggableOptions('u')">
+            <i class="fas fa-underline"></i>
+            <span>U 下划线</span>
+          </div>
+          <div class="menu-item" v-draggable="draggableOptions('pre')">
+            <i class="fas fa-code"></i>
+            <span>Pre 预格式文本</span>
+          </div>
+          <div class="menu-item" v-draggable="draggableOptions('blockquote')">
+            <i class="fas fa-quote-right"></i>
+            <span>Blockquote 引用</span>
+          </div>
+          <div class="menu-item" v-draggable="draggableOptions('mark')">
+            <i class="fas fa-highlighter"></i>
+            <span>Mark 标记</span>
+          </div>
+          <div class="menu-item" v-draggable="draggableOptions('small')">
+            <i class="fas fa-text-height"></i>
+            <span>Small 小文本</span>
+          </div>
+          <div class="menu-item" v-draggable="draggableOptions('time')">
+            <i class="fas fa-clock"></i>
+            <span>Time 时间</span>
           </div>
         </div>
 
         <div class="menu-section">
-          <div class="menu-section-title text-align-left">媒体元素</div>
-          <div class="menu-item" v-draggable="draggableOptions('img')">
-            <i class="fas fa-image"></i>
-            <span>Img 图片</span>
+          <div class="menu-section-title text-align-left">列表元素</div>
+          <div class="menu-item" v-draggable="draggableOptions('ul')">
+            <i class="fas fa-list-ul"></i>
+            <span>Ul 无序列表</span>
           </div>
-          <div class="menu-item" v-draggable="draggableOptions('svg')">
-            <i class="fas fa-draw-polygon"></i>
-            <span>SVG 矢量图</span>
+          <div class="menu-item" v-draggable="draggableOptions('ol')">
+            <i class="fas fa-list-ol"></i>
+            <span>Ol 有序列表</span>
           </div>
-          <div class="menu-item" v-draggable="draggableOptions('canvas')">
-            <i class="fas fa-paint-brush"></i>
-            <span>Canvas 画布</span>
+          <div class="menu-item" v-draggable="draggableOptions('li')">
+            <i class="fas fa-list"></i>
+            <span>Li 列表项</span>
           </div>
         </div>
 
@@ -131,6 +222,10 @@
             <i class="fas fa-grip-lines"></i>
             <span>Tr 表格行</span>
           </div>
+          <div class="menu-item" v-draggable="draggableOptions('th')">
+            <i class="fas fa-th"></i>
+            <span>Th 表头单元格</span>
+          </div>
           <div class="menu-item" v-draggable="draggableOptions('td')">
             <i class="fas fa-square"></i>
             <span>Td 表格单元格</span>
@@ -138,18 +233,74 @@
         </div>
 
         <div class="menu-section">
-          <div class="menu-section-title text-align-left">列表元素</div>
-          <div class="menu-item" v-draggable="draggableOptions('ul')">
-            <i class="fas fa-list-ul"></i>
-            <span>Ul 无序列表</span>
+          <div class="menu-section-title text-align-left">表单元素</div>
+          <div class="menu-item" v-draggable="draggableOptions('form')">
+            <i class="fas fa-window-restore"></i>
+            <span>Form 表单</span>
           </div>
-          <div class="menu-item" v-draggable="draggableOptions('ol')">
-            <i class="fas fa-list-ol"></i>
-            <span>Ol 有序列表</span>
+          <div class="menu-item" v-draggable="draggableOptions('input')">
+            <i class="fas fa-edit"></i>
+            <span>Input 输入框</span>
           </div>
-          <div class="menu-item" v-draggable="draggableOptions('li')">
-            <i class="fas fa-list"></i>
-            <span>Li 列表项</span>
+          <div class="menu-item" v-draggable="draggableOptions('textarea')">
+            <i class="fas fa-align-left"></i>
+            <span>Textarea 文本域</span>
+          </div>
+          <div class="menu-item" v-draggable="draggableOptions('button')">
+            <i class="fas fa-hand-pointer"></i>
+            <span>Button 按钮</span>
+          </div>
+          <div class="menu-item" v-draggable="draggableOptions('select')">
+            <i class="fas fa-caret-square-down"></i>
+            <span>Select 下拉框</span>
+          </div>
+          <div class="menu-item" v-draggable="draggableOptions('option')">
+            <i class="fas fa-caret-right"></i>
+            <span>Option 选项</span>
+          </div>
+          <div class="menu-item" v-draggable="draggableOptions('label')">
+            <i class="fas fa-tag"></i>
+            <span>Label 标签</span>
+          </div>
+        </div>
+        <div class="menu-section">
+          <div class="menu-section-title text-align-left">媒体元素</div>
+          <div class="menu-item" v-draggable="draggableOptions('img')">
+            <i class="fas fa-image"></i>
+            <span>Img 图片</span>
+          </div>
+          <div class="menu-item" v-draggable="draggableOptions('svg')">
+            <i class="fas fa-draw-polygon"></i>
+            <span>SVG 矢量图</span>
+          </div>
+          <div class="menu-item" v-draggable="draggableOptions('audio')">
+            <i class="fas fa-volume-up"></i>
+            <span>Audio 音频</span>
+          </div>
+          <div class="menu-item" v-draggable="draggableOptions('video')">
+            <i class="fas fa-video"></i>
+            <span>Video 视频</span>
+          </div>
+          <div class="menu-item" v-draggable="draggableOptions('iframe')">
+            <i class="fas fa-external-link-alt"></i>
+            <span>Iframe 内联框架</span>
+          </div>
+        </div>
+
+        <!-- 其他元素 -->
+        <div class="menu-section">
+          <div class="menu-section-title text-align-left">其他元素</div>
+          <div class="menu-item" v-draggable="draggableOptions('progress')">
+            <i class="fas fa-spinner"></i>
+            <span>Progress 进度条</span>
+          </div>
+          <div class="menu-item" v-draggable="draggableOptions('br')">
+            <i class="fas fa-level-down-alt"></i>
+            <span>Br 换行</span>
+          </div>
+          <div class="menu-item" v-draggable="draggableOptions('hr')">
+            <i class="fas fa-minus"></i>
+            <span>Hr 水平线</span>
           </div>
         </div>
       </aside>
@@ -424,6 +575,7 @@
 
 <script>
 import { defineComponent, ref, computed } from 'vue';
+
 const draggable = {
   mounted(el, binding) {
     el.draggable = true;
@@ -473,6 +625,10 @@ h1[h1_1234]: { style-fontSize: "24px"; style-color: "#333"; } :: "一级标题";
 p[p_5678]: { style-fontSize: "14px"; style-color: "#666"; } :: "这是一个段落文本";
 button[button_9012]: { style-padding: "8px 16px"; style-backgroundColor: "#ff8326"; style-color: "white"; } :: "按钮";
 input[input_3456]: { type: "text"; placeholder: "请输入内容"; style-padding: "8px"; style-border: "1px solid #ddd"; };`);
+
+    const inlineElements = ['span', 'a', 'strong', 'em', 'i', 'b', 'u', 'mark', 'small', 'time',
+      'input', 'button', 'label', 'img', 'br'];
+
     const components = ref([
       {
         id: 'h1_1234',
@@ -537,9 +693,11 @@ input[input_3456]: { type: "text"; placeholder: "请输入内容"; style-padding
         relations: ''
       }
     ]);
+
     const selectedComponent = computed(() => {
       return components.value.find(c => c.id === selectedComponentId.value) || null;
     });
+
     const getComponentStyle = (component) => {
       return {
         fontSize: component.style.fontSize,
@@ -616,47 +774,158 @@ input[input_3456]: { type: "text"; placeholder: "请输入内容"; style-padding
       console.log('应用HTML:', htmlCode.value);
       closeModal();
     };
-
+    // 图标映射
     const draggableOptions = (type) => {
       const icons = {
+        // 容器元素
         div: 'fas fa-square',
+        section: 'fas fa-square-full',
+        article: 'fas fa-newspaper',
         header: 'fas fa-heading',
+        footer: 'fas fa-window-minimize',
         nav: 'fas fa-bars',
+        aside: 'fas fa-columns',
         main: 'fas fa-home',
-        input: 'fas fa-edit',
-        button: 'fas fa-hand-pointer',
-        select: 'fas fa-caret-square-down',
-        label: 'fas fa-tag',
-        textarea: 'fas fa-align-left',
-        img: 'fas fa-image',
-        svg: 'fas fa-draw-polygon',
-        canvas: 'fas fa-paint-brush',
+        details: 'fas fa-info-circle',
+        summary: 'fas fa-list-alt',
+        dialog: 'fas fa-window-restore',
+        // 标题元素
+        h1: 'fas fa-heading',
+        h2: 'fas fa-heading',
+        h3: 'fas fa-heading',
+        h4: 'fas fa-heading',
+        h5: 'fas fa-heading',
+        h6: 'fas fa-heading',
+        heading: 'fas fa-heading',
+        // 文本内容元素
+        p: 'fas fa-paragraph',
+        span: 'fas fa-square',
+        a: 'fas fa-link',
+        strong: 'fas fa-bold',
+        em: 'fas fa-italic',
+        i: 'fas fa-italic',
+        b: 'fas fa-bold',
+        u: 'fas fa-underline',
+        pre: 'fas fa-code',
+        blockquote: 'fas fa-quote-right',
+        mark: 'fas fa-highlighter',
+        small: 'fas fa-text-height',
+        time: 'fas fa-clock',
+        // 列表元素
+        ul: 'fas fa-list-ul',
+        ol: 'fas fa-list-ol',
+        li: 'fas fa-list',
+        // 表格元素
         table: 'fas fa-table',
         thead: 'fas fa-table-header',
         tbody: 'fas fa-table-body',
         tr: 'fas fa-grip-lines',
+        th: 'fas fa-th',
         td: 'fas fa-square',
-        ul: 'fas fa-list-ul',
-        ol: 'fas fa-list-ol',
-        li: 'fas fa-list'
+        // 表单元素
+        form: 'fas fa-window-restore',
+        input: 'fas fa-edit',
+        textarea: 'fas fa-align-left',
+        button: 'fas fa-hand-pointer',
+        select: 'fas fa-caret-square-down',
+        option: 'fas fa-caret-right',
+        label: 'fas fa-tag',
+        // 媒体元素
+        img: 'fas fa-image',
+        svg: 'fas fa-draw-polygon',
+        audio: 'fas fa-volume-up',
+        video: 'fas fa-video',
+        iframe: 'fas fa-external-link-alt',
+        // 其他元素
+        progress: 'fas fa-spinner',
+        br: 'fas fa-level-down-alt',
+        hr: 'fas fa-minus'
       };
-      const inlineElements = ['button', 'input', 'label', 'span', 'a', 'img', 'select'];
+
+      // 名称映射
+      const names = {
+        div: 'Div 容器',
+        section: 'Section 分区',
+        article: 'Article 文章',
+        header: 'Header 头部',
+        footer: 'Footer 页脚',
+        nav: 'Nav 导航',
+        aside: 'Aside 侧边栏',
+        main: 'Main 主内容',
+        details: 'Details 详情',
+        summary: 'Summary 摘要',
+        dialog: 'Dialog 对话框',
+        h1: 'H1 一级标题',
+        h2: 'H2 二级标题',
+        h3: 'H3 三级标题',
+        h4: 'H4 四级标题',
+        h5: 'H5 五级标题',
+        h6: 'H6 六级标题',
+        heading: 'Heading 标题',
+        p: 'P 段落',
+        span: 'Span 内联容器',
+        a: 'A 链接',
+        strong: 'Strong 强调',
+        em: 'Em 强调',
+        i: 'I 斜体',
+        b: 'B 粗体',
+        u: 'U 下划线',
+        pre: 'Pre 预格式文本',
+        blockquote: 'Blockquote 引用',
+        mark: 'Mark 标记',
+        small: 'Small 小文本',
+        time: 'Time 时间',
+        ul: 'Ul 无序列表',
+        ol: 'Ol 有序列表',
+        li: 'Li 列表项',
+        table: 'Table 表格',
+        thead: 'Thead 表头',
+        tbody: 'Tbody 表体',
+        tr: 'Tr 表格行',
+        th: 'Th 表头单元格',
+        td: 'Td 表格单元格',
+        form: 'Form 表单',
+        input: 'Input 输入框',
+        textarea: 'Textarea 文本域',
+        button: 'Button 按钮',
+        select: 'Select 下拉框',
+        option: 'Option 选项',
+        label: 'Label 标签',
+        img: 'Img 图片',
+        svg: 'SVG 矢量图',
+        audio: 'Audio 音频',
+        video: 'Video 视频',
+        iframe: 'Iframe 内联框架',
+        progress: 'Progress 进度条',
+        br: 'Br 换行',
+        hr: 'Hr 水平线'
+      };
+      const defaultContent = {
+        input: '<input type="text" class="preview-input" placeholder="请输入内容" disabled>',
+        button: '按钮',
+        img: '<img src="..." alt="图片" class="preview-image">',
+        select: '<select class="preview-select" disabled><option>选项1</option></select>',
+        textarea: '<textarea class="preview-textarea" placeholder="请输入内容" disabled></textarea>',
+        a: '<a href="#" class="preview-link">链接</a>',
+        audio: '<audio controls class="preview-audio"><source src="..." type="audio/mpeg"></audio>',
+        video: '<video controls class="preview-video"><source src="..." type="video/mp4"></video>',
+        iframe: '<iframe src="..." class="preview-iframe" frameborder="0"></iframe>'
+      };
+
       const isInline = inlineElements.includes(type);
+      const name = names[type] || `${type.charAt(0).toUpperCase() + type.slice(1)} 元素`;
+      const icon = icons[type] || 'fas fa-cube';
+      const content = defaultContent[type] || `${name} 内容`;
 
       return {
         type,
-        name: `${type.charAt(0).toUpperCase() + type.slice(1)} ${type === 'div' ? '容器' : ''}`,
-        icon: icons[type] || 'fas fa-cube',
+        name,
+        icon,
         inline: isInline,
-        content: type === 'input' ?
-            '<input type="text" class="preview-input" placeholder="请输入内容" disabled>' :
-            type === 'button' ? '按钮' :
-                type === 'img' ? '<img src="..." alt="图片">' :
-                    type === 'select' ? '<select class="preview-select" disabled><option>选项1</option></select>' :
-                        type === 'textarea' ? '<textarea class="preview-textarea" placeholder="请输入内容" disabled></textarea>' :
-                            `${type.charAt(0).toUpperCase() + type.slice(1)} 内容`
+        content
       };
     };
+
     const handleDragOver = (e) => {
       e.preventDefault();
       isDraggingOver.value = true;
@@ -747,6 +1016,7 @@ input[input_3456]: { type: "text"; placeholder: "请输入内容"; style-padding
 </script>
 
 <style>
+
 :root {
   --primary-color: #ff8326;
   --secondary-color: #f5f5f5;
@@ -778,55 +1048,94 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 20px;
+  padding: 6px 16px;
   background-color: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   z-index: 100;
+  min-height: 48px;
+  max-height: 48px;
+  flex-shrink: 0;
 }
 
 .mobile-menu-toggle {
   display: none;
   background: none;
   border: none;
-  font-size: 1.2rem;
+  font-size: 1rem;
   cursor: pointer;
   color: var(--text-color);
+  padding: 4px;
+  margin-right: 8px;
 }
 
 .logo {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   font-weight: bold;
-  font-size: 1.2rem;
+  font-size: 1rem;
   color: var(--primary-color);
+  flex-shrink: 0;
 }
 
 .logo i {
   font-size: 1.5rem;
 }
-
-.action-btn {
-  background: none;
-  border: none;
-  padding: 8px 12px;
+.header-main-actions {
   display: flex;
   align-items: center;
-  gap: 5px;
-  cursor: pointer;
-  border-radius: 4px;
-  transition: background-color 0.2s;
+  gap: 4px;
+  flex: 1;
+  justify-content: center;
+  max-width: 400px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding: 0 8px;
 }
-
+.header-secondary-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background-color: white;
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+  height: 28px;
+}
+.action-btn.compact {
+  padding: 4px 6px;
+  width: 28px;
+  justify-content: center;
+}
 .action-btn:hover {
   background-color: var(--secondary-color);
+  border-color: var(--primary-color);
+}
+.action-btn i {
+  font-size: 0.9rem;
 }
 
 .user-profile {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 0 10px;
+  gap: 6px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  flex-shrink: 0;
+  height: 28px;
 }
 
 .user-avatar {
@@ -840,14 +1149,12 @@ body {
   color: white;
 }
 
-/* 主内容区 */
 .main-content {
   display: flex;
   flex: 1;
   overflow: hidden;
 }
 
-/* 侧边栏 */
 .sidebar {
   width: 250px;
   background-color: white;
@@ -860,125 +1167,7 @@ body {
   padding: 15px 0;
   border-bottom: 1px solid var(--border-color);
 }
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 16px;
-  background-color: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  z-index: 100;
-  gap: 12px;
-  min-height: 56px;
-  flex-wrap: nowrap;
-  overflow: hidden;
-}
-/* Logo 样式 */
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 1.1rem;
-  font-weight: bold;
-  color: var(--primary-color);
-  flex-shrink: 0;
-  white-space: nowrap;
-}
 
-.logo i {
-  font-size: 1.3rem;
-}
-
-/* 主要操作按钮组 */
-.header-main-actions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex: 1;
-  justify-content: center;
-  max-width: 400px;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-}
-
-/* 次要操作按钮组 */
-.header-secondary-actions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
-  white-space: nowrap;
-}
-
-/* 操作按钮优化 */
-.action-btn {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 6px 10px;
-  background-color: white;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-size: 0.85rem;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.action-btn.compact {
-  padding: 6px 8px;
-}
-
-.action-btn:hover {
-  background-color: var(--secondary-color);
-  border-color: var(--primary-color);
-}
-
-/* 用户信息优化 */
-.user-profile {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  flex-shrink: 0;
-}
-
-.user-profile.compact .username {
-  display: inline;
-}
-
-.user-profile:hover {
-  background-color: var(--secondary-color);
-}
-
-.user-avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background-color: var(--primary-color);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 0.8rem;
-  flex-shrink: 0;
-}
-
-/* 移动端菜单 */
-.mobile-menu-toggle {
-  display: none;
-  background: none;
-  border: none;
-  font-size: 1.1rem;
-  cursor: pointer;
-  color: var(--text-color);
-  padding: 6px;
-  flex-shrink: 0;
-}
 .menu-section-title {
   padding: 0 15px 10px;
   font-weight: bold;
@@ -1009,7 +1198,6 @@ body {
   color: var(--primary-color);
 }
 
-/* 工作区 */
 .workspace {
   flex: 1;
   display: flex;
@@ -1040,7 +1228,6 @@ body {
   gap: 10px;
 }
 
-/* 画布区域 - 改进布局 */
 .canvas-container {
   flex: 1;
   padding: 20px;
@@ -1056,13 +1243,11 @@ body {
   transition: all 0.2s;
 }
 
-/* 拖拽悬停效果 */
 .canvas-drag-area.dragover {
   border-color: var(--primary-color);
   background-color: rgba(255, 131, 38, 0.1);
 }
 
-/* 网格布局 */
 .canvas-drag-area.grid-layout {
   display: flex;
   flex-wrap: wrap;
@@ -1085,14 +1270,12 @@ body {
   box-shadow: 0 0 0 2px rgba(255, 131, 38, 0.2);
 }
 
-/* 内联组件样式 */
 .canvas-component.inline-component {
   display: inline-block;
   vertical-align: top;
   min-width: 100px;
 }
 
-/* 块级组件样式 */
 .canvas-component:not(.inline-component) {
   width: 100%;
 }
@@ -1145,69 +1328,6 @@ body {
   overflow: hidden;
 }
 
-/* 预览元素样式 */
-.preview-button {
-  padding: 8px 16px;
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  width: 100%;
-}
-
-.preview-input {
-  padding: 8px;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  width: 100%;
-}
-
-.preview-select {
-  padding: 8px;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  width: 100%;
-}
-
-.preview-textarea {
-  padding: 8px;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  width: 100%;
-  min-height: 80px;
-  resize: vertical;
-}
-
-.preview-image {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  color: #666;
-}
-
-.preview-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.preview-table th,
-.preview-table td {
-  border: 1px solid #ddd;
-  padding: 4px 8px;
-  text-align: left;
-}
-
-.preview-list {
-  width: 100%;
-}
-
-.list-item {
-  padding: 4px 0;
-}
-
-/* 属性面板 */
 .properties-panel {
   width: 300px;
   background-color: white;
@@ -1312,7 +1432,6 @@ body {
   background-color: var(--secondary-color);
 }
 
-/* 模态框 */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -1439,7 +1558,6 @@ body {
   padding: 5px;
 }
 
-/* 响应式设计 */
 @media (max-width: 1024px) {
   .properties-panel {
     width: 250px;
@@ -1497,6 +1615,7 @@ body {
     width: 100%;
     justify-content: space-between;
   }
+
   .canvas-drag-area.grid-layout {
     gap: 8px;
   }
