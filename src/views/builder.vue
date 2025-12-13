@@ -1,6 +1,5 @@
 <template>
   <div class="container">
-    <!-- 头部保持不变 -->
     <header class="header">
       <button class="mobile-menu-toggle" @click="toggleSidebar">
         <i class="fas fa-bars"></i>
@@ -40,20 +39,18 @@
     </header>
 
     <div class="main-content">
-      <!-- 侧边栏 -->
       <aside class="sidebar" :class="{ active: sidebarActive }">
-        <!-- 侧边栏内容保持不变 -->
         <div class="menu-section">
           <div class="menu-section-title text-align-left">布局元素</div>
-          <div class="menu-item" v-draggable="draggableOptions('row')">
+          <div class="menu-item" draggable="true" @dragstart="handleDragStart($event, 'row')">
             <i class="fas fa-grip-horizontal"></i>
             <span>行容器 (Row)</span>
           </div>
-          <div class="menu-item" v-draggable="draggableOptions('col')">
+          <div class="menu-item" draggable="true" @dragstart="handleDragStart($event, 'col')">
             <i class="fas fa-columns"></i>
             <span>列容器 (Col)</span>
           </div>
-          <div class="menu-item" v-draggable="draggableOptions('grid')">
+          <div class="menu-item" draggable="true" @dragstart="handleDragStart($event, 'grid')">
             <i class="fas fa-th"></i>
             <span>网格容器 (Grid)</span>
           </div>
@@ -61,15 +58,15 @@
 
         <div class="menu-section">
           <div class="menu-section-title text-align-left">内容元素</div>
-          <div class="menu-item" v-draggable="draggableOptions('card')">
+          <div class="menu-item" draggable="true" @dragstart="handleDragStart($event, 'card')">
             <i class="fas fa-square"></i>
             <span>卡片 (Card)</span>
           </div>
-          <div class="menu-item" v-draggable="draggableOptions('panel')">
+          <div class="menu-item" draggable="true" @dragstart="handleDragStart($event, 'panel')">
             <i class="fas fa-window-maximize"></i>
             <span>面板 (Panel)</span>
           </div>
-          <div class="menu-item" v-draggable="draggableOptions('widget')">
+          <div class="menu-item" draggable="true" @dragstart="handleDragStart($event, 'widget')">
             <i class="fas fa-cube"></i>
             <span>组件 (Widget)</span>
           </div>
@@ -77,27 +74,27 @@
 
         <div class="menu-section">
           <div class="menu-section-title text-align-left">基础元素</div>
-          <div class="menu-item" v-draggable="draggableOptions('text')">
+          <div class="menu-item" draggable="true" @dragstart="handleDragStart($event, 'text')">
             <i class="fas fa-font"></i>
             <span>文本 (Text)</span>
           </div>
-          <div class="menu-item" v-draggable="draggableOptions('button')">
+          <div class="menu-item" draggable="true" @dragstart="handleDragStart($event, 'button')">
             <i class="fas fa-hand-pointer"></i>
             <span>按钮 (Button)</span>
           </div>
-          <div class="menu-item" v-draggable="draggableOptions('input')">
+          <div class="menu-item" draggable="true" @dragstart="handleDragStart($event, 'input')">
             <i class="fas fa-edit"></i>
             <span>输入框 (Input)</span>
           </div>
-          <div class="menu-item" v-draggable="draggableOptions('select')">
+          <div class="menu-item" draggable="true" @dragstart="handleDragStart($event, 'select')">
             <i class="fas fa-caret-square-down"></i>
             <span>下拉框 (Select)</span>
           </div>
-          <div class="menu-item" v-draggable="draggableOptions('table')">
+          <div class="menu-item" draggable="true" @dragstart="handleDragStart($event, 'table')">
             <i class="fas fa-table"></i>
             <span>表格 (Table)</span>
           </div>
-          <div class="menu-item" v-draggable="draggableOptions('chart')">
+          <div class="menu-item" draggable="true" @dragstart="handleDragStart($event, 'chart')">
             <i class="fas fa-chart-bar"></i>
             <span>图表 (Chart)</span>
           </div>
@@ -140,7 +137,6 @@
         </div>
       </aside>
 
-      <!-- 工作区 -->
       <div class="workspace">
         <div class="workspace-header">
           <div>
@@ -171,7 +167,6 @@
             'dragover': isDraggingOver,
             'show-grid': showGridLines
           }">
-            <!-- 布局容器渲染 -->
             <template v-if="layoutContainers.length > 0">
               <div
                   v-for="container in layoutContainers"
@@ -202,7 +197,6 @@
                   </div>
                 </div>
 
-                <!-- 容器内组件 -->
                 <div class="container-content" :class="container.config.display">
                   <div
                       v-for="component in getComponentsInContainer(container.id)"
@@ -231,7 +225,6 @@
                     <div class="component-content" v-html="renderComponentContent(component)"></div>
                   </div>
 
-                  <!-- 空容器提示 -->
                   <div v-if="getComponentsInContainer(container.id).length === 0" class="empty-container-hint">
                     <i class="fas fa-plus-circle"></i>
                     <p>拖放组件到此区域</p>
@@ -239,8 +232,6 @@
                 </div>
               </div>
             </template>
-
-            <!-- 无容器时的组件 -->
             <template v-else>
               <div
                   v-for="component in components.filter(c => !c.containerId)"
@@ -270,8 +261,6 @@
                 <div class="component-content" v-html="renderComponentContent(component)"></div>
               </div>
             </template>
-
-            <!-- 空画布提示 -->
             <div v-if="layoutContainers.length === 0 && components.length === 0" class="empty-canvas-hint">
               <i class="fas fa-magic"></i>
               <h3>开始创建您的报表</h3>
@@ -284,7 +273,6 @@
         </div>
       </div>
 
-      <!-- 属性面板 -->
       <div class="properties-panel active" :class="{ active: propertiesPanelActive }">
         <div class="panel-title">
           <i class="fas fa-sliders-h"></i>
@@ -310,7 +298,6 @@
         </div>
 
         <div class="tab-content" v-if="selectedComponent">
-          <!-- 布局设置 -->
           <div v-if="activeTab === 'layout'">
             <div class="setting-group">
               <div class="setting-title">尺寸设置</div>
@@ -414,7 +401,6 @@
             </div>
           </div>
 
-          <!-- 样式设置 -->
           <div v-if="activeTab === 'style'">
             <div class="setting-group">
               <div class="setting-title">文字样式</div>
@@ -564,7 +550,6 @@
             </div>
           </div>
 
-          <!-- 内容设置 -->
           <div v-if="activeTab === 'content'">
             <div class="setting-group">
               <div class="setting-title">内容编辑</div>
@@ -612,7 +597,6 @@
             </div>
           </div>
 
-          <!-- 高级设置 -->
           <div v-if="activeTab === 'advanced'">
             <div class="setting-group">
               <div class="setting-title">响应式设置</div>
@@ -644,15 +628,12 @@
 
               <div class="setting-item">
                 <label>自定义样式</label>
-                <textarea class="form-control" rows="6"
-                          v-model="selectedComponent.config.customCss"
-                          placeholder="输入自定义CSS样式"></textarea>
+                <textarea class="form-control" rows="6" v-model="selectedComponent.config.customCss" placeholder="输入自定义CSS样式"></textarea>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- 无选中组件时的提示 -->
         <div v-else class="no-selection">
           <i class="fas fa-mouse-pointer"></i>
           <p>点击画布中的元素进行编辑</p>
@@ -660,7 +641,6 @@
       </div>
     </div>
 
-    <!-- HTML编辑器模态框 -->
     <div class="modal-overlay" :class="{ active: activeModal === 'HTML编辑器' }" @click="closeModal">
       <div class="modal large-modal" @click.stop>
         <div class="modal-header">
@@ -695,26 +675,8 @@
 <script>
 import { defineComponent, ref, computed, watch } from 'vue';
 
-const draggable = {
-  mounted(el, binding) {
-    el.draggable = true;
-    el.addEventListener('dragstart', (e) => {
-      e.dataTransfer.setData('text/plain', JSON.stringify(binding.value));
-      el.classList.add('dragging');
-    });
-
-    el.addEventListener('dragend', () => {
-      el.classList.remove('dragging');
-    });
-  }
-};
-
 export default defineComponent({
-  directives: {
-    draggable
-  },
   setup() {
-    // 响应式数据
     const sidebarActive = ref(false);
     const propertiesPanelActive = ref(true);
     const activeTab = ref('layout');
@@ -725,8 +687,8 @@ export default defineComponent({
     const isDraggingOver = ref(false);
     const currentBreakpoint = ref('desktop');
     const htmlEditorContent = ref('');
+    const draggingElementType = ref('');
 
-    // 布局容器
     const layoutContainers = ref([
       {
         id: 'row_1',
@@ -771,7 +733,6 @@ export default defineComponent({
       }
     ]);
 
-    // 组件数据
     const components = ref([
       {
         id: 'text_1',
@@ -847,14 +808,10 @@ export default defineComponent({
         }
       }
     ]);
-
-    // 计算属性
     const selectedComponent = computed(() => {
       const allItems = [...layoutContainers.value, ...components.value];
       return allItems.find(item => item.id === selectedComponentId.value) || null;
     });
-
-    // 方法
     const getComponentsInContainer = (containerId) => {
       return components.value.filter(component => component.containerId === containerId);
     };
@@ -862,7 +819,6 @@ export default defineComponent({
     const getContainerStyle = (container) => {
       const config = container.config;
       const responsiveConfig = config.responsive[currentBreakpoint.value];
-
       let style = {
         width: config.width.value + config.width.unit,
         height: config.height.value + (config.height.unit === 'auto' ? '' : config.height.unit),
@@ -927,7 +883,6 @@ export default defineComponent({
         'box-shadow': config.boxShadow
       };
 
-      // 添加响应式样式
       if (responsiveConfig && responsiveConfig.css) {
         const responsiveStyles = responsiveConfig.css.split(';').reduce((acc, rule) => {
           const [prop, value] = rule.split(':').map(s => s.trim());
@@ -936,11 +891,8 @@ export default defineComponent({
           }
           return acc;
         }, {});
-
         style = { ...style, ...responsiveStyles };
       }
-
-      // 添加自定义CSS
       if (config.customCss) {
         const customStyles = config.customCss.split(';').reduce((acc, rule) => {
           const [prop, value] = rule.split(':').map(s => s.trim());
@@ -975,37 +927,24 @@ export default defineComponent({
                   <option>选项1</option>
                   <option>选项2</option>
                 </select>`;
+      } else if (component.type === 'table') {
+        return `<div class="table-placeholder">
+                  <i class="fas fa-table"></i>
+                  <span>${component.content}</span>
+                </div>`;
       }
       return component.content;
     };
 
-    // 拖拽相关方法
-    const draggableOptions = (type) => {
-      const elementTypes = {
-        row: { name: '行容器', icon: 'fas fa-grip-horizontal' },
-        col: { name: '列容器', icon: 'fas fa-columns' },
-        grid: { name: '网格容器', icon: 'fas fa-th' },
-        card: { name: '卡片', icon: 'fas fa-square' },
-        panel: { name: '面板', icon: 'fas fa-window-maximize' },
-        widget: { name: '组件', icon: 'fas fa-cube' },
-        text: { name: '文本', icon: 'fas fa-font' },
-        button: { name: '按钮', icon: 'fas fa-hand-pointer' },
-        input: { name: '输入框', icon: 'fas fa-edit' },
-        select: { name: '下拉框', icon: 'fas fa-caret-square-down' },
-        table: { name: '表格', icon: 'fas fa-table' },
-        chart: { name: '图表', icon: 'fas fa-chart-bar' }
-      };
-
-      const elementType = elementTypes[type] || { name: `${type}元素`, icon: 'fas fa-cube' };
-      const isInline = ['button', 'input', 'text'].includes(type);
-
-      return {
-        type,
-        name: elementType.name,
-        icon: elementType.icon,
-        inline: isInline,
-        isContainer: ['row', 'col', 'grid', 'card', 'panel'].includes(type)
-      };
+    const handleDragStart = (event, elementType) => {
+      draggingElementType.value = elementType;
+      event.dataTransfer.setData('text/plain', elementType);
+      event.dataTransfer.effectAllowed = 'copy';
+      const element = event.target;
+      element.classList.add('dragging');
+      setTimeout(() => {
+        element.classList.remove('dragging');
+      }, 0);
     };
 
     const handleDragOver = (e) => {
@@ -1023,90 +962,121 @@ export default defineComponent({
       e.stopPropagation();
       isDraggingOver.value = false;
 
-      try {
-        const data = JSON.parse(e.dataTransfer.getData('text/plain'));
-        const newId = `${data.type}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+      const elementType = draggingElementType.value || e.dataTransfer.getData('text/plain');
 
-        if (data.isContainer) {
-          // 创建容器
-          const containerConfig = {
-            width: { value: data.type === 'col' ? 50 : 100, unit: '%' },
-            height: { value: data.type === 'col' ? 'auto' : 200, unit: data.type === 'col' ? 'auto' : 'px' },
-            display: data.type === 'row' ? 'flex' : 'block',
-            flexDirection: 'row',
-            margin: { top: '10px', right: '0', bottom: '10px', left: '0' },
-            padding: { top: '20px', right: '20px', bottom: '20px', left: '20px' },
-            backgroundColor: data.type === 'col' ? '#f8f9fa' : '#ffffff',
-            columns: 2,
-            responsive: {
-              desktop: { className: '', css: '' },
-              tablet: { className: '', css: '' },
-              mobile: { className: '', css: '' }
-            }
-          };
+      if (!elementType) return;
 
-          layoutContainers.value.push({
-            id: newId,
-            type: data.type,
-            name: data.name,
-            icon: data.icon,
-            config: containerConfig
-          });
-        } else {
-          // 创建组件
-          const componentConfig = {
-            width: { value: data.inline ? 'auto' : 100, unit: data.inline ? 'auto' : '%' },
-            height: { value: data.type === 'button' ? 40 : 'auto', unit: 'px' },
-            display: data.inline ? 'inline-block' : 'block',
-            fontSize: data.type === 'text' ? '16px' : '14px',
-            fontWeight: 'normal',
-            fontFamily: '',
-            color: data.type === 'button' ? '#ffffff' : '#333333',
-            textAlign: 'left',
-            lineHeight: '1.5',
-            margin: { top: '0', right: data.inline ? '10px' : '0', bottom: '0', left: '0' },
-            padding: { top: data.type === 'button' ? '0' : '10px',
-              right: data.type === 'button' ? '20px' : '10px',
-              bottom: data.type === 'button' ? '0' : '10px',
-              left: data.type === 'button' ? '20px' : '10px' },
-            backgroundColor: data.type === 'button' ? '#ff8326' : 'transparent',
-            backgroundImage: '',
-            backgroundSize: 'cover',
-            borderWidth: '0',
-            borderStyle: 'solid',
-            borderColor: '#dddddd',
-            borderRadius: data.type === 'button' ? '4px' : '0',
-            boxShadow: data.type === 'button' ? '0 2px 4px rgba(255,131,38,0.3)' : 'none',
-            placeholder: '',
-            buttonType: 'button',
-            inputType: 'text',
-            chartType: 'bar',
-            customCss: '',
-            responsive: {
-              desktop: { className: '', css: '' },
-              tablet: { className: '', css: '' },
-              mobile: { className: '', css: '' }
-            }
-          };
+      const newId = `${elementType}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+      const elementTypes = {
+        row: { name: '行容器', icon: 'fas fa-grip-horizontal', isContainer: true },
+        col: { name: '列容器', icon: 'fas fa-columns', isContainer: true },
+        grid: { name: '网格容器', icon: 'fas fa-th', isContainer: true },
+        card: { name: '卡片', icon: 'fas fa-square', isContainer: true },
+        panel: { name: '面板', icon: 'fas fa-window-maximize', isContainer: true },
+        widget: { name: '组件', icon: 'fas fa-cube', isContainer: false },
+        text: { name: '文本', icon: 'fas fa-font', isContainer: false },
+        button: { name: '按钮', icon: 'fas fa-hand-pointer', isContainer: false },
+        input: { name: '输入框', icon: 'fas fa-edit', isContainer: false },
+        select: { name: '下拉框', icon: 'fas fa-caret-square-down', isContainer: false },
+        table: { name: '表格', icon: 'fas fa-table', isContainer: false },
+        chart: { name: '图表', icon: 'fas fa-chart-bar', isContainer: false }
+      };
 
-          components.value.push({
-            id: newId,
-            type: data.type,
-            name: data.name,
-            icon: data.icon,
-            content: data.name,
-            inline: data.inline,
-            config: componentConfig
-          });
-        }
+      const elementInfo = elementTypes[elementType] || {
+        name: `${elementType}元素`,
+        icon: 'fas fa-cube',
+        isContainer: false
+      };
 
-        selectComponent(newId);
-      } catch (error) {
-        console.error('拖拽数据解析失败:', error);
+      const isInline = ['button', 'input'].includes(elementType);
+
+      if (elementInfo.isContainer) {
+        const containerConfig = {
+          width: { value: elementType === 'col' ? 50 : 100, unit: '%' },
+          height: { value: elementType === 'col' ? 'auto' : 200, unit: elementType === 'col' ? 'auto' : 'px' },
+          display: elementType === 'row' ? 'flex' : elementType === 'grid' ? 'grid' : 'block',
+          flexDirection: 'row',
+          margin: { top: '10px', right: '0', bottom: '10px', left: '0' },
+          padding: { top: '20px', right: '20px', bottom: '20px', left: '20px' },
+          backgroundColor: elementType === 'col' ? '#f8f9fa' : '#ffffff',
+          columns: elementType === 'grid' ? 3 : 2,
+          responsive: {
+            desktop: { className: '', css: '' },
+            tablet: { className: '', css: '' },
+            mobile: { className: '', css: '' }
+          }
+        };
+
+        layoutContainers.value.push({
+          id: newId,
+          type: elementType,
+          name: elementInfo.name,
+          icon: elementInfo.icon,
+          config: containerConfig
+        });
+
+        console.log('创建容器:', elementType, newId);
+      } else {
+        const contentMap = {
+          text: '文本内容',
+          button: '按钮',
+          input: '输入框',
+          select: '下拉框',
+          table: '表格数据',
+          chart: '图表'
+        };
+
+        const componentConfig = {
+          width: { value: isInline ? 'auto' : 100, unit: isInline ? 'auto' : '%' },
+          height: { value: elementType === 'button' ? 40 : elementType === 'input' ? 35 : 'auto', unit: 'px' },
+          display: isInline ? 'inline-block' : 'block',
+          fontSize: elementType === 'text' ? '16px' : '14px',
+          fontWeight: 'normal',
+          fontFamily: '',
+          color: elementType === 'button' ? '#ffffff' : '#333333',
+          textAlign: 'left',
+          lineHeight: elementType === 'button' ? '40px' : '1.5',
+          margin: { top: '0', right: isInline ? '10px' : '0', bottom: '0', left: '0' },
+          padding: { top: elementType === 'button' ? '0' : elementType === 'input' ? '8px' : '10px',
+            right: elementType === 'button' ? '20px' : elementType === 'input' ? '12px' : '10px',
+            bottom: elementType === 'button' ? '0' : elementType === 'input' ? '8px' : '10px',
+            left: elementType === 'button' ? '20px' : elementType === 'input' ? '12px' : '10px' },
+          backgroundColor: elementType === 'button' ? '#ff8326' : 'transparent',
+          backgroundImage: '',
+          backgroundSize: 'cover',
+          borderWidth: elementType === 'input' ? '1px' : '0',
+          borderStyle: 'solid',
+          borderColor: elementType === 'input' ? '#dddddd' : '#ff8326',
+          borderRadius: elementType === 'button' ? '4px' : elementType === 'input' ? '4px' : '0',
+          boxShadow: elementType === 'button' ? '0 2px 4px rgba(255,131,38,0.3)' : 'none',
+          placeholder: elementType === 'input' ? '请输入内容' : '',
+          buttonType: 'button',
+          inputType: 'text',
+          chartType: 'bar',
+          customCss: '',
+          responsive: {
+            desktop: { className: '', css: '' },
+            tablet: { className: '', css: '' },
+            mobile: { className: '', css: '' }
+          }
+        };
+
+        components.value.push({
+          id: newId,
+          type: elementType,
+          name: elementInfo.name,
+          icon: elementInfo.icon,
+          content: contentMap[elementType] || elementInfo.name,
+          inline: isInline,
+          config: componentConfig
+        });
+
+        console.log('创建组件:', elementType, newId);
       }
-    };
 
-    // 布局预设
+      selectComponent(newId);
+      draggingElementType.value = '';
+    };
     const applyLayoutPreset = (presetType) => {
       layoutContainers.value = [];
       components.value = [];
@@ -1235,8 +1205,6 @@ export default defineComponent({
 
       selectedComponentId.value = layoutContainers.value.length > 0 ? layoutContainers.value[0].id : '';
     };
-
-    // 其他方法
     const toggleSidebar = () => {
       sidebarActive.value = !sidebarActive.value;
     };
@@ -1262,13 +1230,11 @@ export default defineComponent({
     };
 
     const deleteContainer = (id) => {
-      // 删除容器及其内部组件
       components.value = components.value.filter(c => c.containerId !== id);
       layoutContainers.value = layoutContainers.value.filter(c => c.id !== id);
 
       if (selectedComponentId.value === id) {
-        selectedComponentId.value = layoutContainers.value.length > 0 ? layoutContainers.value[0].id :
-            components.value.length > 0 ? components.value[0].id : '';
+        selectedComponentId.value = layoutContainers.value.length > 0 ? layoutContainers.value[0].id : components.value.length > 0 ? components.value[0].id : '';
       }
     };
 
@@ -1303,7 +1269,6 @@ export default defineComponent({
     };
 
     const generateHtml = () => {
-      // 简化的HTML生成逻辑
       return `
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -1343,11 +1308,9 @@ export default defineComponent({
         `).join('\n')}
 
         @media (max-width: 1199px) {
-            /* 平板样式 */
         }
 
         @media (max-width: 767px) {
-            /* 手机样式 */
         }
     </style>
 </head>
@@ -1365,7 +1328,6 @@ export default defineComponent({
 </html>`;
     };
 
-    // 模态框相关方法
     const openHtmlEditor = () => {
       htmlEditorContent.value = generateHtml();
       activeModal.value = 'HTML编辑器';
@@ -1393,14 +1355,11 @@ export default defineComponent({
       alert('应用功能待实现');
       closeModal();
     };
-
-    // 监听响应式断点变化
     watch(currentBreakpoint, (newValue) => {
       console.log('切换到断点:', newValue);
     });
 
     return {
-      // 状态
       sidebarActive,
       propertiesPanelActive,
       activeTab,
@@ -1411,15 +1370,10 @@ export default defineComponent({
       isDraggingOver,
       currentBreakpoint,
       htmlEditorContent,
-
-      // 数据
       layoutContainers,
       components,
-
-      // 计算属性
       selectedComponent,
-
-      // 方法
+      handleDragStart,
       toggleSidebar,
       toggleGridLines,
       selectComponent,
@@ -1442,7 +1396,6 @@ export default defineComponent({
       importHtml,
       clearHtml,
       applyHtml,
-      draggableOptions,
       handleDragOver,
       handleDragLeave,
       handleDrop
@@ -1452,7 +1405,6 @@ export default defineComponent({
 </script>
 
 <style>
-/* 扩展样式 */
 .layout-controls {
   display: flex;
   gap: 10px;
@@ -1637,8 +1589,6 @@ export default defineComponent({
   margin-bottom: 20px;
   color: #999;
 }
-
-/* 属性面板扩展 */
 .range-input {
   display: flex;
   gap: 8px;
@@ -1735,16 +1685,16 @@ export default defineComponent({
   margin-bottom: 15px;
   color: #ddd;
 }
-
-/* 网格线 */
 .canvas-drag-area.show-grid {
   background-image:
       linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
       linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
   background-size: 20px 20px;
 }
-
-/* 响应式样式 */
+.menu-item.dragging {
+  opacity: 0.5;
+  background-color: rgba(255, 131, 38, 0.1);
+}
 @media (max-width: 768px) {
   .layout-presets {
     grid-template-columns: 1fr;
@@ -1760,7 +1710,6 @@ export default defineComponent({
   }
 }
 
-/* 原有的样式保持不变 */
 :root {
   --primary-color: #ff8326;
   --secondary-color: #f5f5f5;
@@ -1932,6 +1881,7 @@ body {
   padding: 10px 15px;
   cursor: pointer;
   transition: background-color 0.2s;
+  user-select: none;
 }
 
 .menu-item:hover {
