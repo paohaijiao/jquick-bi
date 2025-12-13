@@ -1497,8 +1497,6 @@ body {
     width: 100%;
     justify-content: space-between;
   }
-
-  /* 移动端布局调整 */
   .canvas-drag-area.grid-layout {
     gap: 8px;
   }
