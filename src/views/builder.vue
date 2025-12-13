@@ -11,7 +11,7 @@
 
       <div class="header-actions">
         <div class="search-box">
-          <i class="fas fa-search"></i>
+          <el-icon><Search /></el-icon>
           <input placeholder="搜索报表、数据源或文档..." type="text">
         </div>
 
@@ -2907,8 +2907,12 @@ body {
   display: flex;
   border-bottom: 1px solid var(--border-color);
   background: #fafafa;
+  flex-wrap: nowrap;
 }
-
+.panel-tabs > * {
+  flex-shrink: 0;
+  min-width: fit-content;
+}
 .tab-item {
   flex: 1;
   padding: 12px;
