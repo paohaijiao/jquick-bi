@@ -953,17 +953,41 @@ export default defineComponent({
 
     const selectedComponent = computed(() => {
       const allItems = [...layoutContainers.value, ...components.value];
-      layoutContainers.value.forEach(container => {
-        if (container.type === 'grid' && container.config.cells) {
-          container.config.cells.forEach(cell => {
-            if (cell.id === selectedComponentId.value) {
-              allItems.push(cell);
+      let selectedItem = allItems.find(item => item.id === selectedComponentId.value);
+      if (!selectedItem) {
+        layoutContainers.value.forEach(container => {
+          if (container.type === 'grid' && container.config.cells) {
+            const cell = container.config.cells.find(c => c.id === selectedComponentId.value);
+            if (cell) {
+              selectedItem = {
+                ...cell,
+                type: 'grid-cell',
+                name: `网格单元格 (${cell.row},${cell.col})`,
+                icon: 'fas fa-th',
+                config: {
+                  width: { value: 100, unit: '%' },
+                  height: { value: 'auto', unit: 'auto' },
+                  display: 'block',
+                  margin: { top: '0', right: '0', bottom: '0', left: '0' },
+                  padding: { top: '0', right: '0', bottom: '0', left: '0' },
+                  backgroundColor: 'transparent',
+                  rowSpan: cell.rowSpan || 1,
+                  colSpan: cell.colSpan || 1,
+                  responsive: {
+                    desktop: { className: '', css: '' },
+                    tablet: { className: '', css: '' },
+                    mobile: { className: '', css: '' }
+                  }
+                }
+              };
             }
-          });
-        }
-      });
-      return allItems.find(item => item.id === selectedComponentId.value) || null;
+          }
+        });
+      }
+
+      return selectedItem || null;
     });
+
 
     const getComponentsInContainer = (containerId) => {
       if (!components.value) return [];
