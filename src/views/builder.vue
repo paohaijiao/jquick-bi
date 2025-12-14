@@ -146,7 +146,7 @@
       <div class="workspace">
         <div class="page-header">
           <div>
-            <h1 class="page-title">报表设计器</h1>
+            <h1 class="page-title text-align-left">报表设计器</h1>
             <p class="page-description">拖放元素到画布中创建页面，支持响应式布局</p>
           </div>
           <div class="layout-controls">
@@ -1259,13 +1259,13 @@ export default defineComponent({
       draggingElementType.value = domType;
       event.dataTransfer.setData('text/plain', domType);
       event.dataTransfer.effectAllowed = 'copy';
-
       event.target.classList.add('dragging');
       setTimeout(() => {
         event.target.classList.remove('dragging');
       }, 0);
     };
     const handleGridCellDragOver = (e, cellId) => {
+      console.log(cellId);
       e.preventDefault();
       e.stopPropagation();
       e.dataTransfer.dropEffect = 'copy';
@@ -1277,6 +1277,7 @@ export default defineComponent({
     };
 
     const handleGridCellDragLeave = (e, cellId) => {
+      console.log(cellId);
       e.preventDefault();
       e.stopPropagation();
 
@@ -1883,63 +1884,7 @@ export default defineComponent({
     };
 
     const generateHtml = () => {
-      return `
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JQuick BI 报表</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        ${layoutContainers.value.map(container => `
-        .${container.id} {
-            width: ${container.config.width.value}${container.config.width.unit};
-            height: ${container.config.height.value}${container.config.height.unit};
-            display: ${container.config.display};
-            margin: ${container.config.margin.top} ${container.config.margin.right} ${container.config.margin.bottom} ${container.config.margin.left};
-            padding: ${container.config.padding.top} ${container.config.padding.right} ${container.config.padding.bottom} ${container.config.padding.left};
-            background-color: ${container.config.backgroundColor};
-            flex-direction: ${container.config.flexDirection || 'row'};
-        }
-        `).join('\n')}
-
-        ${components.value.map(component => `
-        .${component.id} {
-            width: ${component.config.width.value}${component.config.width.unit};
-            height: ${component.config.height.value}${component.config.height.unit};
-            display: ${component.config.display};
-            font-size: ${component.config.fontSize}px;
-            color: ${component.config.color};
-            background-color: ${component.config.backgroundColor};
-            margin: ${component.config.margin.top} ${component.config.margin.right} ${component.config.margin.bottom} ${component.config.margin.left};
-            padding: ${component.config.padding.top} ${component.config.padding.right} ${component.config.padding.bottom} ${component.config.padding.left};
-            border-radius: ${component.config.borderRadius}px;
-            ${component.config.customCss}
-        }
-        `).join('\n')}
-
-        @media (max-width: 1199px) {
-        }
-
-        @media (max-width: 767px) {
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        ${layoutContainers.value.map(container => `
-        <div class="${container.id}">
-            ${getComponentsInContainer(container.id).map(component => `
-            <div class="${component.id}">${component.content}</div>
-            `).join('')}
-        </div>
-        `).join('')}
-    </div>
-</body>
-</html>`;
+      return `template html`;
     };
 
     const openHtmlEditor = () => {
@@ -1953,7 +1898,6 @@ export default defineComponent({
 
     const parseHtml = () => {
       console.log('解析HTML:', htmlEditorContent.value);
-      alert('解析功能待实现');
     };
 
     const importHtml = () => {
@@ -1966,7 +1910,6 @@ export default defineComponent({
 
     const applyHtml = () => {
       console.log('应用HTML:', htmlEditorContent.value);
-      alert('应用功能待实现');
       closeModal();
     };
 
