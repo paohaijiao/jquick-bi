@@ -8,7 +8,6 @@
         <i class="fas fa-chart-line"></i>
         <span>JQuick BI</span>
       </div>
-
       <div class="header-actions">
         <div class="search-box">
           <el-icon><Search /></el-icon>
@@ -36,17 +35,14 @@
             <i class="far fa-bell"></i>
             <span class="notification-badge">3</span>
           </div>
-
           <button class="action-btn compact" @click="toggleGridLayout">
             <i :class="useGridLayout ? 'fas fa-th' : 'fas fa-th-large'"
                :title="useGridLayout ? '网格布局' : '自由布局'"></i>
           </button>
-
           <button class="action-btn compact" @click="toggleGridLines">
             <i :class="showGridLines ? 'fas fa-eye-slash' : 'fas fa-eye'"
                :title="showGridLines ? '隐藏网格' : '显示网格'"></i>
           </button>
-
           <div class="user-info">
             <div class="user-avatar">ZL</div>
             <span class="user-name">张磊</span>
@@ -230,7 +226,6 @@
                   </div>
                 </div>
               </div>
-
               <div v-else
                    :class="{ 'selected': selectedComponentId === container.id }"
                    :style="getGridContainerStyle(container)"
@@ -259,7 +254,6 @@
                     </button>
                   </div>
                 </div>
-
                 <div :style="getGridTemplateStyle(container)" class="grid-cells">
                   <div v-for="cell in container.config.cells"
                        :key="cell.id"
@@ -275,7 +269,6 @@
                        @drop="handleGridCellDrop($event, cell.id)"
                        @click.stop="selectComponent(cell.id)"
                        @dragover.prevent="handleGridCellDragOver($event, cell.id)">
-
                     <div v-if="!cell.merged" class="cell-header">
                       <div class="cell-info">
                         <span class="cell-position">{{ cell.row }},{{ cell.col }}</span>
@@ -294,7 +287,6 @@
                         </button>
                       </div>
                     </div>
-
                     <div class="cell-content">
                       <div v-for="component in getComponentsInGridCell(cell.id)"
                            :key="component.id"
@@ -502,7 +494,6 @@
           <div v-if="activeTab === 'style'" class="setting-panel">
             <div class="setting-group">
               <div class="setting-title">文字样式</div>
-
               <div class="setting-item">
                 <label>字体</label>
                 <select class="form-control" v-model="selectedComponent.config.fontFamily">
@@ -548,20 +539,16 @@
               <div class="setting-item">
                 <label>对齐方式</label>
                 <div class="align-buttons">
-                  <button class="align-btn" :class="{ active: selectedComponent.config.textAlign === 'left' }"
-                          @click="selectedComponent.config.textAlign = 'left'">
+                  <button class="align-btn" :class="{ active: selectedComponent.config.textAlign === 'left' }" @click="selectedComponent.config.textAlign = 'left'">
                     <i class="fas fa-align-left"></i>
                   </button>
-                  <button class="align-btn" :class="{ active: selectedComponent.config.textAlign === 'center' }"
-                          @click="selectedComponent.config.textAlign = 'center'">
+                  <button class="align-btn" :class="{ active: selectedComponent.config.textAlign === 'center' }" @click="selectedComponent.config.textAlign = 'center'">
                     <i class="fas fa-align-center"></i>
                   </button>
-                  <button class="align-btn" :class="{ active: selectedComponent.config.textAlign === 'right' }"
-                          @click="selectedComponent.config.textAlign = 'right'">
+                  <button class="align-btn" :class="{ active: selectedComponent.config.textAlign === 'right' }" @click="selectedComponent.config.textAlign = 'right'">
                     <i class="fas fa-align-right"></i>
                   </button>
-                  <button class="align-btn" :class="{ active: selectedComponent.config.textAlign === 'justify' }"
-                          @click="selectedComponent.config.textAlign = 'justify'">
+                  <button class="align-btn" :class="{ active: selectedComponent.config.textAlign === 'justify' }" @click="selectedComponent.config.textAlign = 'justify'">
                     <i class="fas fa-align-justify"></i>
                   </button>
                 </div>
@@ -578,7 +565,6 @@
 
             <div class="setting-group">
               <div class="setting-title">背景样式</div>
-
               <div class="setting-item">
                 <label>背景颜色</label>
                 <div class="color-picker">
@@ -589,8 +575,7 @@
 
               <div class="setting-item">
                 <label>背景图片</label>
-                <input type="text" class="form-control" v-model="selectedComponent.config.backgroundImage"
-                       placeholder="输入图片URL">
+                <input type="text" class="form-control" v-model="selectedComponent.config.backgroundImage" placeholder="输入图片URL">
               </div>
 
               <div v-if="selectedComponent.config.backgroundImage" class="setting-item">
@@ -615,12 +600,10 @@
 
             <div class="setting-group">
               <div class="setting-title">边框样式</div>
-
               <div class="setting-item">
                 <label>边框宽度</label>
                 <input type="text" class="form-control" v-model="selectedComponent.config.borderWidth" placeholder="1px">
               </div>
-
               <div class="setting-item">
                 <label>边框样式</label>
                 <select class="form-control" v-model="selectedComponent.config.borderStyle">
@@ -651,12 +634,10 @@
           <div v-if="activeTab === 'content'" class="setting-panel">
             <div class="setting-group">
               <div class="setting-title">内容编辑</div>
-
               <div class="setting-item">
                 <label>文本内容</label>
                 <textarea class="form-control" rows="4" v-model="selectedComponent.content"></textarea>
               </div>
-
               <div class="setting-item">
                 <label>占位文本</label>
                 <input type="text" class="form-control" v-model="selectedComponent.config.placeholder">
@@ -763,6 +744,9 @@
 </template>
 <script>
 import {computed, defineComponent, onMounted, ref, watch} from 'vue';
+import request from '../api/request';
+import {ElMessage} from "element-plus";
+
 export default defineComponent({
   setup() {
     const sidebarActive = ref(false);
@@ -779,6 +763,70 @@ export default defineComponent({
     const layoutContainers = ref([]);
     const components = ref([]);
     const containerDragStates = ref({});
+    const containerElements = ref([]);
+    const textElements = ref([]);
+    const formElements = ref([]);
+    const mediaElements = ref([]);
+    const allDomElements = ref({});
+    const initializeDomElements = async () => {
+      try {
+        request.get('/api/elements/all')
+            .then(response => {
+              if (response.code == 200) {
+                const allElements = response.data;
+                const elementMap = {};
+                allElements.forEach(element => {
+                  elementMap[element.type] = {
+                    name: element.name,
+                    icon: element.icon,
+                    isContainer: element.container,
+                    inline: element.inline || false
+                  };
+                });
+                allDomElements.value = elementMap;
+              } else {
+                ElMessage.error(`获取该连接器属性失败`);
+              }
+            });
+        request.get('/api/elements/containers')
+            .then(response => {
+              if (response.code == 200) {
+                containerElements.value = response.data;
+              } else {
+                ElMessage.error(`获取该连接器属性失败`);
+              }
+            });
+        request.get('/api/elements/text')
+            .then(response => {
+              if (response.code == 200) {
+                textElements.value = response.data;
+              } else {
+                ElMessage.error(`获取该连接器属性失败`);
+              }
+            });
+        request.get('/api/elements/form')
+            .then(response => {
+              if (response.code == 200) {
+                formElements.value = response.data;
+              } else {
+                ElMessage.error(`获取该连接器属性失败`);
+              }
+            });
+
+        request.get('/api/elements/media')
+            .then(response => {
+              if (response.code == 200) {
+                mediaElements.value = response.data;
+              } else {
+                ElMessage.error(`获取该连接器属性失败`);
+              }
+            });
+        console.log('DOM元素数据加载完成');
+      } catch (error) {
+        console.error('加载DOM元素数据失败:', error);
+      }
+    };
+
     const initializeData = () => {
       layoutContainers.value = [
         {
@@ -892,91 +940,16 @@ export default defineComponent({
           .filter(c => c.type === 'grid')
           .forEach(container => {
             if (!container.config.cells || container.config.cells.length === 0) {
-              initializeGridCells(container.id,
-                  container.config.rows || 3,
-                  container.config.columns || 3);
+              initializeGridCells(container.id, container.config.rows || 3, container.config.columns || 3);
             }
           });
     };
-    onMounted(() => {
+
+    onMounted(async () => {
+      await initializeDomElements();
       initializeData();
       initializeExistingGrids();
     });
-    const domTypeElements = {
-      div: {name: 'DIV容器', icon: 'fas fa-square', isContainer: true},
-      section: {name: '区块', icon: 'fas fa-square-full', isContainer: true},
-      header: {name: '页眉', icon: 'fas fa-heading', isContainer: true},
-      footer: {name: '页脚', icon: 'fas fa-shoe-prints', isContainer: true},
-      nav: {name: '导航', icon: 'fas fa-bars', isContainer: true},
-      aside: {name: '侧边栏', icon: 'fas fa-columns', isContainer: true},
-      main: {name: '主要内容', icon: 'fas fa-stream', isContainer: true},
-      h1: {name: '一级标题', icon: 'fas fa-heading', isContainer: false},
-      h2: {name: '二级标题', icon: 'fas fa-heading', isContainer: false},
-      h3: {name: '三级标题', icon: 'fas fa-heading', isContainer: false},
-      p: {name: '段落', icon: 'fas fa-paragraph', isContainer: false},
-      span: {name: '行内文本', icon: 'fas fa-font', isContainer: false, inline: true},
-      a: {name: '链接', icon: 'fas fa-link', isContainer: false, inline: true},
-      strong: {name: '加粗', icon: 'fas fa-bold', isContainer: false, inline: true},
-      em: {name: '强调', icon: 'fas fa-italic', isContainer: false, inline: true},
-      i: {name: '斜体', icon: 'fas fa-italic', isContainer: false, inline: true},
-      b: {name: '粗体', icon: 'fas fa-bold', isContainer: false, inline: true},
-      u: {name: '下划线', icon: 'fas fa-underline', isContainer: false, inline: true},
-
-      // 表单元素
-      form: {name: '表单', icon: 'fas fa-wpforms', isContainer: true},
-      input: {name: '输入框', icon: 'fas fa-edit', isContainer: false, inline: true},
-      textarea: {name: '文本域', icon: 'fas fa-align-left', isContainer: false},
-      button: {name: '按钮', icon: 'fas fa-hand-pointer', isContainer: false, inline: true},
-      select: {name: '下拉框', icon: 'fas fa-caret-square-down', isContainer: false},
-      label: {name: '标签', icon: 'fas fa-tag', isContainer: false, inline: true},
-
-      // 多媒体元素
-      img: {name: '图片', icon: 'fas fa-image', isContainer: false, inline: true},
-      audio: {name: '音频', icon: 'fas fa-volume-up', isContainer: false},
-      video: {name: '视频', icon: 'fas fa-video', isContainer: false},
-      iframe: {name: '内嵌框架', icon: 'fas fa-window-restore', isContainer: false},
-
-      // 列表元素
-      ul: {name: '无序列表', icon: 'fas fa-list-ul', isContainer: true},
-      ol: {name: '有序列表', icon: 'fas fa-list-ol', isContainer: true},
-      li: {name: '列表项', icon: 'fas fa-list', isContainer: false},
-
-      // 表格元素
-      table: {name: '表格', icon: 'fas fa-table', isContainer: true},
-      tr: {name: '表格行', icon: 'fas fa-grip-lines', isContainer: false},
-      th: {name: '表头', icon: 'fas fa-heading', isContainer: false},
-      td: {name: '表格数据', icon: 'fas fa-square', isContainer: false},
-
-      // 其他元素
-      br: {name: '换行', icon: 'fas fa-level-down-alt', isContainer: false, inline: true},
-      hr: {name: '水平线', icon: 'fas fa-minus', isContainer: false},
-      progress: {name: '进度条', icon: 'fas fa-tasks', isContainer: false},
-    };
-
-    // 按类别分组
-    const containerElements = computed(() =>
-        Object.entries(domTypeElements)
-            .filter(([key, value]) => value.isContainer)
-            .map(([key, value]) => ({type: key, ...value}))
-    );
-
-    const textElements = computed(() =>
-        ['h1', 'h2', 'h3', 'p', 'span', 'a', 'strong', 'em', 'i', 'b', 'u']
-            .filter(key => domTypeElements[key])
-            .map(key => ({type: key, ...domTypeElements[key]}))
-    );
-
-    const formElements = computed(() =>
-        ['form', 'input', 'textarea', 'button', 'select', 'label']
-            .filter(key => domTypeElements[key])
-            .map(key => ({type: key, ...domTypeElements[key]}))
-    );
-
-    const mediaElements = computed(() =>
-        ['img', 'audio', 'video', 'iframe']
-            .filter(key => domTypeElements[key])
-            .map(key => ({type: key, ...domTypeElements[key]}))
-    );
 
     const selectedComponent = computed(() => {
       const allItems = [...layoutContainers.value, ...components.value];
@@ -1309,16 +1282,41 @@ export default defineComponent({
       }
       createComponent(elementType, null, cellId);
     };
+
     const createComponent = (elementType, containerId = null, gridCellId = null) => {
       const newId = `${elementType}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-      const elementInfo = domTypeElements[elementType] || {
+      const elementInfo = allDomElements.value[elementType] || {
         name: `${elementType}元素`,
         icon: 'fas fa-cube',
         isContainer: false,
         inline: false
       };
-      const isDomTypeElement = domTypeElements[elementType];
-      if (isDomTypeElement) {
+
+      if (elementInfo.isContainer) {
+        const containerConfig = {
+          width: {value: 100, unit: '%'},
+          height: {value: 200, unit: 'px'},
+          display: 'block',
+          margin: {top: '10px', right: '0', bottom: '10px', left: '0'},
+          padding: {top: '20px', right: '20px', bottom: '20px', left: '20px'},
+          backgroundColor: '#ffffff',
+          responsive: {
+            desktop: {className: '', css: ''},
+            tablet: {className: '', css: 'width: 100%;'},
+            mobile: {className: '', css: 'width: 100%;'}
+          }
+        };
+
+        layoutContainers.value.push({
+          id: newId,
+          type: elementType,
+          name: elementInfo.name,
+          icon: elementInfo.icon,
+          config: containerConfig
+        });
+
+        console.log('创建容器:', elementType, newId);
+      } else {
         const contentMap = {
           h1: '一级标题',
           h2: '二级标题',
@@ -1334,7 +1332,21 @@ export default defineComponent({
           audio: '音频',
           video: '视频',
           iframe: '内嵌内容',
+          li: '列表项',
+          tr: '表格行',
+          th: '表头',
+          td: '表格数据',
+          br: '换行',
+          hr: '水平线',
+          progress: '进度条',
+          strong: '加粗文本',
+          em: '强调文本',
+          i: '斜体文本',
+          b: '粗体文本',
+          u: '下划线文本',
+          label: '标签',
         };
+
         const componentConfig = {
           width: {value: elementInfo.inline ? 'auto' : 100, unit: elementInfo.inline ? 'auto' : '%'},
           height: {value: 'auto', unit: 'auto'},
@@ -1393,128 +1405,6 @@ export default defineComponent({
         }
 
         console.log('创建组件:', elementType, newId, '容器:', containerId, '网格单元格:', gridCellId);
-      } else {
-        const elementTypes = {
-          row: {name: '行容器', icon: 'fas fa-grip-horizontal', isContainer: true},
-          col: {name: '列容器', icon: 'fas fa-columns', isContainer: true},
-          grid: {name: '网格容器', icon: 'fas fa-th', isContainer: true},
-          card: {name: '卡片', icon: 'fas fa-square', isContainer: true},
-          panel: {name: '面板', icon: 'fas fa-window-maximize', isContainer: true},
-          widget: {name: '组件', icon: 'fas fa-cube', isContainer: false},
-          text: {name: '文本', icon: 'fas fa-font', isContainer: false},
-          button: {name: '按钮', icon: 'fas fa-hand-pointer', isContainer: false},
-          input: {name: '输入框', icon: 'fas fa-edit', isContainer: false},
-          select: {name: '下拉框', icon: 'fas fa-caret-square-down', isContainer: false},
-          table: {name: '表格', icon: 'fas fa-table', isContainer: false},
-          chart: {name: '图表', icon: 'fas fa-chart-bar', isContainer: false}
-        };
-
-        const elementTypeInfo = elementTypes[elementType] || {
-          name: `${elementType}元素`,
-          icon: 'fas fa-cube',
-          isContainer: false
-        };
-
-        const isInline = ['button', 'input'].includes(elementType);
-
-        if (elementTypeInfo.isContainer) {
-          const containerConfig = {
-            width: {value: elementType === 'col' ? 50 : 100, unit: '%'},
-            height: {value: elementType === 'col' ? 'auto' : 200, unit: elementType === 'col' ? 'auto' : 'px'},
-            display: elementType === 'row' ? 'flex' : elementType === 'grid' ? 'grid' : 'block',
-            flexDirection: 'row',
-            margin: {top: '10px', right: '0', bottom: '10px', left: '0'},
-            padding: {top: '20px', right: '20px', bottom: '20px', left: '20px'},
-            backgroundColor: elementType === 'col' ? '#f8f9fa' : '#ffffff',
-            columns: elementType === 'grid' ? 3 : 2,
-            responsive: {
-              desktop: {className: '', css: ''},
-              tablet: {className: '', css: 'width: 100%;'},
-              mobile: {className: '', css: 'width: 100%;'}
-            }
-          };
-
-          if (elementType === 'grid') {
-            containerConfig.rows = 3;
-            containerConfig.columns = 3;
-            containerConfig.gap = '10px';
-            containerConfig.cells = [];
-          }
-
-          layoutContainers.value.push({
-            id: newId,
-            type: elementType,
-            name: elementTypeInfo.name,
-            icon: elementTypeInfo.icon,
-            config: containerConfig
-          });
-
-          if (elementType === 'grid') {
-            initializeGridCells(newId, 3, 3);
-          }
-
-          console.log('创建容器:', elementType, newId);
-        } else {
-          const contentMap = {
-            text: '文本内容',
-            button: '按钮',
-            input: '输入框',
-            select: '下拉框',
-            table: '表格数据',
-            chart: '图表'
-          };
-
-          const componentConfig = {
-            width: {value: isInline ? 'auto' : 100, unit: isInline ? 'auto' : '%'},
-            height: {value: elementType === 'button' ? 40 : elementType === 'input' ? 35 : 'auto', unit: 'px'},
-            display: isInline ? 'inline-block' : 'block',
-            fontSize: elementType === 'text' ? '16px' : '14px',
-            fontWeight: 'normal',
-            fontFamily: '',
-            color: elementType === 'button' ? '#ffffff' : '#333333',
-            textAlign: 'left',
-            lineHeight: elementType === 'button' ? '40px' : '1.5',
-            margin: {top: '0', right: isInline ? '10px' : '0', bottom: '0', left: '0'},
-            padding: {
-              top: elementType === 'button' ? '0' : elementType === 'input' ? '8px' : '10px',
-              right: elementType === 'button' ? '20px' : elementType === 'input' ? '12px' : '10px',
-              bottom: elementType === 'button' ? '0' : elementType === 'input' ? '8px' : '10px',
-              left: elementType === 'button' ? '20px' : elementType === 'input' ? '12px' : '10px'
-            },
-            backgroundColor: elementType === 'button' ? '#ff8326' : 'transparent',
-            backgroundImage: '',
-            backgroundSize: 'cover',
-            borderWidth: elementType === 'input' ? '1px' : '0',
-            borderStyle: 'solid',
-            borderColor: elementType === 'input' ? '#dddddd' : '#ff8326',
-            borderRadius: elementType === 'button' ? '4px' : elementType === 'input' ? '4px' : '0',
-            boxShadow: elementType === 'button' ? '0 2px 4px rgba(255,131,38,0.3)' : 'none',
-            placeholder: elementType === 'input' ? '请输入内容' : '',
-            buttonType: 'button',
-            inputType: 'text',
-            chartType: 'bar',
-            inline: isInline,
-            customCss: '',
-            responsive: {
-              desktop: {className: '', css: ''},
-              tablet: {className: '', css: ''},
-              mobile: {className: '', css: ''}
-            }
-          };
-
-          components.value.push({
-            id: newId,
-            type: elementType,
-            name: elementTypeInfo.name,
-            icon: elementTypeInfo.icon,
-            content: contentMap[elementType] || elementTypeInfo.name,
-            containerId: containerId,
-            gridCellId: gridCellId,
-            config: componentConfig
-          });
-
-          console.log('创建组件:', elementType, newId, '放入容器:', containerId);
-        }
       }
 
       selectComponent(newId);
@@ -2032,6 +1922,7 @@ export default defineComponent({
 </script>
 
 <style>
+/* 样式部分保持不变，与原始文件相同 */
 :root {
   --primary-color: #ff8326;
   --secondary-color: #fff5eb;
