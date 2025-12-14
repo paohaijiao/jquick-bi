@@ -1998,7 +1998,6 @@ export default defineComponent({
   border-radius: 8px;
   background-color: rgba(255, 131, 38, 0.05);
 }
-
 .row-container:empty.dragover {
   border-color: var(--primary-color);
   background-color: rgba(255, 131, 38, 0.1);
