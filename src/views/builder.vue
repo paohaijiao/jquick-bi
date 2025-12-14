@@ -1948,7 +1948,61 @@ export default defineComponent({
   --header-height: 60px;
   --properties-panel-width: 300px;
 }
+.row-container {
+  min-height: 100px;
+  position: relative;
+}
+.container-content.dragover {
+  border: 2px dashed var(--primary-color);
+  background-color: rgba(255, 131, 38, 0.05);
+  border-radius: 8px;
+  margin: 2px;
+}
+.row-container .canvas-component {
+  margin: 4px;
+  flex-shrink: 0;
+}
+.row-container .canvas-component * {
+  pointer-events: auto;
+}
+.row-container::after {
+  content: '拖放元素到这里';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #999;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+.row-container.dragover::after {
+  opacity: 1;
+}
+.row-container:empty::before {
+  content: '拖放元素到行容器';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--primary-color);
+  font-size: 16px;
+  text-align: center;
+  width: 100%;
+  pointer-events: none;
+}
 
+.row-container:empty {
+  border: 2px dashed var(--border-color);
+  border-radius: 8px;
+  background-color: rgba(255, 131, 38, 0.05);
+}
+
+.row-container:empty.dragover {
+  border-color: var(--primary-color);
+  background-color: rgba(255, 131, 38, 0.1);
+}
 * {
   margin: 0;
   padding: 0;
