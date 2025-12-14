@@ -59,7 +59,7 @@
     <div class="main-content">
       <aside class="sidebar" :class="{ active: sidebarActive }">
         <div class="menu-section">
-          <div class="menu-section-title">布局元素</div>
+          <div class="menu-section-title text-align-left">布局元素</div>
           <div class="menu-item" draggable="true" @dragstart="handleDragStart($event, 'row')">
             <i class="fas fa-grip-horizontal"></i>
             <span>行容器 (Row)</span>
@@ -75,7 +75,7 @@
         </div>
 
         <div class="menu-section">
-          <div class="menu-section-title">容器元素</div>
+          <div class="menu-section-title text-align-left">容器元素</div>
           <div v-for="item in containerElements" :key="item.type" class="menu-item" draggable="true" @dragstart="handleDomTypeDragStart($event, item.type)">
             <i :class="item.icon"></i>
             <span>{{ item.name }}</span>
@@ -83,7 +83,7 @@
         </div>
 
         <div class="menu-section">
-          <div class="menu-section-title">文本元素</div>
+          <div class="menu-section-title text-align-left">文本元素</div>
           <div v-for="item in textElements" :key="item.type" class="menu-item" draggable="true" @dragstart="handleDomTypeDragStart($event, item.type)">
             <i :class="item.icon"></i>
             <span>{{ item.name }}</span>
@@ -91,7 +91,7 @@
         </div>
 
         <div class="menu-section">
-          <div class="menu-section-title">表单元素</div>
+          <div class="menu-section-title text-align-left">表单元素</div>
           <div v-for="item in formElements" :key="item.type" class="menu-item" draggable="true" @dragstart="handleDomTypeDragStart($event, item.type)">
             <i :class="item.icon"></i>
             <span>{{ item.name }}</span>
@@ -99,7 +99,7 @@
         </div>
 
         <div class="menu-section">
-          <div class="menu-section-title">多媒体元素</div>
+          <div class="menu-section-title text-align-left">多媒体元素</div>
           <div v-for="item in mediaElements" :key="item.type" class="menu-item" draggable="true" @dragstart="handleDomTypeDragStart($event, item.type)">
             <i :class="item.icon"></i>
             <span>{{ item.name }}</span>
@@ -107,7 +107,7 @@
         </div>
 
         <div class="menu-section">
-          <div class="menu-section-title">预设布局</div>
+          <div class="menu-section-title text-align-left">预设布局</div>
           <div class="layout-presets">
             <div class="layout-preset" @click="applyLayoutPreset('header-sidebar-main')">
               <div class="preset-preview">
