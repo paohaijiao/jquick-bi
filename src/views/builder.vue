@@ -14,7 +14,6 @@
           <el-icon><Search /></el-icon>
           <input placeholder="搜索报表、数据源或文档..." type="text">
         </div>
-
         <div class="action-buttons">
           <button class="action-btn" @click="exportHtml">
             <i class="fas fa-code"></i>导出HTML
@@ -32,7 +31,6 @@
             <i class="fas fa-folder-open"></i>加载
           </button>
         </div>
-
         <div class="header-secondary-actions">
           <div class="notification-icon">
             <i class="far fa-bell"></i>
@@ -78,10 +76,7 @@
 
         <div class="menu-section">
           <div class="menu-section-title">容器元素</div>
-          <div v-for="item in containerElements" :key="item.type"
-               class="menu-item"
-               draggable="true"
-               @dragstart="handleDomTypeDragStart($event, item.type)">
+          <div v-for="item in containerElements" :key="item.type" class="menu-item" draggable="true" @dragstart="handleDomTypeDragStart($event, item.type)">
             <i :class="item.icon"></i>
             <span>{{ item.name }}</span>
           </div>
@@ -89,10 +84,7 @@
 
         <div class="menu-section">
           <div class="menu-section-title">文本元素</div>
-          <div v-for="item in textElements" :key="item.type"
-               class="menu-item"
-               draggable="true"
-               @dragstart="handleDomTypeDragStart($event, item.type)">
+          <div v-for="item in textElements" :key="item.type" class="menu-item" draggable="true" @dragstart="handleDomTypeDragStart($event, item.type)">
             <i :class="item.icon"></i>
             <span>{{ item.name }}</span>
           </div>
@@ -100,10 +92,7 @@
 
         <div class="menu-section">
           <div class="menu-section-title">表单元素</div>
-          <div v-for="item in formElements" :key="item.type"
-               class="menu-item"
-               draggable="true"
-               @dragstart="handleDomTypeDragStart($event, item.type)">
+          <div v-for="item in formElements" :key="item.type" class="menu-item" draggable="true" @dragstart="handleDomTypeDragStart($event, item.type)">
             <i :class="item.icon"></i>
             <span>{{ item.name }}</span>
           </div>
@@ -111,10 +100,7 @@
 
         <div class="menu-section">
           <div class="menu-section-title">多媒体元素</div>
-          <div v-for="item in mediaElements" :key="item.type"
-               class="menu-item"
-               draggable="true"
-               @dragstart="handleDomTypeDragStart($event, item.type)">
+          <div v-for="item in mediaElements" :key="item.type" class="menu-item" draggable="true" @dragstart="handleDomTypeDragStart($event, item.type)">
             <i :class="item.icon"></i>
             <span>{{ item.name }}</span>
           </div>
@@ -165,9 +151,9 @@
           </div>
           <div class="layout-controls">
             <select v-model="currentBreakpoint" class="breakpoint-select">
-              <option value="desktop">桌面 (≥1200px)</option>
+              <option value="desktop">桌面 (大于等于1200px)</option>
               <option value="tablet">平板 (768px-1199px)</option>
-              <option value="mobile">手机 (<768px)</option>
+              <option value="mobile">手机 (小于768px)</option>
             </select>
             <button class="action-btn" @click="showGridLines = !showGridLines">
               <i :class="showGridLines ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
@@ -180,15 +166,8 @@
           </div>
         </div>
 
-        <div class="canvas-container" id="canvas"
-             @dragover.prevent="handleDragOver"
-             @drop="handleDrop"
-             @dragleave="handleDragLeave">
-          <div class="canvas-drag-area" :class="{
-            'grid-layout': useGridLayout,
-            'dragover': isDraggingOver,
-            'show-grid': showGridLines
-          }">
+        <div class="canvas-container" id="canvas" @dragover.prevent="handleDragOver" @drop="handleDrop" @dragleave="handleDragLeave">
+          <div class="canvas-drag-area" :class="{ 'grid-layout': useGridLayout,  'dragover': isDraggingOver,   'show-grid': showGridLine }">
             <div v-for="container in layoutContainers" :key="container.id" class="container-content">
               <div v-if="container.type !== 'grid'"
                    :class="[
@@ -719,32 +698,24 @@
           <div v-if="activeTab === 'advanced'" class="setting-panel">
             <div class="setting-group">
               <div class="setting-title">响应式设置</div>
-
               <div class="setting-item">
-                <label>桌面版样式 (≥1200px)</label>
-                <textarea class="form-control" rows="3"
-                          v-model="selectedComponent.config.responsive.desktop.css"
-                          placeholder="例如: width: 25%; margin: 10px;"></textarea>
+                <label>桌面版样式 (大于等于1200px)</label>
+                <textarea class="form-control" rows="3" v-model="selectedComponent.config.responsive.desktop.css" placeholder="例如: width: 25%; margin: 10px;"></textarea>
               </div>
 
               <div class="setting-item">
                 <label>平板版样式 (768px-1199px)</label>
-                <textarea class="form-control" rows="3"
-                          v-model="selectedComponent.config.responsive.tablet.css"
-                          placeholder="例如: width: 50%; margin: 8px;"></textarea>
+                <textarea class="form-control" rows="3" v-model="selectedComponent.config.responsive.tablet.css" placeholder="例如: width: 50%; margin: 8px;"></textarea>
               </div>
 
               <div class="setting-item">
-                <label>手机版样式 (<768px)</label>
-                <textarea class="form-control" rows="3"
-                          v-model="selectedComponent.config.responsive.mobile.css"
-                          placeholder="例如: width: 100%; margin: 5px;"></textarea>
+                <label>手机版样式 (小于768px)</label>
+                <textarea class="form-control" rows="3" v-model="selectedComponent.config.responsive.mobile.css" placeholder="例如: width: 100%; margin: 5px;"></textarea>
               </div>
             </div>
 
             <div class="setting-group">
               <div class="setting-title">自定义CSS</div>
-
               <div class="setting-item">
                 <label>自定义样式</label>
                 <textarea class="form-control" rows="6" v-model="selectedComponent.config.customCss" placeholder="输入自定义CSS样式"></textarea>
@@ -792,7 +763,6 @@
 </template>
 <script>
 import {computed, defineComponent, onMounted, ref, watch} from 'vue';
-
 export default defineComponent({
   setup() {
     const sidebarActive = ref(false);
@@ -899,11 +869,9 @@ export default defineComponent({
     const initializeGridCells = (containerId, rows = 3, columns = 3) => {
       const container = layoutContainers.value.find(c => c.id === containerId);
       if (!container || container.type !== 'grid') return;
-
       container.config.rows = rows;
       container.config.columns = columns;
       container.config.cells = [];
-
       for (let row = 1; row <= rows; row++) {
         for (let col = 1; col <= columns; col++) {
           const cellId = `cell_${containerId}_${row}_${col}`;
@@ -1348,9 +1316,7 @@ export default defineComponent({
         isContainer: false,
         inline: false
       };
-
       const isDomTypeElement = domTypeElements[elementType];
-
       if (isDomTypeElement) {
         const contentMap = {
           h1: '一级标题',
@@ -1368,7 +1334,6 @@ export default defineComponent({
           video: '视频',
           iframe: '内嵌内容',
         };
-
         const componentConfig = {
           width: {value: elementInfo.inline ? 'auto' : 100, unit: elementInfo.inline ? 'auto' : '%'},
           height: {value: 'auto', unit: 'auto'},
@@ -1613,7 +1578,6 @@ export default defineComponent({
     const deleteGridCellComponent = (containerId, cellId) => {
       const container = layoutContainers.value.find(c => c.id === containerId);
       if (!container || container.type !== 'grid') return;
-
       const cell = container.config.cells.find(c => c.id === cellId);
       if (!cell) return;
       if (cell.components && cell.components.length > 0) {
@@ -1629,7 +1593,6 @@ export default defineComponent({
         components: components.value,
         timestamp: new Date().toISOString()
       };
-
       const jsonStr = JSON.stringify(layoutData, null, 2);
       const blob = new Blob([jsonStr], {type: 'application/json'});
       const url = URL.createObjectURL(blob);
@@ -1638,7 +1601,6 @@ export default defineComponent({
       a.download = `jquick-bi-layout-${Date.now()}.json`;
       a.click();
       URL.revokeObjectURL(url);
-
       alert('布局已保存！');
     };
 
@@ -1649,7 +1611,6 @@ export default defineComponent({
       input.onchange = (e) => {
         const file = e.target.files[0];
         if (!file) return;
-
         const reader = new FileReader();
         reader.onload = (e) => {
           try {
@@ -1661,7 +1622,6 @@ export default defineComponent({
             components.value = layoutData.components;
             selectedComponentId.value = '';
             initializeExistingGrids();
-
             alert('布局加载成功！');
           } catch (error) {
             console.error('加载布局失败:', error);
@@ -1677,7 +1637,6 @@ export default defineComponent({
       draggingElementType.value = elementType;
       event.dataTransfer.setData('text/plain', elementType);
       event.dataTransfer.effectAllowed = 'copy';
-
       event.target.classList.add('dragging');
       setTimeout(() => {
         event.target.classList.remove('dragging');
