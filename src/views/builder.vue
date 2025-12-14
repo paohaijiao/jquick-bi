@@ -1118,10 +1118,8 @@ export default defineComponent({
 
     const getComponentStyle = (component) => {
       if (!component || !component.config) return {};
-
       const config = component.config;
       const responsiveConfig = config.responsive && config.responsive[currentBreakpoint.value];
-
       let style = {
         width: (config.width?.value || 100) + (config.width?.unit === 'auto' ? '' : config.width?.unit || '%'),
         height: (config.height?.value || 'auto') + (config.height?.unit === 'auto' ? '' : config.height?.unit || 'px'),
@@ -1149,7 +1147,6 @@ export default defineComponent({
         'border-radius': (config.borderRadius || '0') + 'px',
         'box-shadow': config.boxShadow || 'none'
       };
-
       if (responsiveConfig && responsiveConfig.css) {
         try {
           const responsiveStyles = responsiveConfig.css.split(';').reduce((acc, rule) => {
@@ -1186,7 +1183,6 @@ export default defineComponent({
 
     const renderComponentContent = (component) => {
       if (!component) return '';
-
       if (component.type === 'button') {
         return `<button type="${component.config.buttonType || 'button'}"
                 style="width:100%; height:100%; border:none; background:transparent; color:inherit; font:inherit;">
@@ -1415,7 +1411,6 @@ export default defineComponent({
     const addGridRow = (containerId) => {
       const container = layoutContainers.value.find(c => c.id === containerId);
       if (!container || container.type !== 'grid') return;
-
       const newRow = (container.config.rows || 3) + 1;
       container.config.rows = newRow;
       if (!container.config.cells) container.config.cells = [];
@@ -1436,7 +1431,6 @@ export default defineComponent({
     const addGridColumn = (containerId) => {
       const container = layoutContainers.value.find(c => c.id === containerId);
       if (!container || container.type !== 'grid') return;
-
       const newCol = (container.config.columns || 3) + 1;
       container.config.columns = newCol;
       if (!container.config.cells) container.config.cells = [];
@@ -1523,7 +1517,6 @@ export default defineComponent({
       };
       input.click();
     };
-
     const handleDragStart = (event, elementType) => {
       draggingElementType.value = elementType;
       event.dataTransfer.setData('text/plain', elementType);
@@ -1533,26 +1526,20 @@ export default defineComponent({
         event.target.classList.remove('dragging');
       }, 0);
     };
-
     const handleDragOver = (e) => {
       e.preventDefault();
       isDraggingOver.value = true;
       e.dataTransfer.dropEffect = 'copy';
     };
-
     const handleDragLeave = () => {
       isDraggingOver.value = false;
     };
-
     const handleDrop = (e) => {
       e.preventDefault();
       e.stopPropagation();
       isDraggingOver.value = false;
-
       const elementType = draggingElementType.value || e.dataTransfer.getData('text/plain');
-
       if (!elementType) return;
-
       createComponent(elementType);
     };
 
@@ -1560,7 +1547,6 @@ export default defineComponent({
       layoutContainers.value = [];
       components.value = [];
       selectedComponentId.value = '';
-
       switch (presetType) {
         case 'header-sidebar-main':
           layoutContainers.value = [
@@ -1608,7 +1594,6 @@ export default defineComponent({
             }
           ];
           break;
-
         case 'three-column':
           layoutContainers.value = [
             {
@@ -1922,7 +1907,6 @@ export default defineComponent({
 </script>
 
 <style>
-/* 样式部分保持不变，与原始文件相同 */
 :root {
   --primary-color: #ff8326;
   --secondary-color: #fff5eb;
@@ -2468,7 +2452,6 @@ body {
   padding: 12px;
 }
 
-/* 网格容器样式 */
 .grid-container {
   border-color: #9C27B0;
   width: 100% !important;
@@ -2952,7 +2935,6 @@ textarea.form-control {
   border-color: var(--primary-color);
 }
 
-/* 预设布局样式 */
 .layout-presets {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
