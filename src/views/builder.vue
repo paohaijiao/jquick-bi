@@ -191,7 +191,12 @@
                   </div>
                 </div>
 
-                <div class="container-content" :class="container.config.display">
+                <div :class="[container.config.display, { 'row-container': container.type === 'row' }]"
+                     class="container-content"
+                     @dragleave="handleContainerDragLeave($event, container.id)"
+                     @drop="handleContainerDrop($event, container.id)"
+                     @dragover.prevent="handleContainerDragOver($event, container.id)"
+                >
                   <div v-for="component in getComponentsInContainer(container.id)"
                        :key="component.id"
                        :class="{
@@ -742,6 +747,7 @@
     </div>
   </div>
 </template>
+
 <script>
 import {computed, defineComponent, onMounted, ref, watch} from 'vue';
 import request from '../api/request';
