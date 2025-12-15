@@ -56,14 +56,6 @@
       <aside class="sidebar" :class="{ active: sidebarActive }">
         <div class="menu-section">
           <div class="menu-section-title text-align-left">布局元素</div>
-          <div class="menu-item" draggable="true" @dragstart="handleDragStart($event, 'row')">
-            <i class="fas fa-grip-horizontal"></i>
-            <span>行容器 (Row)</span>
-          </div>
-          <div class="menu-item" draggable="true" @dragstart="handleDragStart($event, 'col')">
-            <i class="fas fa-columns"></i>
-            <span>列容器 (Col)</span>
-          </div>
           <div class="menu-item" draggable="true" @dragstart="handleDragStart($event, 'grid')">
             <i class="fas fa-th"></i>
             <span>网格容器 (Grid)</span>
@@ -164,75 +156,8 @@
 
         <div class="canvas-container" id="canvas" @dragover.prevent="handleDragOver" @drop="handleDrop" @dragleave="handleDragLeave">
           <div class="canvas-drag-area" :class="{ 'grid-layout': useGridLayout,  'dragover': isDraggingOver,   'show-grid': showGridLine }">
-            <div v-for="container in layoutContainers" :key="container.id" class="container-content">
-              <div v-if="container.type !== 'grid'"
-                   :class="[
-                     container.type,
-                     { 'selected': selectedComponentId === container.id },
-                     container.config.responsive[currentBreakpoint]?.className || ''
-                   ]"
-                   :style="getContainerStyle(container)"
-                   class="layout-container"
-                   @click="selectComponent(container.id)">
-                <div class="container-header">
-                  <div class="container-info">
-                    <i :class="container.icon"></i>
-                    <span>{{ container.name }}</span>
-                    <small class="container-id">#{{ container.id }}</small>
-                  </div>
-                  <div class="container-actions">
-                    <div class="container-hint">
-                      <span v-if="container.config.width">{{ container.config.width.value }}{{ container.config.width.unit }}</span>
-                      <span v-if="container.config.columns">×{{ container.config.columns }}</span>
-                    </div>
-                    <button class="operation-btn" title="删除容器" @click.stop="deleteContainer(container.id)">
-                      <i class="fas fa-trash-alt"></i>
-                    </button>
-                  </div>
-                </div>
-
-                <div :class="[container.config.display, { 'row-container': container.type === 'row' }]"
-                     class="container-content"
-                     @dragleave="handleContainerDragLeave($event, container.id)"
-                     @drop="handleContainerDrop($event, container.id)"
-                     @dragover.prevent="handleContainerDragOver($event, container.id)"
-                >
-                  <div v-for="component in getComponentsInContainer(container.id)"
-                       :key="component.id"
-                       :class="{
-                         'selected': selectedComponentId === component.id,
-                         'inline-component': component.config.inline
-                       }"
-                       :style="getComponentStyle(component)"
-                       class="canvas-component"
-                       @click.stop="selectComponent(component.id)">
-                    <div class="component-header">
-                      <div class="component-info">
-                        <i :class="component.icon"></i>
-                        <span>{{ component.name }}</span>
-                        <small class="component-id">#{{ component.id }}</small>
-                      </div>
-                      <div class="component-actions">
-                        <button class="operation-btn" title="删除组件" @click.stop="deleteComponent(component.id)">
-                          <i class="fas fa-trash-alt"></i>
-                        </button>
-                      </div>
-                    </div>
-                    <div class="component-content" v-html="renderComponentContent(component)"></div>
-                  </div>
-
-                  <div v-if="getComponentsInContainer(container.id).length === 0"
-                       class="empty-container-hint"
-                       @dragover.prevent="handleContainerDragOver($event, container.id)"
-                       @drop="handleContainerDrop($event, container.id)"
-                       @dragleave="handleContainerDragLeave($event, container.id)">
-                    <i class="fas fa-plus-circle"></i>
-                    <p>拖放组件到此区域</p>
-                  </div>
-                </div>
-              </div>
-              <div v-else
-                   :class="{ 'selected': selectedComponentId === container.id }"
+            <div v-for="container in layoutContainers" :key="container.id" class="container-content" style="width: 100%">
+              <div :class="{ 'selected': selectedComponentId === container.id }"
                    :style="getGridContainerStyle(container)"
                    class="layout-container grid-container"
                    @click="selectComponent(container.id)">
@@ -251,6 +176,9 @@
                       <button class="grid-action-btn" title="添加列" @click.stop="addGridColumn(container.id)">
                         <i class="fas fa-plus"></i>列
                       </button>
+                      <button class="grid-action-btn" title="拆分单元格" @click.stop="splitGridCell(container.id)">
+                        <i class="fas fa-cut"></i>拆分
+                      </button>
                     </div>
                   </div>
                   <div class="container-actions">
@@ -266,22 +194,27 @@
                          'selected': selectedComponentId === cell.id,
                          'merged': cell.merged,
                          'span-col': cell.colSpan > 1,
-                         'span-row': cell.rowSpan > 1
+                         'span-row': cell.rowSpan > 1,
+                         'splittable': cell.rowSpan > 1 || cell.colSpan > 1
                        }"
                        :style="getGridCellStyle(cell, container)"
                        class="grid-cell"
                        @dragleave="handleGridCellDragLeave($event, cell.id)"
                        @drop="handleGridCellDrop($event, cell.id)"
                        @click.stop="selectComponent(cell.id)"
-                       @dragover.prevent="handleGridCellDragOver($event, cell.id)">
+                       @dragover.prevent="handleGridCellDragOver($event, cell.id)"
+                       @dblclick.stop="handleGridCellDoubleClick(container.id, cell)">
                     <div v-if="!cell.merged" class="cell-header">
                       <div class="cell-info">
                         <span class="cell-position">{{ cell.row }},{{ cell.col }}</span>
-                        <button v-if="cell.components.length > 0"
+                        <span v-if="cell.rowSpan > 1 || cell.colSpan > 1" class="cell-span-info">
+                          ({{ cell.rowSpan }}×{{ cell.colSpan }})
+                        </span>
+                        <button v-if="cell.components.length > 0 || (cell.rowSpan > 1 || cell.colSpan > 1)"
                                 class="cell-merge-btn"
-                                title="合并单元格"
-                                @click.stop="mergeGridCell(container.id, cell)">
-                          <i class="fas fa-compress"></i>
+                                :title="cell.rowSpan > 1 || cell.colSpan > 1 ? '拆分单元格' : '合并单元格'"
+                                @click.stop="toggleGridCellMerge(container.id, cell)">
+                          <i :class="cell.rowSpan > 1 || cell.colSpan > 1 ? 'fas fa-cut' : 'fas fa-compress'"></i>
                         </button>
                       </div>
                       <div class="cell-actions">
@@ -291,6 +224,12 @@
                           <i class="fas fa-times"></i>
                         </button>
                       </div>
+                    </div>
+                    <div v-else class="merged-cell-header">
+                      <span>已合并</span>
+                      <button class="cell-merge-btn" title="取消合并" @click.stop="unmergeGridCell(container.id, cell)">
+                        <i class="fas fa-expand"></i>
+                      </button>
                     </div>
                     <div class="cell-content">
                       <div v-for="component in getComponentsInGridCell(cell.id)"
@@ -357,7 +296,7 @@
             <div v-if="layoutContainers.length === 0 && components.length === 0" class="empty-canvas-hint">
               <i class="fas fa-magic"></i>
               <h3>开始创建您的报表</h3>
-              <p>从左侧拖拽元素到此处，或选择预设布局开始</p>
+              <p>从左侧拖拽网格容器到此处，或选择预设布局开始</p>
               <button class="btn btn-primary" @click="applyLayoutPreset('dashboard')">
                 使用仪表盘模板
               </button>
@@ -396,7 +335,6 @@
           <div v-if="activeTab === 'layout'" class="setting-panel">
             <div class="setting-group">
               <div class="setting-title">尺寸设置</div>
-
               <div class="setting-item">
                 <label>宽度</label>
                 <div class="range-input">
@@ -437,19 +375,32 @@
                 </select>
               </div>
 
-              <div v-if="selectedComponent.config.display === 'flex'" class="setting-item">
-                <label>Flex 方向</label>
-                <select class="form-control" v-model="selectedComponent.config.flexDirection">
-                  <option value="row">水平 (row)</option>
-                  <option value="column">垂直 (column)</option>
-                  <option value="row-reverse">水平反向</option>
-                  <option value="column-reverse">垂直反向</option>
-                </select>
+              <div v-if="selectedComponent.type === 'grid'" class="setting-group">
+                <div class="setting-title">网格设置</div>
+                <div class="setting-item">
+                  <label>行数</label>
+                  <input v-model="selectedComponent.config.rows" class="form-control" max="12" min="1" type="number">
+                </div>
+                <div class="setting-item">
+                  <label>列数</label>
+                  <input v-model="selectedComponent.config.columns" class="form-control" max="12" min="1" type="number">
+                </div>
+                <div class="setting-item">
+                  <label>间距</label>
+                  <input v-model="selectedComponent.config.gap" class="form-control" placeholder="10px" type="text">
+                </div>
               </div>
 
-              <div v-if="selectedComponent.type === 'grid'" class="setting-item">
-                <label>网格列数</label>
-                <input type="number" class="form-control" v-model="selectedComponent.config.columns" min="1" max="12">
+              <div v-if="selectedComponent.type === 'grid-cell'" class="setting-group">
+                <div class="setting-title">单元格设置</div>
+                <div class="setting-item">
+                  <label>行跨度</label>
+                  <input v-model="selectedComponent.config.rowSpan" class="form-control" max="12" min="1" type="number">
+                </div>
+                <div class="setting-item">
+                  <label>列跨度</label>
+                  <input v-model="selectedComponent.config.colSpan" class="form-control" max="12" min="1" type="number">
+                </div>
               </div>
             </div>
 
@@ -752,7 +703,6 @@
 import {computed, defineComponent, onMounted, ref, watch} from 'vue';
 import request from '../api/request';
 import {ElMessage} from "element-plus";
-
 export default defineComponent({
   setup() {
     const sidebarActive = ref(false);
@@ -836,27 +786,6 @@ export default defineComponent({
     const initializeData = () => {
       layoutContainers.value = [
         {
-          id: 'row_1',
-          type: 'row',
-          name: '行容器',
-          icon: 'fas fa-grip-horizontal',
-          config: {
-            width: {value: 100, unit: '%'},
-            height: {value: 200, unit: 'px'},
-            display: 'flex',
-            flexDirection: 'row',
-            margin: {top: '10px', right: '0', bottom: '10px', left: '0'},
-            padding: {top: '20px', right: '20px', bottom: '20px', left: '20px'},
-            backgroundColor: '#ffffff',
-            columns: 2,
-            responsive: {
-              desktop: {className: 'desktop-layout', css: ''},
-              tablet: {className: 'tablet-layout', css: 'flex-direction: column; width: 100%;'},
-              mobile: {className: 'mobile-layout', css: 'flex-direction: column; width: 100%;'}
-            }
-          }
-        },
-        {
           id: 'grid_1',
           type: 'grid',
           name: '网格容器',
@@ -888,8 +817,8 @@ export default defineComponent({
           name: '标题文本',
           icon: 'fas fa-font',
           content: '欢迎使用JQuick BI',
-          containerId: 'row_1',
-          gridCellId: null,
+          containerId: null,
+          gridCellId: 'cell_grid_1_1_1',
           config: {
             width: {value: 100, unit: '%'},
             height: {value: 'auto', unit: 'auto'},
@@ -920,6 +849,7 @@ export default defineComponent({
       ];
       initializeGridCells('grid_1', 3, 3);
     };
+
     const initializeGridCells = (containerId, rows = 3, columns = 3) => {
       const container = layoutContainers.value.find(c => c.id === containerId);
       if (!container || container.type !== 'grid') return;
@@ -941,6 +871,7 @@ export default defineComponent({
         }
       }
     };
+
     const initializeExistingGrids = () => {
       layoutContainers.value
           .filter(c => c.type === 'grid')
@@ -960,6 +891,8 @@ export default defineComponent({
     const selectedComponent = computed(() => {
       const allItems = [...layoutContainers.value, ...components.value];
       let selectedItem = allItems.find(item => item.id === selectedComponentId.value);
+
+      // 检查是否是网格单元格
       if (!selectedItem) {
         layoutContainers.value.forEach(container => {
           if (container.type === 'grid' && container.config.cells) {
@@ -994,78 +927,23 @@ export default defineComponent({
       return selectedItem || null;
     });
 
-
-    const getComponentsInContainer = (containerId) => {
-      if (!components.value) return [];
-      return components.value.filter(component => component.containerId === containerId);
-    };
-
     const getComponentsInGridCell = (cellId) => {
       if (!components.value) return [];
       return components.value.filter(component => component.gridCellId === cellId);
     };
+
     const getFreeComponents = computed(() => {
       if (!components.value) return [];
       return components.value.filter(c => !c.containerId && !c.gridCellId);
     });
 
-    const getContainerStyle = (container) => {
-      if (!container || !container.config) return {};
-      const config = container.config;
-      const responsiveConfig = config.responsive && config.responsive[currentBreakpoint.value];
-      let width = (config.width?.value || 100) + (config.width?.unit || '%');
-      if (container.type === 'row' || container.type === 'grid') {
-        if (config.width?.unit === '%' && config.width?.value < 100) {
-          width = '100%';
-        }
-      }
-
-      let style = {
-        width: width,
-        height: (config.height?.value || 'auto') + (config.height?.unit === 'auto' ? '' : config.height?.unit || 'px'),
-        display: config.display || (container.type === 'row' ? 'flex' : 'block'),
-        'margin-top': config.margin?.top || '0',
-        'margin-right': config.margin?.right || '0',
-        'margin-bottom': config.margin?.bottom || '0',
-        'margin-left': config.margin?.left || '0',
-        'padding-top': config.padding?.top || '0',
-        'padding-right': config.padding?.right || '0',
-        'padding-bottom': config.padding?.bottom || '0',
-        'padding-left': config.padding?.left || '0',
-        'background-color': config.backgroundColor || 'transparent',
-        'flex-direction': config.flexDirection || 'row'
-      };
-      if (container.type === 'row') {
-        style['flex-wrap'] = 'nowrap';
-        style['align-items'] = 'flex-start';
-        style['justify-content'] = 'flex-start';
-      }
-      if (responsiveConfig && responsiveConfig.css) {
-        try {
-          const responsiveStyles = responsiveConfig.css.split(';').reduce((acc, rule) => {
-            const [prop, value] = rule.split(':').map(s => s.trim());
-            if (prop && value) {
-              acc[prop] = value;
-            }
-            return acc;
-          }, {});
-
-          style = {...style, ...responsiveStyles};
-        } catch (e) {
-          console.warn('解析响应式CSS失败:', e);
-        }
-      }
-
-      return style;
-    };
-
     const getGridContainerStyle = (container) => {
       if (!container || !container.config) return {};
       const config = container.config;
       const responsiveConfig = config.responsive && config.responsive[currentBreakpoint.value];
-      const rows = config.rows || 3; // 根据行列数量动态计算建议高度
-      const suggestedHeight = Math.max(rows * 100, 300); // 每行至少100px，最小300px
-      let width = '100%'; // 网格容器应该占满宽度
+      const rows = config.rows || 3;
+      const suggestedHeight = Math.max(rows * 100, 300);
+      let width = '100%';
       if (config.width?.unit === '%' && config.width?.value) {
         width = config.width.value + '%';
       }
@@ -1106,10 +984,10 @@ export default defineComponent({
 
       let style = {
         display: 'grid',
-        'grid-template-rows': `repeat(${config.rows || 3}, minmax(80px, 1fr))`, // 添加最小高度约束
-        'grid-template-columns': `repeat(${config.columns || 3}, minmax(100px, 1fr))`, // 添加最小宽度约束
+        'grid-template-rows': `repeat(${config.rows || 3}, minmax(80px, 1fr))`,
+        'grid-template-columns': `repeat(${config.columns || 3}, minmax(100px, 1fr))`,
         gap: config.gap || '10px',
-        'min-height': '200px', // 确保网格容器有最小高度
+        'min-height': '200px',
       };
       if (responsiveConfig && responsiveConfig.css) {
         try {
@@ -1263,8 +1141,8 @@ export default defineComponent({
         event.target.classList.remove('dragging');
       }, 0);
     };
+
     const handleGridCellDragOver = (e, cellId) => {
-      console.log(cellId);
       e.preventDefault();
       e.stopPropagation();
       e.dataTransfer.dropEffect = 'copy';
@@ -1276,7 +1154,6 @@ export default defineComponent({
     };
 
     const handleGridCellDragLeave = (e, cellId) => {
-      console.log(cellId);
       e.preventDefault();
       e.stopPropagation();
 
@@ -1478,16 +1355,179 @@ export default defineComponent({
       }
     };
 
+    const toggleGridCellMerge = (containerId, cell) => {
+      const container = layoutContainers.value.find(c => c.id === containerId);
+      if (!container || container.type !== 'grid') return;
+
+      if (cell.rowSpan > 1 || cell.colSpan > 1) {
+        // 如果是已合并的单元格，则拆分
+        splitGridCellAt(containerId, cell);
+      } else {
+        // 如果是普通单元格，则合并
+        mergeGridCell(containerId, cell);
+      }
+    };
+
     const mergeGridCell = (containerId, cell) => {
       const container = layoutContainers.value.find(c => c.id === containerId);
       if (!container || container.type !== 'grid') return;
-      cell.merged = true;
-      if (cell.components && cell.components.length > 0) {
-        cell.components.forEach(componentId => {
-          deleteComponent(componentId);
-        });
-        cell.components = [];
+
+      // 合并当前单元格和右侧单元格
+      const targetRow = cell.row;
+      const targetCol = cell.col + 1;
+
+      // 检查右侧单元格是否存在
+      const rightCell = container.config.cells.find(c => c.row === targetRow && c.col === targetCol);
+      if (rightCell && !rightCell.merged) {
+        // 清空右侧单元格的内容
+        if (rightCell.components && rightCell.components.length > 0) {
+          rightCell.components.forEach(componentId => {
+            deleteComponent(componentId);
+          });
+          rightCell.components = [];
+        }
+
+        // 设置当前单元格的列跨度
+        cell.colSpan = 2;
+        cell.merged = false; // 设置为未合并状态，但有跨度
+
+        // 标记右侧单元格为已合并
+        rightCell.merged = true;
+        rightCell.rowSpan = 1;
+        rightCell.colSpan = 1;
+
+        // 重新计算单元格位置
+        recalculateGridCells(container);
       }
+    };
+
+    const unmergeGridCell = (containerId, cell) => {
+      const container = layoutContainers.value.find(c => c.id === containerId);
+      if (!container || container.type !== 'grid') return;
+
+      // 如果是已合并的单元格，取消合并
+      if (cell.merged) {
+        cell.merged = false;
+        // 清空已合并单元格的内容
+        if (cell.components && cell.components.length > 0) {
+          cell.components.forEach(componentId => {
+            deleteComponent(componentId);
+          });
+          cell.components = [];
+        }
+      }
+
+      // 如果是跨度的单元格，重置跨度
+      if (cell.rowSpan > 1 || cell.colSpan > 1) {
+        // 查找并重置相关的单元格
+        for (let r = cell.row; r < cell.row + cell.rowSpan; r++) {
+          for (let c = cell.col; c < cell.col + cell.colSpan; c++) {
+            if (r === cell.row && c === cell.col) continue; // 跳过自身
+
+            const relatedCell = container.config.cells.find(cell => cell.row === r && cell.col === c);
+            if (relatedCell) {
+              relatedCell.merged = false;
+              relatedCell.rowSpan = 1;
+              relatedCell.colSpan = 1;
+            }
+          }
+        }
+
+        // 重置当前单元格的跨度
+        cell.rowSpan = 1;
+        cell.colSpan = 1;
+      }
+
+      recalculateGridCells(container);
+    };
+
+    const splitGridCell = (containerId) => {
+      const container = layoutContainers.value.find(c => c.id === containerId);
+      if (!container || container.type !== 'grid') return;
+
+      // 查找当前选中的单元格
+      const selectedCell = container.config.cells.find(c => c.id === selectedComponentId.value);
+      if (selectedCell) {
+        splitGridCellAt(containerId, selectedCell);
+      }
+    };
+
+    const splitGridCellAt = (containerId, cell) => {
+      const container = layoutContainers.value.find(c => c.id === containerId);
+      if (!container || container.type !== 'grid') return;
+
+      if (cell.rowSpan > 1 || cell.colSpan > 1) {
+        // 清空拆分后新单元格的内容
+        for (let r = cell.row; r < cell.row + cell.rowSpan; r++) {
+          for (let c = cell.col; c < cell.col + cell.colSpan; c++) {
+            if (r === cell.row && c === cell.col) continue; // 跳过自身
+
+            const relatedCell = container.config.cells.find(cell => cell.row === r && cell.col === c);
+            if (relatedCell) {
+              relatedCell.merged = false;
+              relatedCell.rowSpan = 1;
+              relatedCell.colSpan = 1;
+
+              // 清空内容
+              if (relatedCell.components && relatedCell.components.length > 0) {
+                relatedCell.components.forEach(componentId => {
+                  deleteComponent(componentId);
+                });
+                relatedCell.components = [];
+              }
+            }
+          }
+        }
+
+        // 重置当前单元格的跨度
+        cell.rowSpan = 1;
+        cell.colSpan = 1;
+
+        recalculateGridCells(container);
+      }
+    };
+
+    const recalculateGridCells = (container) => {
+      if (!container || container.type !== 'grid') return;
+
+      // 重新计算所有单元格的位置
+      const cells = [];
+      let cellIdCounter = 1;
+
+      for (let row = 1; row <= container.config.rows; row++) {
+        for (let col = 1; col <= container.config.columns; col++) {
+          const existingCell = container.config.cells.find(c => c.row === row && c.col === col);
+
+          if (existingCell && !existingCell.merged) {
+            // 保留未合并的单元格
+            cells.push({
+              ...existingCell,
+              row,
+              col,
+              id: existingCell.id || `cell_${container.id}_${row}_${col}`
+            });
+          } else if (!existingCell || existingCell.merged) {
+            // 创建新的单元格或处理已合并的单元格
+            cells.push({
+              id: `cell_${container.id}_${row}_${col}`,
+              row,
+              col,
+              rowSpan: 1,
+              colSpan: 1,
+              merged: existingCell ? existingCell.merged : false,
+              components: existingCell && existingCell.components ? existingCell.components : []
+            });
+          }
+        }
+      }
+
+      container.config.cells = cells;
+    };
+
+    const handleGridCellDoubleClick = (containerId, cell) => {
+      // 双击单元格可以快速编辑
+      selectComponent(cell.id);
+      activeTab.value = 'content';
     };
 
     const deleteGridCellComponent = (containerId, cellId) => {
@@ -1502,6 +1542,7 @@ export default defineComponent({
         cell.components = [];
       }
     };
+
     const saveLayout = () => {
       const layoutData = {
         layoutContainers: layoutContainers.value,
@@ -1547,6 +1588,7 @@ export default defineComponent({
       };
       input.click();
     };
+
     const handleDragStart = (event, elementType) => {
       draggingElementType.value = elementType;
       event.dataTransfer.setData('text/plain', elementType);
@@ -1556,14 +1598,17 @@ export default defineComponent({
         event.target.classList.remove('dragging');
       }, 0);
     };
+
     const handleDragOver = (e) => {
       e.preventDefault();
       isDraggingOver.value = true;
       e.dataTransfer.dropEffect = 'copy';
     };
+
     const handleDragLeave = () => {
       isDraggingOver.value = false;
     };
+
     const handleDrop = (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -1577,74 +1622,82 @@ export default defineComponent({
       layoutContainers.value = [];
       components.value = [];
       selectedComponentId.value = '';
+
       switch (presetType) {
         case 'header-sidebar-main':
           layoutContainers.value = [
             {
-              id: 'header_1',
-              type: 'row',
-              name: '头部区域',
-              icon: 'fas fa-grip-horizontal',
+              id: 'header_grid',
+              type: 'grid',
+              name: '头部网格',
+              icon: 'fas fa-th',
               config: {
                 width: { value: 100, unit: '%' },
                 height: { value: 80, unit: 'px' },
-                display: 'flex',
-                flexDirection: 'row',
+                display: 'grid',
+                rows: 1,
+                columns: 3,
+                gap: '10px',
                 margin: { top: '0', right: '0', bottom: '10px', left: '0' },
-                padding: { top: '0', right: '20px', bottom: '0', left: '20px' },
+                padding: {top: '15px', right: '15px', bottom: '15px', left: '15px'},
                 backgroundColor: '#ffffff',
-                columns: 2,
                 responsive: {
                   desktop: { className: '', css: '' },
-                  tablet: {className: '', css: 'height: 60px; width: 100%;'},
-                  mobile: {className: '', css: 'height: 50px; padding: 0 10px; width: 100%;'}
-                }
+                  tablet: {className: '', css: 'gap: 8px; width: 100%;'},
+                  mobile: {className: '', css: 'gap: 5px; width: 100%;'}
+                },
+                cells: []
               }
             },
             {
-              id: 'main_row',
-              type: 'row',
-              name: '主要内容区',
-              icon: 'fas fa-grip-horizontal',
+              id: 'main_grid',
+              type: 'grid',
+              name: '主内容网格',
+              icon: 'fas fa-th',
               config: {
                 width: { value: 100, unit: '%' },
                 height: { value: 500, unit: 'px' },
-                display: 'flex',
-                flexDirection: 'row',
+                display: 'grid',
+                rows: 2,
+                columns: 3,
+                gap: '15px',
                 margin: { top: '0', right: '0', bottom: '0', left: '0' },
-                padding: { top: '0', right: '0', bottom: '0', left: '0' },
+                padding: {top: '15px', right: '15px', bottom: '15px', left: '15px'},
                 backgroundColor: '#f8f9fa',
-                columns: 2,
                 responsive: {
                   desktop: { className: '', css: '' },
-                  tablet: {className: '', css: 'flex-direction: column; width: 100%;'},
-                  mobile: {className: '', css: 'flex-direction: column; height: auto; width: 100%;'}
-                }
+                  tablet: {className: '', css: 'grid-template-columns: 1fr 2fr; gap: 10px;'},
+                  mobile: {className: '', css: 'grid-template-columns: 1fr; gap: 8px;'}
+                },
+                cells: []
               }
             }
           ];
           break;
+
         case 'three-column':
           layoutContainers.value = [
             {
-              id: 'row_3col',
-              type: 'row',
-              name: '三栏布局',
-              icon: 'fas fa-grip-horizontal',
+              id: 'three_col_grid',
+              type: 'grid',
+              name: '三栏网格',
+              icon: 'fas fa-th',
               config: {
                 width: { value: 100, unit: '%' },
                 height: { value: 400, unit: 'px' },
-                display: 'flex',
-                flexDirection: 'row',
-                margin: { top: '10px', right: '0', bottom: '10px', left: '0' },
-                padding: { top: '0', right: '0', bottom: '0', left: '0' },
-                backgroundColor: '#f8f9fa',
+                display: 'grid',
+                rows: 1,
                 columns: 3,
+                gap: '20px',
+                margin: { top: '10px', right: '0', bottom: '10px', left: '0' },
+                padding: {top: '20px', right: '20px', bottom: '20px', left: '20px'},
+                backgroundColor: '#f8f9fa',
                 responsive: {
                   desktop: { className: '', css: '' },
-                  tablet: {className: '', css: 'flex-wrap: wrap; width: 100%;'},
-                  mobile: {className: '', css: 'flex-direction: column; height: auto; width: 100%;'}
-                }
+                  tablet: {className: '', css: 'grid-template-columns: 1fr 1fr;'},
+                  mobile: {className: '', css: 'grid-template-columns: 1fr;'}
+                },
+                cells: []
               }
             }
           ];
@@ -1653,53 +1706,38 @@ export default defineComponent({
         case 'dashboard':
           layoutContainers.value = [
             {
-              id: 'dashboard_row1',
-              type: 'row',
-              name: '仪表盘第一行',
-              icon: 'fas fa-grip-horizontal',
+              id: 'dashboard_grid',
+              type: 'grid',
+              name: '仪表盘网格',
+              icon: 'fas fa-th',
               config: {
                 width: { value: 100, unit: '%' },
-                height: { value: 200, unit: 'px' },
-                display: 'flex',
-                flexDirection: 'row',
-                margin: { top: '10px', right: '0', bottom: '10px', left: '0' },
-                padding: { top: '0', right: '0', bottom: '0', left: '0' },
-                backgroundColor: '#f8f9fa',
+                height: {value: 600, unit: 'px'},
+                display: 'grid',
+                rows: 3,
                 columns: 3,
-                responsive: {
-                  desktop: { className: '', css: '' },
-                  tablet: {className: '', css: 'flex-wrap: wrap; height: auto; width: 100%;'},
-                  mobile: {className: '', css: 'flex-direction: column; height: auto; width: 100%;'}
-                }
-              }
-            },
-            {
-              id: 'dashboard_row2',
-              type: 'row',
-              name: '仪表盘第二行',
-              icon: 'fas fa-grip-horizontal',
-              config: {
-                width: { value: 100, unit: '%' },
-                height: { value: 300, unit: 'px' },
-                display: 'flex',
-                flexDirection: 'row',
-                margin: { top: '0', right: '0', bottom: '10px', left: '0' },
-                padding: { top: '0', right: '0', bottom: '0', left: '0' },
+                gap: '15px',
+                margin: { top: '10px', right: '0', bottom: '10px', left: '0' },
+                padding: {top: '20px', right: '20px', bottom: '20px', left: '20px'},
                 backgroundColor: '#f8f9fa',
-                columns: 2,
                 responsive: {
                   desktop: { className: '', css: '' },
-                  tablet: {className: '', css: 'flex-direction: column; height: auto; width: 100%;'},
-                  mobile: {className: '', css: 'flex-direction: column; height: auto; width: 100%;'}
-                }
+                  tablet: {className: '', css: 'grid-template-columns: repeat(2, 1fr); gap: 12px;'},
+                  mobile: {className: '', css: 'grid-template-columns: 1fr; gap: 10px;'}
+                },
+                cells: []
               }
             }
           ];
           break;
       }
 
+      // 初始化网格单元格
+      layoutContainers.value.forEach(container => {
+        initializeGridCells(container.id, container.config.rows, container.config.columns);
+      });
+
       selectedComponentId.value = layoutContainers.value.length > 0 ? layoutContainers.value[0].id : '';
-      initializeExistingGrids();
     };
 
     const toggleSidebar = () => {
@@ -1720,6 +1758,7 @@ export default defineComponent({
     };
 
     const deleteComponent = (id) => {
+      // 从网格单元格中移除组件引用
       layoutContainers.value.forEach(container => {
         if (container.type === 'grid' && container.config.cells) {
           container.config.cells.forEach(cell => {
@@ -1742,6 +1781,7 @@ export default defineComponent({
     const deleteContainer = (id) => {
       const container = layoutContainers.value.find(c => c.id === id);
       if (container && container.type === 'grid' && container.config.cells) {
+        // 删除网格容器时，同时删除其中的所有组件
         container.config.cells.forEach(cell => {
           if (cell.components && cell.components.length > 0) {
             cell.components.forEach(componentId => {
@@ -1749,9 +1789,8 @@ export default defineComponent({
             });
           }
         });
-      } else {
-        components.value = components.value.filter(c => c.containerId !== id);
       }
+
       layoutContainers.value = layoutContainers.value.filter(c => c.id !== id);
       if (selectedComponentId.value === id) {
         selectedComponentId.value = '';
@@ -1818,51 +1857,6 @@ export default defineComponent({
       closeModal();
     };
 
-    const handleContainerDragOver = (e, containerId) => {
-      e.preventDefault();
-      e.stopPropagation();
-      containerDragStates.value[containerId] = true;
-      e.dataTransfer.dropEffect = 'copy';
-      const hintElement = e.target.closest('.empty-container-hint');
-      if (hintElement) {
-        hintElement.style.borderColor = 'var(--primary-color)';
-        hintElement.style.backgroundColor = 'rgba(255, 131, 38, 0.1)';
-      }
-    };
-
-    const handleContainerDragLeave = (e, containerId) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (containerDragStates.value[containerId]) {
-        containerDragStates.value[containerId] = false;
-      }
-      const hintElement = e.target.closest('.empty-container-hint');
-      if (hintElement) {
-        hintElement.style.borderColor = '';
-        hintElement.style.backgroundColor = '';
-      }
-    };
-
-    const handleContainerDrop = (e, containerId) => {
-      e.preventDefault();
-      e.stopPropagation();
-      containerDragStates.value[containerId] = false;
-      const hintElement = e.target.closest('.empty-container-hint');
-      if (hintElement) {
-        hintElement.style.borderColor = '';
-        hintElement.style.backgroundColor = '';
-      }
-      let elementType = draggingElementType.value;
-      if (!elementType && e.dataTransfer.types.includes('text/plain')) {
-        elementType = e.dataTransfer.getData('text/plain');
-      }
-      if (!elementType) {
-        console.warn('未获取到拖拽元素类型');
-        return;
-      }
-      createComponent(elementType, containerId);
-    };
-
     watch(currentBreakpoint, (newValue) => {
       console.log('切换到断点:', newValue);
     });
@@ -1895,9 +1889,7 @@ export default defineComponent({
       deselectComponent,
       deleteComponent,
       deleteContainer,
-      getComponentsInContainer,
       getComponentsInGridCell,
-      getContainerStyle,
       getGridContainerStyle,
       getGridTemplateStyle,
       getGridCellStyle,
@@ -1918,16 +1910,17 @@ export default defineComponent({
       handleDragOver,
       handleDragLeave,
       handleDrop,
-      handleContainerDragOver,
-      handleContainerDragLeave,
-      handleContainerDrop,
       handleGridCellDragOver,
       handleGridCellDragLeave,
       handleGridCellDrop,
+      handleGridCellDoubleClick,
       createComponent,
       addGridRow,
       addGridColumn,
+      toggleGridCellMerge,
       mergeGridCell,
+      unmergeGridCell,
+      splitGridCell,
       deleteGridCellComponent,
       saveLayout,
       loadLayout
@@ -1948,60 +1941,7 @@ export default defineComponent({
   --header-height: 60px;
   --properties-panel-width: 300px;
 }
-.row-container {
-  min-height: 100px;
-  position: relative;
-}
-.container-content.dragover {
-  border: 2px dashed var(--primary-color);
-  background-color: rgba(255, 131, 38, 0.05);
-  border-radius: 8px;
-  margin: 2px;
-}
-.row-container .canvas-component {
-  margin: 4px;
-  flex-shrink: 0;
-}
-.row-container .canvas-component * {
-  pointer-events: auto;
-}
-.row-container::after {
-  content: '拖放元素到这里';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: #999;
-  font-size: 14px;
-  opacity: 0;
-  transition: opacity 0.2s;
-  pointer-events: none;
-}
-.row-container.dragover::after {
-  opacity: 1;
-}
-.row-container:empty::before {
-  content: '拖放元素到行容器';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: var(--primary-color);
-  font-size: 16px;
-  text-align: center;
-  width: 100%;
-  pointer-events: none;
-}
 
-.row-container:empty {
-  border: 2px dashed var(--border-color);
-  border-radius: 8px;
-  background-color: rgba(255, 131, 38, 0.05);
-}
-.row-container:empty.dragover {
-  border-color: var(--primary-color);
-  background-color: rgba(255, 131, 38, 0.1);
-}
 * {
   margin: 0;
   padding: 0;
@@ -2194,6 +2134,7 @@ body {
   flex: 1;
   overflow: hidden;
 }
+
 .sidebar {
   width: var(--sidebar-width);
   background-color: white;
@@ -2351,16 +2292,6 @@ body {
   box-shadow: 0 0 0 3px rgba(255, 131, 38, 0.1);
 }
 
-.layout-container.row {
-  border-color: #4CAF50;
-  display: flex !important;
-  flex-direction: row !important;
-}
-
-.layout-container.col {
-  border-color: #2196F3;
-}
-
 .layout-container.grid {
   border-color: #9C27B0;
   display: grid !important;
@@ -2424,120 +2355,13 @@ body {
   color: var(--primary-color);
 }
 
-.container-content {
-  min-height: 100px;
-  padding: 16px;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.empty-container-hint {
-  height: 120px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #999;
-  border: 2px dashed #ddd;
-  border-radius: 8px;
-  transition: all 0.2s;
-  cursor: pointer;
-  margin: 10px 0;
-  width: 100%;
-}
-
-.empty-container-hint:hover {
-  border-color: var(--primary-color);
-  background-color: rgba(255, 131, 38, 0.05);
-}
-
-.empty-container-hint.dragover {
-  border-color: var(--primary-color);
-  background-color: rgba(255, 131, 38, 0.1);
-  box-shadow: 0 0 10px rgba(255, 131, 38, 0.2);
-}
-
-.empty-container-hint i {
-  font-size: 28px;
-  margin-bottom: 8px;
-  color: var(--primary-color);
-}
-
-.canvas-component {
-  margin: 8px 0;
-  padding: 16px;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  background-color: white;
-  transition: all 0.2s;
-  box-sizing: border-box;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-.canvas-component.selected {
-  border: 2px solid var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(255, 131, 38, 0.1);
-}
-
-.canvas-component.inline-component {
-  display: inline-block;
-  vertical-align: top;
-  min-width: 100px;
-  margin-right: 8px;
-}
-
-.canvas-component:not(.inline-component) {
-  width: 100%;
-}
-
-.component-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.component-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.component-id {
-  color: #999;
-  font-size: 12px;
-  background: #f0f0f0;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-.component-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.component-hint {
-  color: #999;
-  font-size: 12px;
-  margin-right: 8px;
-}
-
-.component-content {
-  min-height: 40px;
-  background-color: #f9f9f9;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #666;
-  overflow: hidden;
-  padding: 12px;
-}
-
 .grid-container {
   border-color: #9C27B0;
   width: 100% !important;
+  max-height: 500px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .grid-cells {
@@ -2548,6 +2372,9 @@ body {
   width: 100%;
   box-sizing: border-box;
   display: grid !important;
+  overflow-y: auto;
+  flex: 1;
+  max-height: calc(100% - 60px);
 }
 
 .grid-cell {
@@ -2570,6 +2397,7 @@ body {
 .grid-cell.merged {
   background-color: #f5f5f5;
   border-style: dashed;
+  border-color: #ccc;
 }
 
 .grid-cell.span-col {
@@ -2578,6 +2406,11 @@ body {
 
 .grid-cell.span-row {
   background-color: rgba(76, 175, 80, 0.05);
+}
+
+.grid-cell.splittable:hover {
+  background-color: rgba(33, 150, 243, 0.05);
+  cursor: pointer;
 }
 
 .cell-header {
@@ -2602,6 +2435,14 @@ body {
   font-size: 11px;
 }
 
+.cell-span-info {
+  color: #2196F3;
+  font-size: 10px;
+  background: rgba(33, 150, 243, 0.1);
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
 .cell-merge-btn {
   background: none;
   border: none;
@@ -2615,6 +2456,17 @@ body {
 .cell-merge-btn:hover {
   background: rgba(33, 150, 243, 0.1);
   color: #1976D2;
+}
+
+.merged-cell-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 8px;
+  background: #f0f0f0;
+  border-bottom: 1px solid #ddd;
+  font-size: 11px;
+  color: #666;
 }
 
 .cell-content {
@@ -2768,10 +2620,12 @@ body {
   background: #fafafa;
   flex-wrap: nowrap;
 }
+
 .panel-tabs > * {
   flex-shrink: 0;
   min-width: fit-content;
 }
+
 .tab-item {
   flex: 1;
   padding: 12px;
@@ -3113,27 +2967,6 @@ textarea.form-control {
   display: flex;
 }
 
-.grid-container {
-  border-color: #9C27B0;
-  width: 100% !important;
-  max-height: 500px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.grid-cells {
-  min-height: 200px;
-  padding: 16px;
-  background: #fafafa;
-  border-radius: 0 0 10px 10px;
-  width: 100%;
-  box-sizing: border-box;
-  display: grid !important;
-  overflow-y: auto;
-  flex: 1;
-  max-height: calc(100% - 60px);
-}
 .modal {
   background-color: white;
   border-radius: 12px;
@@ -3231,6 +3064,78 @@ textarea.form-control {
   outline: none;
   border-color: var(--primary-color);
   box-shadow: 0 0 0 2px rgba(255, 131, 38, 0.1);
+}
+
+.canvas-component {
+  margin: 8px 0;
+  padding: 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background-color: white;
+  transition: all 0.2s;
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.canvas-component.selected {
+  border: 2px solid var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(255, 131, 38, 0.1);
+}
+
+.canvas-component.inline-component {
+  display: inline-block;
+  vertical-align: top;
+  min-width: 100px;
+  margin-right: 8px;
+}
+
+.canvas-component:not(.inline-component) {
+  width: 100%;
+}
+
+.component-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.component-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.component-id {
+  color: #999;
+  font-size: 12px;
+  background: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.component-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.component-hint {
+  color: #999;
+  font-size: 12px;
+  margin-right: 8px;
+}
+
+.component-content {
+  min-height: 40px;
+  background-color: #f9f9f9;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  overflow: hidden;
+  padding: 12px;
 }
 
 @media (max-width: 1200px) {
@@ -3346,9 +3251,6 @@ textarea.form-control {
     width: 100%;
   }
 
-  .container-content {
-    width: 100%
-  }
 }
 
 @media (max-width: 576px) {
