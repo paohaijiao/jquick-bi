@@ -155,8 +155,11 @@
         </div>
 
         <div class="canvas-container" id="canvas" @dragover.prevent="handleDragOver" @drop="handleDrop" @dragleave="handleDragLeave">
-          <div class="canvas-drag-area" :class="{ 'grid-layout': useGridLayout,  'dragover': isDraggingOver,   'show-grid': showGridLine }">
-            <div v-for="container in layoutContainers" :key="container.id" class="container-content" style="width: 100%">
+          <div :class="{ 'grid-layout': useGridLayout,  'dragover': isDraggingOver,   'show-grid': showGridLines }"
+               class="canvas-drag-area">
+            <!-- 网格容器列表 -->
+            <div v-for="container in layoutContainers" :key="container.id" :style="getContainerWrapperStyle(container)"
+                 class="container-content">
               <div :class="{ 'selected': selectedComponentId === container.id }"
                    :style="getGridContainerStyle(container)"
                    class="layout-container grid-container"
@@ -268,6 +271,7 @@
                 </div>
               </div>
             </div>
+
             <div v-for="component in components.filter(c => !c.containerId && !c.gridCellId)"
                  :key="component.id"
                  :class="{
@@ -332,333 +336,6 @@
         </div>
 
         <div v-if="selectedComponent" class="panel-content">
-          <div v-if="activeTab === 'layout'" class="setting-panel">
-            <div class="setting-group">
-              <div class="setting-title">尺寸设置</div>
-              <div class="setting-item">
-                <label>宽度</label>
-                <div class="range-input">
-                  <input type="range" min="0" max="100" step="1" v-model="selectedComponent.config.width.value">
-                  <input type="text" class="form-control" v-model="selectedComponent.config.width.value">
-                  <select v-model="selectedComponent.config.width.unit">
-                    <option value="%">%</option>
-                    <option value="px">px</option>
-                    <option value="rem">rem</option>
-                    <option value="vw">vw</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="setting-item">
-                <label>高度</label>
-                <div class="range-input">
-                  <input type="range" min="0" max="1000" step="10" v-model="selectedComponent.config.height.value">
-                  <input type="text" class="form-control" v-model="selectedComponent.config.height.value">
-                  <select v-model="selectedComponent.config.height.unit">
-                    <option value="px">px</option>
-                    <option value="%">%</option>
-                    <option value="rem">rem</option>
-                    <option value="vh">vh</option>
-                    <option value="auto">auto</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="setting-item">
-                <label>显示方式</label>
-                <select class="form-control" v-model="selectedComponent.config.display">
-                  <option value="block">块级 (block)</option>
-                  <option value="inline-block">内联块 (inline-block)</option>
-                  <option value="inline">内联 (inline)</option>
-                  <option value="flex">弹性盒子 (flex)</option>
-                  <option value="grid">网格 (grid)</option>
-                </select>
-              </div>
-
-              <div v-if="selectedComponent.type === 'grid'" class="setting-group">
-                <div class="setting-title">网格设置</div>
-                <div class="setting-item">
-                  <label>行数</label>
-                  <input v-model="selectedComponent.config.rows" class="form-control" max="12" min="1" type="number">
-                </div>
-                <div class="setting-item">
-                  <label>列数</label>
-                  <input v-model="selectedComponent.config.columns" class="form-control" max="12" min="1" type="number">
-                </div>
-                <div class="setting-item">
-                  <label>间距</label>
-                  <input v-model="selectedComponent.config.gap" class="form-control" placeholder="10px" type="text">
-                </div>
-              </div>
-
-              <div v-if="selectedComponent.type === 'grid-cell'" class="setting-group">
-                <div class="setting-title">单元格设置</div>
-                <div class="setting-item">
-                  <label>行跨度</label>
-                  <input v-model="selectedComponent.config.rowSpan" class="form-control" max="12" min="1" type="number">
-                </div>
-                <div class="setting-item">
-                  <label>列跨度</label>
-                  <input v-model="selectedComponent.config.colSpan" class="form-control" max="12" min="1" type="number">
-                </div>
-              </div>
-            </div>
-
-            <div class="setting-group">
-              <div class="setting-title">边距与填充</div>
-
-              <div class="spacing-controls">
-                <div class="spacing-item">
-                  <label>上边距</label>
-                  <input type="text" class="form-control" v-model="selectedComponent.config.margin.top">
-                </div>
-                <div class="spacing-item">
-                  <label>右边距</label>
-                  <input type="text" class="form-control" v-model="selectedComponent.config.margin.right">
-                </div>
-                <div class="spacing-item">
-                  <label>下边距</label>
-                  <input type="text" class="form-control" v-model="selectedComponent.config.margin.bottom">
-                </div>
-                <div class="spacing-item">
-                  <label>左边距</label>
-                  <input type="text" class="form-control" v-model="selectedComponent.config.margin.left">
-                </div>
-              </div>
-
-              <div class="spacing-controls">
-                <div class="spacing-item">
-                  <label>上填充</label>
-                  <input type="text" class="form-control" v-model="selectedComponent.config.padding.top">
-                </div>
-                <div class="spacing-item">
-                  <label>右填充</label>
-                  <input type="text" class="form-control" v-model="selectedComponent.config.padding.right">
-                </div>
-                <div class="spacing-item">
-                  <label>下填充</label>
-                  <input type="text" class="form-control" v-model="selectedComponent.config.padding.bottom">
-                </div>
-                <div class="spacing-item">
-                  <label>左填充</label>
-                  <input type="text" class="form-control" v-model="selectedComponent.config.padding.left">
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div v-if="activeTab === 'style'" class="setting-panel">
-            <div class="setting-group">
-              <div class="setting-title">文字样式</div>
-              <div class="setting-item">
-                <label>字体</label>
-                <select class="form-control" v-model="selectedComponent.config.fontFamily">
-                  <option value="">默认字体</option>
-                  <option value="Arial, sans-serif">Arial</option>
-                  <option value="'Microsoft YaHei', sans-serif">微软雅黑</option>
-                  <option value="'SimSun', serif">宋体</option>
-                  <option value="'Helvetica Neue', Helvetica, sans-serif">Helvetica</option>
-                  <option value="Georgia, serif">Georgia</option>
-                </select>
-              </div>
-
-              <div class="setting-item">
-                <label>字号</label>
-                <div class="range-input">
-                  <input type="range" min="8" max="72" step="1" v-model="selectedComponent.config.fontSize">
-                  <input type="text" class="form-control" v-model="selectedComponent.config.fontSize">
-                  <span>px</span>
-                </div>
-              </div>
-
-              <div class="setting-item">
-                <label>字重</label>
-                <select class="form-control" v-model="selectedComponent.config.fontWeight">
-                  <option value="normal">正常</option>
-                  <option value="bold">粗体</option>
-                  <option value="lighter">细体</option>
-                  <option value="bolder">特粗</option>
-                  <option value="100">100</option>
-                  <option value="300">300</option>
-                  <option value="400">400</option>
-                  <option value="500">500</option>
-                  <option value="700">700</option>
-                  <option value="900">900</option>
-                </select>
-              </div>
-
-              <div class="setting-item">
-                <label>行高</label>
-                <input type="text" class="form-control" v-model="selectedComponent.config.lineHeight">
-              </div>
-
-              <div class="setting-item">
-                <label>对齐方式</label>
-                <div class="align-buttons">
-                  <button class="align-btn" :class="{ active: selectedComponent.config.textAlign === 'left' }" @click="selectedComponent.config.textAlign = 'left'">
-                    <i class="fas fa-align-left"></i>
-                  </button>
-                  <button class="align-btn" :class="{ active: selectedComponent.config.textAlign === 'center' }" @click="selectedComponent.config.textAlign = 'center'">
-                    <i class="fas fa-align-center"></i>
-                  </button>
-                  <button class="align-btn" :class="{ active: selectedComponent.config.textAlign === 'right' }" @click="selectedComponent.config.textAlign = 'right'">
-                    <i class="fas fa-align-right"></i>
-                  </button>
-                  <button class="align-btn" :class="{ active: selectedComponent.config.textAlign === 'justify' }" @click="selectedComponent.config.textAlign = 'justify'">
-                    <i class="fas fa-align-justify"></i>
-                  </button>
-                </div>
-              </div>
-
-              <div class="setting-item">
-                <label>文字颜色</label>
-                <div class="color-picker">
-                  <input type="color" v-model="selectedComponent.config.color">
-                  <input type="text" class="form-control" v-model="selectedComponent.config.color">
-                </div>
-              </div>
-            </div>
-
-            <div class="setting-group">
-              <div class="setting-title">背景样式</div>
-              <div class="setting-item">
-                <label>背景颜色</label>
-                <div class="color-picker">
-                  <input type="color" v-model="selectedComponent.config.backgroundColor">
-                  <input type="text" class="form-control" v-model="selectedComponent.config.backgroundColor">
-                </div>
-              </div>
-
-              <div class="setting-item">
-                <label>背景图片</label>
-                <input type="text" class="form-control" v-model="selectedComponent.config.backgroundImage" placeholder="输入图片URL">
-              </div>
-
-              <div v-if="selectedComponent.config.backgroundImage" class="setting-item">
-                <label>背景尺寸</label>
-                <select class="form-control" v-model="selectedComponent.config.backgroundSize">
-                  <option value="cover">覆盖 (cover)</option>
-                  <option value="contain">包含 (contain)</option>
-                  <option value="auto">自动 (auto)</option>
-                  <option value="100% 100%">拉伸</option>
-                </select>
-              </div>
-
-              <div class="setting-item">
-                <label>圆角</label>
-                <div class="range-input">
-                  <input type="range" min="0" max="50" step="1" v-model="selectedComponent.config.borderRadius">
-                  <input type="text" class="form-control" v-model="selectedComponent.config.borderRadius">
-                  <span>px</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="setting-group">
-              <div class="setting-title">边框样式</div>
-              <div class="setting-item">
-                <label>边框宽度</label>
-                <input type="text" class="form-control" v-model="selectedComponent.config.borderWidth" placeholder="1px">
-              </div>
-              <div class="setting-item">
-                <label>边框样式</label>
-                <select class="form-control" v-model="selectedComponent.config.borderStyle">
-                  <option value="none">无</option>
-                  <option value="solid">实线</option>
-                  <option value="dashed">虚线</option>
-                  <option value="dotted">点线</option>
-                  <option value="double">双线</option>
-                </select>
-              </div>
-
-              <div class="setting-item">
-                <label>边框颜色</label>
-                <div class="color-picker">
-                  <input type="color" v-model="selectedComponent.config.borderColor">
-                  <input type="text" class="form-control" v-model="selectedComponent.config.borderColor">
-                </div>
-              </div>
-
-              <div class="setting-item">
-                <label>阴影</label>
-                <input type="text" class="form-control" v-model="selectedComponent.config.boxShadow"
-                       placeholder="e.g. 0 2px 8px rgba(0,0,0,0.1)">
-              </div>
-            </div>
-          </div>
-
-          <div v-if="activeTab === 'content'" class="setting-panel">
-            <div class="setting-group">
-              <div class="setting-title">内容编辑</div>
-              <div class="setting-item">
-                <label>文本内容</label>
-                <textarea class="form-control" rows="4" v-model="selectedComponent.content"></textarea>
-              </div>
-              <div class="setting-item">
-                <label>占位文本</label>
-                <input type="text" class="form-control" v-model="selectedComponent.config.placeholder">
-              </div>
-
-              <div v-if="selectedComponent.type === 'button'" class="setting-item">
-                <label>按钮类型</label>
-                <select class="form-control" v-model="selectedComponent.config.buttonType">
-                  <option value="button">普通按钮</option>
-                  <option value="submit">提交按钮</option>
-                  <option value="reset">重置按钮</option>
-                </select>
-              </div>
-
-              <div v-if="selectedComponent.type === 'input'" class="setting-item">
-                <label>输入类型</label>
-                <select class="form-control" v-model="selectedComponent.config.inputType">
-                  <option value="text">文本</option>
-                  <option value="number">数字</option>
-                  <option value="email">邮箱</option>
-                  <option value="password">密码</option>
-                  <option value="date">日期</option>
-                  <option value="tel">电话</option>
-                </select>
-              </div>
-
-              <div v-if="selectedComponent.type === 'chart'" class="setting-item">
-                <label>图表类型</label>
-                <select class="form-control" v-model="selectedComponent.config.chartType">
-                  <option value="bar">柱状图</option>
-                  <option value="line">折线图</option>
-                  <option value="pie">饼图</option>
-                  <option value="area">面积图</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div v-if="activeTab === 'advanced'" class="setting-panel">
-            <div class="setting-group">
-              <div class="setting-title">响应式设置</div>
-              <div class="setting-item">
-                <label>桌面版样式 (大于等于1200px)</label>
-                <textarea class="form-control" rows="3" v-model="selectedComponent.config.responsive.desktop.css" placeholder="例如: width: 25%; margin: 10px;"></textarea>
-              </div>
-
-              <div class="setting-item">
-                <label>平板版样式 (768px-1199px)</label>
-                <textarea class="form-control" rows="3" v-model="selectedComponent.config.responsive.tablet.css" placeholder="例如: width: 50%; margin: 8px;"></textarea>
-              </div>
-
-              <div class="setting-item">
-                <label>手机版样式 (小于768px)</label>
-                <textarea class="form-control" rows="3" v-model="selectedComponent.config.responsive.mobile.css" placeholder="例如: width: 100%; margin: 5px;"></textarea>
-              </div>
-            </div>
-
-            <div class="setting-group">
-              <div class="setting-title">自定义CSS</div>
-              <div class="setting-item">
-                <label>自定义样式</label>
-                <textarea class="form-control" rows="6" v-model="selectedComponent.config.customCss" placeholder="输入自定义CSS样式"></textarea>
-              </div>
-            </div>
-          </div>
         </div>
 
         <div v-else class="no-selection">
@@ -703,6 +380,7 @@
 import {computed, defineComponent, onMounted, ref, watch} from 'vue';
 import request from '../api/request';
 import {ElMessage} from "element-plus";
+
 export default defineComponent({
   setup() {
     const sidebarActive = ref(false);
@@ -724,6 +402,7 @@ export default defineComponent({
     const formElements = ref([]);
     const mediaElements = ref([]);
     const allDomElements = ref({});
+
     const initializeDomElements = async () => {
       try {
         request.get('/api/elements/all')
@@ -784,92 +463,39 @@ export default defineComponent({
     };
 
     const initializeData = () => {
-      layoutContainers.value = [
-        {
-          id: 'grid_1',
-          type: 'grid',
-          name: '网格容器',
-          icon: 'fas fa-th',
-          config: {
-            width: {value: 100, unit: '%'},
-            height: {value: 300, unit: 'px'},
-            display: 'grid',
-            rows: 3,
-            columns: 3,
-            gap: '10px',
-            margin: {top: '10px', right: '0', bottom: '10px', left: '0'},
-            padding: {top: '15px', right: '15px', bottom: '15px', left: '15px'},
-            backgroundColor: '#ffffff',
-            responsive: {
-              desktop: {className: '', css: ''},
-              tablet: {className: '', css: 'gap: 8px; width: 100%;'},
-              mobile: {className: '', css: 'gap: 5px; width: 100%;'}
-            },
-            cells: []
-          }
-        }
-      ];
-
-      components.value = [
-        {
-          id: 'text_1',
-          type: 'text',
-          name: '标题文本',
-          icon: 'fas fa-font',
-          content: '欢迎使用JQuick BI',
-          containerId: null,
-          gridCellId: 'cell_grid_1_1_1',
-          config: {
-            width: {value: 100, unit: '%'},
-            height: {value: 'auto', unit: 'auto'},
-            display: 'block',
-            fontSize: '24px',
-            fontWeight: 'bold',
-            fontFamily: "'Microsoft YaHei', sans-serif",
-            color: '#333333',
-            textAlign: 'left',
-            lineHeight: '1.5',
-            margin: {top: '0', right: '0', bottom: '15px', left: '0'},
-            padding: {top: '0', right: '0', bottom: '0', left: '0'},
-            backgroundColor: 'transparent',
-            borderWidth: '0',
-            borderStyle: 'solid',
-            borderColor: '#dddddd',
-            borderRadius: '0',
-            boxShadow: 'none',
-            customCss: '',
-            inline: false,
-            responsive: {
-              desktop: {className: '', css: ''},
-              tablet: {className: '', css: 'font-size: 20px;'},
-              mobile: {className: '', css: 'font-size: 18px;'}
-            }
-          }
-        }
-      ];
-      initializeGridCells('grid_1', 3, 3);
+      layoutContainers.value = [];
+      components.value = [];
     };
 
     const initializeGridCells = (containerId, rows = 3, columns = 3) => {
       const container = layoutContainers.value.find(c => c.id === containerId);
       if (!container || container.type !== 'grid') return;
+
       container.config.rows = rows;
       container.config.columns = columns;
-      container.config.cells = [];
+
+      const cells = [];
       for (let row = 1; row <= rows; row++) {
         for (let col = 1; col <= columns; col++) {
           const cellId = `cell_${containerId}_${row}_${col}`;
-          container.config.cells.push({
+
+          let existingCell = null;
+          if (container.config.cells && container.config.cells.length > 0) {
+            existingCell = container.config.cells.find(c => c.row === row && c.col === col);
+          }
+
+          cells.push({
             id: cellId,
             row,
             col,
-            rowSpan: 1,
-            colSpan: 1,
-            merged: false,
-            components: []
+            rowSpan: existingCell?.rowSpan || 1,
+            colSpan: existingCell?.colSpan || 1,
+            merged: existingCell?.merged || false,
+            components: existingCell?.components || []
           });
         }
       }
+      container.config.cells = cells;
     };
 
     const initializeExistingGrids = () => {
@@ -891,8 +517,6 @@ export default defineComponent({
     const selectedComponent = computed(() => {
       const allItems = [...layoutContainers.value, ...components.value];
       let selectedItem = allItems.find(item => item.id === selectedComponentId.value);
-
-      // 检查是否是网格单元格
       if (!selectedItem) {
         layoutContainers.value.forEach(container => {
           if (container.type === 'grid' && container.config.cells) {
@@ -931,30 +555,53 @@ export default defineComponent({
       if (!components.value) return [];
       return components.value.filter(component => component.gridCellId === cellId);
     };
+    /**
+     * 为容器包装器添加边距，确保多个容器不会重叠
+     * @param container
+     * @returns {{marginBottom: string}}
+     */
+    const getContainerWrapperStyle = (container) => {
 
-    const getFreeComponents = computed(() => {
-      if (!components.value) return [];
-      return components.value.filter(c => !c.containerId && !c.gridCellId);
-    });
+      return {
+        marginBottom: '20px'
+      };
+    };
 
     const getGridContainerStyle = (container) => {
       if (!container || !container.config) return {};
       const config = container.config;
       const responsiveConfig = config.responsive && config.responsive[currentBreakpoint.value];
-      const rows = config.rows || 3;
-      const suggestedHeight = Math.max(rows * 100, 300);
-      let width = '100%';
+      let width = '100%';// 计算宽度 - 移除 !important，允许自适应布局
       if (config.width?.unit === '%' && config.width?.value) {
-        width = config.width.value + '%';
+        width = Math.min(config.width.value, 100) + '%';
+      } else if (config.width?.unit === 'px' && config.width?.value) {
+        width = config.width.value + 'px';
       }
+
+      // 计算高度 - 基于行数动态调整
+      const rows = config.rows || 3;
+      const cellHeight = 100; // 每个单元格的基础高度
+      const containerPadding = 60; // 容器内边距和头部高度
+      const suggestedHeight = rows * cellHeight + containerPadding;
+      let height = suggestedHeight + 'px';
+      if (config.height?.unit && config.height?.value) {
+        if (config.height.unit === 'auto') {
+          height = 'auto';
+        } else {
+          height = config.height.value + config.height.unit;
+        }
+      }
+
       let style = {
         width: width,
-        height: (config.height?.value || suggestedHeight) + (config.height?.unit || 'px'),
+        height: height,
         margin: `${config.margin?.top || '0'} ${config.margin?.right || '0'} ${config.margin?.bottom || '0'} ${config.margin?.left || '0'}`,
         padding: `${config.padding?.top || '0'} ${config.padding?.right || '0'} ${config.padding?.bottom || '0'} ${config.padding?.left || '0'}`,
         'background-color': config.backgroundColor || '#ffffff',
         'overflow': 'visible',
         'box-sizing': 'border-box',
+        'display': 'flex',
+        'flex-direction': 'column'
       };
 
       if (responsiveConfig && responsiveConfig.css) {
@@ -978,16 +625,15 @@ export default defineComponent({
 
     const getGridTemplateStyle = (container) => {
       if (!container || !container.config) return {};
-
       const config = container.config;
       const responsiveConfig = config.responsive && config.responsive[currentBreakpoint.value];
-
       let style = {
         display: 'grid',
         'grid-template-rows': `repeat(${config.rows || 3}, minmax(80px, 1fr))`,
         'grid-template-columns': `repeat(${config.columns || 3}, minmax(100px, 1fr))`,
         gap: config.gap || '10px',
         'min-height': '200px',
+        'flex': '1'
       };
       if (responsiveConfig && responsiveConfig.css) {
         try {
@@ -1055,6 +701,7 @@ export default defineComponent({
         'border-radius': (config.borderRadius || '0') + 'px',
         'box-shadow': config.boxShadow || 'none'
       };
+
       if (responsiveConfig && responsiveConfig.css) {
         try {
           const responsiveStyles = responsiveConfig.css.split(';').reduce((acc, rule) => {
@@ -1195,7 +842,37 @@ export default defineComponent({
         inline: false
       };
 
-      if (elementInfo.isContainer) {
+      if (elementType === 'grid') {
+        const containerConfig = {
+          width: {value: 100, unit: '%'},
+          height: {value: 300, unit: 'px'},
+          display: 'grid',
+          rows: 3,
+          columns: 3,
+          gap: '10px',
+          margin: {top: '10px', right: '0', bottom: '10px', left: '0'},
+          padding: {top: '15px', right: '15px', bottom: '15px', left: '15px'},
+          backgroundColor: '#ffffff',
+          responsive: {
+            desktop: {className: '', css: ''},
+            tablet: {className: '', css: 'gap: 8px; width: 100%;'},
+            mobile: {className: '', css: 'gap: 5px; width: 100%;'}
+          },
+          cells: []
+        };
+
+        const newContainer = {
+          id: newId,
+          type: elementType,
+          name: '网格容器',
+          icon: elementInfo.icon,
+          config: containerConfig
+        };
+
+        layoutContainers.value.push(newContainer);
+        initializeGridCells(newId, 3, 3);
+        console.log('创建网格容器:', newId);
+      } else if (elementInfo.isContainer) {
         const containerConfig = {
           width: {value: 100, unit: '%'},
           height: {value: 200, unit: 'px'},
@@ -1209,7 +886,6 @@ export default defineComponent({
             mobile: {className: '', css: 'width: 100%;'}
           }
         };
-
         layoutContainers.value.push({
           id: newId,
           type: elementType,
@@ -1217,7 +893,6 @@ export default defineComponent({
           icon: elementInfo.icon,
           config: containerConfig
         });
-
         console.log('创建容器:', elementType, newId);
       } else {
         const contentMap = {
@@ -1254,8 +929,7 @@ export default defineComponent({
           width: {value: elementInfo.inline ? 'auto' : 100, unit: elementInfo.inline ? 'auto' : '%'},
           height: {value: 'auto', unit: 'auto'},
           display: elementInfo.inline ? 'inline-block' : 'block',
-          fontSize: ['h1', 'h2', 'h3'].includes(elementType) ?
-              (elementType === 'h1' ? '32px' : elementType === 'h2' ? '24px' : '18px') : '14px',
+          fontSize: ['h1', 'h2', 'h3'].includes(elementType) ? (elementType === 'h1' ? '32px' : elementType === 'h2' ? '24px' : '18px') : '14px',
           fontWeight: ['h1', 'h2', 'h3', 'strong', 'b'].includes(elementType) ? 'bold' : 'normal',
           fontFamily: '',
           color: '#333333',
@@ -1284,7 +958,7 @@ export default defineComponent({
           }
         };
 
-        components.value.push({
+        const newComponent = {
           id: newId,
           type: elementType,
           name: elementInfo.name,
@@ -1293,8 +967,12 @@ export default defineComponent({
           containerId: containerId,
           gridCellId: gridCellId,
           config: componentConfig
-        });
+        };
+
+        components.value.push(newComponent);
+
         if (gridCellId) {
+          // 找到对应的网格容器和单元格
           const container = layoutContainers.value.find(c =>
               c.type === 'grid' && c.config.cells && c.config.cells.some(cell => cell.id === gridCellId)
           );
@@ -1302,7 +980,9 @@ export default defineComponent({
             const cell = container.config.cells.find(c => c.id === gridCellId);
             if (cell && !cell.merged) {
               if (!cell.components) cell.components = [];
-              cell.components.push(newId);
+              if (!cell.components.includes(newId)) {
+                cell.components.push(newId);
+              }
             }
           }
         }
@@ -1320,19 +1000,8 @@ export default defineComponent({
       if (!container || container.type !== 'grid') return;
       const newRow = (container.config.rows || 3) + 1;
       container.config.rows = newRow;
-      if (!container.config.cells) container.config.cells = [];
-      for (let col = 1; col <= (container.config.columns || 3); col++) {
-        const cellId = `cell_${containerId}_${newRow}_${col}`;
-        container.config.cells.push({
-          id: cellId,
-          row: newRow,
-          col,
-          rowSpan: 1,
-          colSpan: 1,
-          merged: false,
-          components: []
-        });
-      }
+      // 重新初始化单元格
+      initializeGridCells(containerId, newRow, container.config.columns || 3);
     };
 
     const addGridColumn = (containerId) => {
@@ -1340,25 +1009,13 @@ export default defineComponent({
       if (!container || container.type !== 'grid') return;
       const newCol = (container.config.columns || 3) + 1;
       container.config.columns = newCol;
-      if (!container.config.cells) container.config.cells = [];
-      for (let row = 1; row <= (container.config.rows || 3); row++) {
-        const cellId = `cell_${containerId}_${row}_${newCol}`;
-        container.config.cells.push({
-          id: cellId,
-          row,
-          col: newCol,
-          rowSpan: 1,
-          colSpan: 1,
-          merged: false,
-          components: []
-        });
-      }
+      // 重新初始化单元格
+      initializeGridCells(containerId, container.config.rows || 3, newCol);
     };
 
     const toggleGridCellMerge = (containerId, cell) => {
       const container = layoutContainers.value.find(c => c.id === containerId);
       if (!container || container.type !== 'grid') return;
-
       if (cell.rowSpan > 1 || cell.colSpan > 1) {
         // 如果是已合并的单元格，则拆分
         splitGridCellAt(containerId, cell);
@@ -1371,11 +1028,9 @@ export default defineComponent({
     const mergeGridCell = (containerId, cell) => {
       const container = layoutContainers.value.find(c => c.id === containerId);
       if (!container || container.type !== 'grid') return;
-
       // 合并当前单元格和右侧单元格
       const targetRow = cell.row;
       const targetCol = cell.col + 1;
-
       // 检查右侧单元格是否存在
       const rightCell = container.config.cells.find(c => c.row === targetRow && c.col === targetCol);
       if (rightCell && !rightCell.merged) {
@@ -1386,16 +1041,13 @@ export default defineComponent({
           });
           rightCell.components = [];
         }
-
         // 设置当前单元格的列跨度
         cell.colSpan = 2;
         cell.merged = false; // 设置为未合并状态，但有跨度
-
         // 标记右侧单元格为已合并
         rightCell.merged = true;
         rightCell.rowSpan = 1;
         rightCell.colSpan = 1;
-
         // 重新计算单元格位置
         recalculateGridCells(container);
       }
@@ -1404,7 +1056,6 @@ export default defineComponent({
     const unmergeGridCell = (containerId, cell) => {
       const container = layoutContainers.value.find(c => c.id === containerId);
       if (!container || container.type !== 'grid') return;
-
       // 如果是已合并的单元格，取消合并
       if (cell.merged) {
         cell.merged = false;
@@ -1416,14 +1067,12 @@ export default defineComponent({
           cell.components = [];
         }
       }
-
       // 如果是跨度的单元格，重置跨度
       if (cell.rowSpan > 1 || cell.colSpan > 1) {
         // 查找并重置相关的单元格
         for (let r = cell.row; r < cell.row + cell.rowSpan; r++) {
           for (let c = cell.col; c < cell.col + cell.colSpan; c++) {
             if (r === cell.row && c === cell.col) continue; // 跳过自身
-
             const relatedCell = container.config.cells.find(cell => cell.row === r && cell.col === c);
             if (relatedCell) {
               relatedCell.merged = false;
@@ -1432,19 +1081,16 @@ export default defineComponent({
             }
           }
         }
-
         // 重置当前单元格的跨度
         cell.rowSpan = 1;
         cell.colSpan = 1;
       }
-
       recalculateGridCells(container);
     };
 
     const splitGridCell = (containerId) => {
       const container = layoutContainers.value.find(c => c.id === containerId);
       if (!container || container.type !== 'grid') return;
-
       // 查找当前选中的单元格
       const selectedCell = container.config.cells.find(c => c.id === selectedComponentId.value);
       if (selectedCell) {
@@ -1461,13 +1107,11 @@ export default defineComponent({
         for (let r = cell.row; r < cell.row + cell.rowSpan; r++) {
           for (let c = cell.col; c < cell.col + cell.colSpan; c++) {
             if (r === cell.row && c === cell.col) continue; // 跳过自身
-
             const relatedCell = container.config.cells.find(cell => cell.row === r && cell.col === c);
             if (relatedCell) {
               relatedCell.merged = false;
               relatedCell.rowSpan = 1;
               relatedCell.colSpan = 1;
-
               // 清空内容
               if (relatedCell.components && relatedCell.components.length > 0) {
                 relatedCell.components.forEach(componentId => {
@@ -1478,28 +1122,21 @@ export default defineComponent({
             }
           }
         }
-
         // 重置当前单元格的跨度
         cell.rowSpan = 1;
         cell.colSpan = 1;
-
         recalculateGridCells(container);
       }
     };
 
     const recalculateGridCells = (container) => {
       if (!container || container.type !== 'grid') return;
-
       // 重新计算所有单元格的位置
       const cells = [];
-      let cellIdCounter = 1;
-
       for (let row = 1; row <= container.config.rows; row++) {
         for (let col = 1; col <= container.config.columns; col++) {
           const existingCell = container.config.cells.find(c => c.row === row && c.col === col);
-
           if (existingCell && !existingCell.merged) {
-            // 保留未合并的单元格
             cells.push({
               ...existingCell,
               row,
@@ -1520,7 +1157,6 @@ export default defineComponent({
           }
         }
       }
-
       container.config.cells = cells;
     };
 
@@ -1731,12 +1367,10 @@ export default defineComponent({
           ];
           break;
       }
-
       // 初始化网格单元格
       layoutContainers.value.forEach(container => {
         initializeGridCells(container.id, container.config.rows, container.config.columns);
       });
-
       selectedComponentId.value = layoutContainers.value.length > 0 ? layoutContainers.value[0].id : '';
     };
 
@@ -1747,18 +1381,15 @@ export default defineComponent({
     const toggleGridLines = () => {
       showGridLines.value = !showGridLines.value;
     };
-
     const selectComponent = (id) => {
       selectedComponentId.value = id;
       activeTab.value = 'layout';
     };
-
     const deselectComponent = () => {
       selectedComponentId.value = '';
     };
 
     const deleteComponent = (id) => {
-      // 从网格单元格中移除组件引用
       layoutContainers.value.forEach(container => {
         if (container.type === 'grid' && container.config.cells) {
           container.config.cells.forEach(cell => {
@@ -1771,7 +1402,6 @@ export default defineComponent({
           });
         }
       });
-
       components.value = components.value.filter(c => c.id !== id);
       if (selectedComponentId.value === id) {
         selectedComponentId.value = '';
@@ -1781,7 +1411,6 @@ export default defineComponent({
     const deleteContainer = (id) => {
       const container = layoutContainers.value.find(c => c.id === id);
       if (container && container.type === 'grid' && container.config.cells) {
-        // 删除网格容器时，同时删除其中的所有组件
         container.config.cells.forEach(cell => {
           if (cell.components && cell.components.length > 0) {
             cell.components.forEach(componentId => {
@@ -1880,7 +1509,6 @@ export default defineComponent({
       textElements,
       formElements,
       mediaElements,
-      getFreeComponents,
       handleDragStart,
       handleDomTypeDragStart,
       toggleSidebar,
@@ -1890,6 +1518,7 @@ export default defineComponent({
       deleteComponent,
       deleteContainer,
       getComponentsInGridCell,
+      getContainerWrapperStyle,
       getGridContainerStyle,
       getGridTemplateStyle,
       getGridCellStyle,
@@ -1973,6 +1602,21 @@ body {
   z-index: 10;
 }
 
+.container-content {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.grid-container {
+  width: 100% !important;
+  max-width: 100%;
+}
+
+.canvas-drag-area {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
 .logo {
   display: flex;
   align-items: center;
