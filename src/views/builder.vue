@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container" @click="handleCanvasClick">
     <header class="header">
       <button class="mobile-menu-toggle" @click="toggleSidebar">
         <i class="fas fa-bars"></i>
@@ -359,12 +359,11 @@
 <script>
 import request from '../api/request';
 import { ElMessage } from "element-plus";
-
 export default {
   name: 'Builder',
   data() {
     return {
-      // 原有状态
+  
       sidebarActive: false,
       propertiesPanelActive: true,
       activeTab: 'layout',
@@ -384,8 +383,6 @@ export default {
       formElements: [],
       mediaElements: [],
       allDomElements: {},
-      
-      // 新增状态
       selectedCells: [],
       currentGridContainerId: ''
     };
@@ -474,7 +471,6 @@ export default {
     }
   },
   methods: {
-    // === 新增的单元格操作方法 ===
     getCellAddress(cellId) {
       const container = this.layoutContainers.find(c => c.id === this.currentGridContainerId);
       if (!container) return '';
@@ -724,13 +720,13 @@ export default {
     },
     
     handleCanvasClick(event) {
-      if (!event.target.closest('.grid-cell')) {
+      // 如果点击的不是网格单元格或容器
+      if (!event.target.closest('.grid-cell') && !event.target.closest('.layout-container')) {
         this.selectedCells = [];
         this.currentGridContainerId = '';
       }
     },
     
-    // === 原有方法 ===
     async initializeDomElements() {
       try {
         request.get('/api/elements/all')
@@ -832,6 +828,7 @@ export default {
       const config = container.config;
       const responsiveConfig = config.responsive && config.responsive[this.currentBreakpoint];
       
+      // 关键修复：确保容器宽度为100%
       let width = '100%';
       if (config.width?.unit === '%' && config.width?.value) {
         width = Math.min(config.width.value, 100) + '%';
@@ -840,9 +837,10 @@ export default {
       }
 
       const rows = config.rows || 3;
-      const cellHeight = 100;
+      const cellHeight = 80; // 减小单元格高度
+      const gap = parseInt(config.gap || '10px');
       const containerPadding = 0;
-      const suggestedHeight = rows * cellHeight + containerPadding;
+      const suggestedHeight = rows * cellHeight + (rows - 1) * gap + containerPadding * 2;
       let height = suggestedHeight + 'px';
       if (config.height?.unit && config.height?.value) {
         if (config.height.unit === 'auto') {
@@ -854,7 +852,9 @@ export default {
 
       let style = {
         width: width,
+        minWidth: '100%', // 确保最小宽度也是100%
         height: height,
+        minHeight: '200px',
         margin: `${config.margin?.top || '0'} ${config.margin?.right || '0'} ${config.margin?.bottom || '0'} ${config.margin?.left || '0'}`,
         padding: '0',
         'background-color': config.backgroundColor || 'transparent',
@@ -898,7 +898,8 @@ export default {
         'min-height': '200px',
         'flex': '1',
         'width': '100%',
-        'height': '100%'
+        'height': '100%',
+        'box-sizing': 'border-box'
       };
       if (responsiveConfig && responsiveConfig.css) {
         try {
@@ -925,6 +926,8 @@ export default {
         'grid-column': `${cell.col || 1} / span ${cell.colSpan || 1}`,
         'min-height': '80px',
         'min-width': '100px',
+        'box-sizing': 'border-box',
+        'overflow': 'visible'
       };
 
       if (cell.merged) {
@@ -1003,8 +1006,18 @@ export default {
     
     renderComponentContent(component) {
       if (!component) return '';
-      // ... 原有的渲染逻辑 ...
-      return component.content || '';
+      if (component.type === 'div') {
+        return `<div style="padding: 8px; background: #f0f0f0; border-radius: 4px;">${component.name || '容器'}</div>`;
+      } else if (component.type === 'span') {
+        return `<span style="padding: 4px 8px; background: #e6f7ff; border-radius: 4px;">${component.content || '文本内容'}</span>`;
+      } else if (component.type === 'button') {
+        return `<button style="padding: 6px 12px; background: var(--primary-color); color: white; border: none; border-radius: 4px;">${component.content || '按钮'}</button>`;
+      } else if (component.type === 'img') {
+        return `<img src="https://via.placeholder.com/100x60?text=图片" alt="图片" style="max-width: 100%; height: auto; display: block;">`;
+      } else if (component.type === 'input') {
+        return `<input type="text" placeholder="输入文本" style="padding: 6px; border: 1px solid #ddd; border-radius: 4px; width: 100%;">`;
+      }
+      return component.content || `<div style="color: #666; padding: 8px;">${component.name || '组件'}</div>`;
     },
     
     handleDragStart(event, elementType) {
@@ -1068,10 +1081,14 @@ export default {
         console.warn('未获取到拖拽元素类型');
         return;
       }
+      
+      console.log('拖放到单元格:', cellId, '元素类型:', elementType);
       this.createComponent(elementType, null, cellId);
     },
     
     createComponent(elementType, containerId = null, gridCellId = null) {
+      console.log('创建组件:', elementType, 'containerId:', containerId, 'gridCellId:', gridCellId);
+      
       const newId = `${elementType}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
       const elementInfo = this.allDomElements[elementType] || {
         name: `${elementType}元素`,
@@ -1110,14 +1127,83 @@ export default {
         this.layoutContainers.push(newContainer);
         this.initializeGridCells(newId, 3, 3);
         console.log('创建网格容器:', newId);
-      } else if (elementInfo.isContainer) {
-        // ... 容器创建逻辑 ...
       } else {
-        // ... 组件创建逻辑 ...
+        // 创建普通组件
+        const componentConfig = {
+          width: { value: 100, unit: '%' },
+          height: { value: 'auto', unit: 'auto' },
+          display: 'block',
+          margin: { top: '0', right: '0', bottom: '0', left: '0' },
+          padding: { top: '8px', right: '8px', bottom: '8px', left: '8px' },
+          backgroundColor: 'white',
+          fontSize: '14',
+          fontWeight: 'normal',
+          color: '#333333',
+          textAlign: 'left',
+          responsive: {
+            desktop: { className: '', css: '' },
+            tablet: { className: '', css: '' },
+            mobile: { className: '', css: '' }
+          }
+        };
+
+        const newComponent = {
+          id: newId,
+          type: elementType,
+          name: elementInfo.name,
+          icon: elementInfo.icon,
+          config: componentConfig,
+          containerId: containerId,
+          gridCellId: gridCellId,
+          content: this.getDefaultContentForElement(elementType)
+        };
+
+        this.components.push(newComponent);
+        
+        // 如果拖放到了网格单元格中，更新单元格的组件列表
+        if (gridCellId) {
+          const container = this.layoutContainers.find(c => 
+            c.config.cells && c.config.cells.some(cell => cell.id === gridCellId)
+          );
+          if (container) {
+            const cell = container.config.cells.find(c => c.id === gridCellId);
+            if (cell) {
+              if (!cell.components) {
+                cell.components = [];
+              }
+              cell.components.push(newId);
+            }
+          }
+        }
+        
+        console.log('创建组件成功:', newComponent);
       }
 
       this.selectComponent(newId);
       this.draggingElementType = '';
+      
+      ElMessage.success(`已添加 ${elementInfo.name}`);
+    },
+    
+    getDefaultContentForElement(elementType) {
+      const defaults = {
+        'div': '容器内容',
+        'span': '文本内容',
+        'p': '段落文本',
+        'h1': '标题1',
+        'h2': '标题2',
+        'h3': '标题3',
+        'button': '按钮',
+        'input': '',
+        'textarea': '多行文本',
+        'img': '图片',
+        'video': '视频',
+        'audio': '音频',
+        'ul': '无序列表',
+        'ol': '有序列表',
+        'table': '表格'
+      };
+      return defaults[elementType] || '组件内容';
     },
     
     handleGridCellDoubleClick(containerId, cell) {
@@ -1144,6 +1230,7 @@ export default {
     },
     
     deleteComponent(id) {
+      // 从单元格中移除组件引用
       this.layoutContainers.forEach(container => {
         if (container.type === 'grid' && container.config.cells) {
           container.config.cells.forEach(cell => {
@@ -1156,10 +1243,14 @@ export default {
           });
         }
       });
+      
+      // 从组件列表中移除
       this.components = this.components.filter(c => c.id !== id);
       if (this.selectedComponentId === id) {
         this.selectedComponentId = '';
       }
+      
+      ElMessage.success('组件已删除');
     },
     
     deleteContainer(id) {
@@ -1178,6 +1269,8 @@ export default {
       if (this.selectedComponentId === id) {
         this.selectedComponentId = '';
       }
+      
+      ElMessage.success('容器已删除');
     },
     
     toggleGridLayout() {
@@ -1191,6 +1284,7 @@ export default {
         this.selectedComponentId = '';
         this.selectedCells = [];
         this.currentGridContainerId = '';
+        ElMessage.success('布局已重置');
       }
     },
     
@@ -1203,6 +1297,7 @@ export default {
       a.download = 'jquick-bi-report.html';
       a.click();
       URL.revokeObjectURL(url);
+      ElMessage.success('HTML已导出');
     },
     
     previewHtml() {
@@ -1210,10 +1305,103 @@ export default {
       const previewWindow = window.open();
       previewWindow.document.write(htmlContent);
       previewWindow.document.close();
+      ElMessage.success('预览已打开');
     },
     
     generateHtml() {
-      return `template html`;
+      let html = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JQuick BI 报表</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #2d3e50; background-color: #f9f9f9; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">`;
+      
+      // 生成网格容器HTML
+      this.layoutContainers.forEach(container => {
+        if (container.type === 'grid') {
+          html += `
+        <div class="grid-container" style="
+            display: grid;
+            grid-template-rows: repeat(${container.config.rows || 3}, 1fr);
+            grid-template-columns: repeat(${container.config.columns || 3}, 1fr);
+            gap: ${container.config.gap || '10px'};
+            margin: ${container.config.margin?.top || '0'} ${container.config.margin?.right || '0'} ${container.config.margin?.bottom || '0'} ${container.config.margin?.left || '0'};
+            padding: 0;
+            background-color: ${container.config.backgroundColor || 'transparent'};
+            width: 100%;
+            min-height: ${container.config.height?.value || '300'}${container.config.height?.unit || 'px'};
+        ">`;
+          
+          container.config.cells.forEach(cell => {
+            html += `
+            <div class="grid-cell" style="
+                grid-row: ${cell.row} / span ${cell.rowSpan || 1};
+                grid-column: ${cell.col} / span ${cell.colSpan || 1};
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                background: white;
+                padding: 10px;
+                min-height: 80px;
+            ">`;
+            
+            // 添加单元格内的组件
+            if (cell.components && cell.components.length > 0) {
+              cell.components.forEach(componentId => {
+                const component = this.components.find(c => c.id === componentId);
+                if (component) {
+                  html += this.generateComponentHtml(component);
+                }
+              });
+            }
+            
+            html += `</div>`;
+          });
+          
+          html += `</div>`;
+        }
+      });
+      
+      // 生成不在网格中的组件
+      this.components
+        .filter(c => !c.gridCellId && !c.containerId)
+        .forEach(component => {
+          html += this.generateComponentHtml(component);
+        });
+      
+      html += `
+    </div>
+</body>
+</html>`;
+      
+      return html;
+    },
+    
+    generateComponentHtml(component) {
+      const style = this.getComponentStyle(component);
+      const styleString = Object.entries(style)
+        .filter(([key, value]) => value && value !== '' && value !== '0')
+        .map(([key, value]) => `${key}: ${value};`)
+        .join(' ');
+      
+      let content = component.content || '';
+      if (!content && component.type === 'img') {
+        content = '<img src="https://via.placeholder.com/100x60?text=图片" alt="图片" style="max-width: 100%; height: auto;">';
+      } else if (!content && component.type === 'button') {
+        content = '按钮';
+      }
+      
+      return `
+        <div class="component ${component.type}" style="${styleString}">
+            ${content}
+        </div>`;
     },
     
     openHtmlEditor() {
@@ -1227,19 +1415,23 @@ export default {
     
     parseHtml() {
       console.log('解析HTML:', this.htmlEditorContent);
+      ElMessage.info('HTML解析功能待实现');
     },
     
     importHtml() {
       this.htmlEditorContent = this.generateHtml();
+      ElMessage.success('已导入当前布局');
     },
     
     clearHtml() {
       this.htmlEditorContent = '';
+      ElMessage.info('编辑器已清空');
     },
     
     applyHtml() {
       console.log('应用HTML:', this.htmlEditorContent);
       this.closeModal();
+      ElMessage.info('应用HTML功能待实现');
     },
     
     handleDragOver(e) {
@@ -1380,6 +1572,8 @@ export default {
         this.initializeGridCells(container.id, container.config.rows, container.config.columns);
       });
       this.selectedComponentId = this.layoutContainers.length > 0 ? this.layoutContainers[0].id : '';
+      
+      ElMessage.success(`已应用${presetType === 'header-sidebar-main' ? '头部+侧边栏' : presetType === 'three-column' ? '三栏' : '仪表盘'}布局`);
     },
     
     saveLayout() {
@@ -1396,7 +1590,7 @@ export default {
       a.download = `jquick-bi-layout-${Date.now()}.json`;
       a.click();
       URL.revokeObjectURL(url);
-      alert('布局已保存！');
+      ElMessage.success('布局已保存！');
     },
     
     loadLayout() {
@@ -1419,10 +1613,10 @@ export default {
             this.selectedCells = [];
             this.currentGridContainerId = '';
             this.initializeExistingGrids();
-            alert('布局加载成功！');
+            ElMessage.success('布局加载成功！');
           } catch (error) {
             console.error('加载布局失败:', error);
-            alert('加载布局失败，请检查文件格式是否正确');
+            ElMessage.error('加载布局失败，请检查文件格式是否正确');
           }
         };
         reader.readAsText(file);
@@ -1436,7 +1630,36 @@ export default {
     this.initializeExistingGrids();
     
     // 添加点击事件监听器
-    document.addEventListener('click', this.handleCanvasClick);
+    document.addEventListener('click', this.handleCanvasClick.bind(this));
+    
+    // 测试数据
+    setTimeout(() => {
+      if (this.containerElements.length === 0) {
+        this.containerElements = [
+          { type: 'div', name: '容器', icon: 'fas fa-square' },
+          { type: 'section', name: '区块', icon: 'fas fa-columns' }
+        ];
+        this.textElements = [
+          { type: 'span', name: '文本', icon: 'fas fa-font' },
+          { type: 'p', name: '段落', icon: 'fas fa-paragraph' },
+          { type: 'h1', name: '标题1', icon: 'fas fa-heading' },
+          { type: 'h2', name: '标题2', icon: 'fas fa-heading' }
+        ];
+        this.formElements = [
+          { type: 'button', name: '按钮', icon: 'fas fa-hand-pointer' },
+          { type: 'input', name: '输入框', icon: 'fas fa-edit' }
+        ];
+        this.mediaElements = [
+          { type: 'img', name: '图片', icon: 'fas fa-image' }
+        ];
+        this.allDomElements = {
+          'div': { name: '容器', icon: 'fas fa-square', isContainer: true, inline: false },
+          'span': { name: '文本', icon: 'fas fa-font', isContainer: false, inline: true },
+          'button': { name: '按钮', icon: 'fas fa-hand-pointer', isContainer: false, inline: false },
+          'img': { name: '图片', icon: 'fas fa-image', isContainer: false, inline: false }
+        };
+      }
+    }, 100);
   },
   beforeDestroy() {
     // 移除事件监听器
@@ -1494,7 +1717,6 @@ body {
   z-index: 10;
 }
 
-/* 新增：单元格操作栏 */
 .cell-operations-bar {
   flex: 1;
   margin: 0 20px;
@@ -1539,17 +1761,23 @@ body {
 .container-content {
   width: 100%;
   margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
 }
 
 .grid-container {
   width: 100% !important;
-  max-width: 100%;
+  min-width: 100% !important;
+  max-width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 .canvas-drag-area {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  width: 100%;
 }
 .logo {
   display: flex;
@@ -1820,6 +2048,7 @@ body {
   flex: 1;
   padding: 24px;
   overflow-y: auto;
+  width: 100%;
 }
 
 .canvas-drag-area {
@@ -1878,10 +2107,10 @@ body {
 .grid-container {
   border-color: #9C27B0;
   width: 100% !important;
-  max-height: 500px;
+  min-height: 300px;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 .grid-cells {
@@ -1905,8 +2134,9 @@ body {
   min-width: 100px;
   transition: all 0.2s;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   box-sizing: border-box;
+  cursor: pointer;
 }
 
 .grid-cell.selected {
@@ -1947,6 +2177,9 @@ body {
   width: 100%;
   height: 100%;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .empty-cell-hint {
@@ -1964,6 +2197,7 @@ body {
   cursor: pointer;
   min-height: 60px;
   width: 100%;
+  flex: 1;
 }
 
 .empty-cell-hint:hover {
@@ -2529,6 +2763,7 @@ textarea.form-control {
   transition: all 0.2s;
   box-sizing: border-box;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
 }
 
 .canvas-component.selected {
@@ -2807,6 +3042,4 @@ textarea.form-control {
     width: 100%;
   }
 }
-
-
 </style>
