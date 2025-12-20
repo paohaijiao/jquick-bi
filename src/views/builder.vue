@@ -438,11 +438,9 @@
               </div>
             </div>
           </div>
-
           <!-- 普通组件属性 -->
           <div v-else class="setting-panel">
             <!-- 内容保持不变 -->
-            <!-- ... -->
           </div>
         </div>
 
@@ -474,12 +472,8 @@ export default {
       currentBreakpoint: 'desktop',
       htmlEditorContent: '',
       draggingElementType: '',
-      
-      // 单一网格容器
       gridContainer: null,
       components: [],
-      
-      // 网格配置
       gridConfig: {
         rows: 3,
         columns: 3,
