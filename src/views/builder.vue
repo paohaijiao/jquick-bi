@@ -190,6 +190,7 @@
                    class="layout-container grid-container"
                    @click="selectComponent(gridContainer.id)">
                 <div :style="getGridTemplateStyle(gridContainer)" class="grid-cells">
+                  <!-- 修改网格单元格结构，支持合并单元格拖放 -->
                   <div v-for="cell in gridContainer.config.cells"
                        :key="cell.id"
                        :class="{
@@ -205,32 +206,64 @@
                        @click.stop="handleCellClick(gridContainer.id, cell, $event)"
                        @dragover.prevent="handleGridCellDragOver($event, cell.id)"
                        @dblclick.stop="handleGridCellDoubleClick(gridContainer.id, cell)">
-                    <div v-if="!cell.merged" class="cell-content">
-                      <div v-for="component in getComponentsInGridCell(cell.id)"
-                           :key="component.id"
-                           :class="{
-                             'selected': selectedComponentId === component.id,
-                             'inline-component': component.config.inline
-                           }"
-                           :style="getComponentStyle(component)"
-                           class="canvas-component"
-                           @click.stop="selectComponent(component.id)">
-                        <div class="component-content" v-html="renderComponentContent(component)"></div>
-                      </div>
-
-                      <div v-if="getComponentsInGridCell(cell.id).length === 0 && !cell.merged"
-                           class="empty-cell-hint"
+                    
+                    <div class="cell-content">
+                      <!-- 合并单元格的内容 -->
+                      <div v-if="cell.merged" class="merged-cell-content"
                            @dragleave="handleGridCellDragLeave($event, cell.id)"
                            @drop="handleGridCellDrop($event, cell.id)"
                            @dragover.prevent="handleGridCellDragOver($event, cell.id)">
-                        <i class="fas fa-plus-circle"></i>
-                        <p>拖放组件到此单元格</p>
+                        <div class="merged-cell-indicator">
+                          <i class="fas fa-compress"></i>
+                          <span>已合并单元格 {{ cell.rowSpan }}×{{ cell.colSpan }}</span>
+                        </div>
+                        
+                        <!-- 合并单元格中的组件 -->
+                        <div v-for="component in getComponentsInGridCell(cell.id)"
+                             :key="component.id"
+                             :class="{
+                               'selected': selectedComponentId === component.id,
+                               'inline-component': component.config.inline
+                             }"
+                             :style="getComponentStyle(component)"
+                             class="canvas-component"
+                             @click.stop="selectComponent(component.id)">
+                          <div class="component-content" v-html="renderComponentContent(component)"></div>
+                        </div>
+                        
+                        <!-- 合并单元格的拖放提示（当没有组件时显示） -->
+                        <div v-if="getComponentsInGridCell(cell.id).length === 0"
+                             class="empty-cell-hint merged-empty-hint"
+                             @dragleave="handleGridCellDragLeave($event, cell.id)"
+                             @drop="handleGridCellDrop($event, cell.id)"
+                             @dragover.prevent="handleGridCellDragOver($event, cell.id)">
+                          <i class="fas fa-plus-circle"></i>
+                          <p>拖放组件到合并单元格</p>
+                        </div>
                       </div>
-                    </div>
-                    <div v-else class="cell-content">
-                      <div class="merged-cell-indicator">
-                        <i class="fas fa-compress"></i>
-                        <span>已合并单元格 {{ cell.rowSpan }}×{{ cell.colSpan }}</span>
+                      
+                      <!-- 非合并单元格的内容 -->
+                      <div v-else>
+                        <div v-for="component in getComponentsInGridCell(cell.id)"
+                             :key="component.id"
+                             :class="{
+                               'selected': selectedComponentId === component.id,
+                               'inline-component': component.config.inline
+                             }"
+                             :style="getComponentStyle(component)"
+                             class="canvas-component"
+                             @click.stop="selectComponent(component.id)">
+                          <div class="component-content" v-html="renderComponentContent(component)"></div>
+                        </div>
+
+                        <div v-if="getComponentsInGridCell(cell.id).length === 0"
+                             class="empty-cell-hint"
+                             @dragleave="handleGridCellDragLeave($event, cell.id)"
+                             @drop="handleGridCellDrop($event, cell.id)"
+                             @dragover.prevent="handleGridCellDragOver($event, cell.id)">
+                          <i class="fas fa-plus-circle"></i>
+                          <p>拖放组件到此单元格</p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -549,8 +582,6 @@
         </div>
       </div>
     </div>
-
-    <!-- HTML编辑器模态框（保持不变） -->
   </div>
 </template>
 
@@ -1036,8 +1067,20 @@ export default {
       }
     },
     
-    // 获取网格单元格中的组件
+    // 获取网格单元格中的组件（修改以支持合并单元格）
     getComponentsInGridCell(cellId) {
+      // 首先检查是否是合并单元格
+      if (this.gridContainer) {
+        const cell = this.gridContainer.config.cells.find(c => c.id === cellId);
+        if (cell && cell.merged && cell.components && cell.components.length > 0) {
+          // 如果是合并单元格且有组件，返回这些组件
+          return this.components.filter(component => 
+            component.gridCellId === cellId
+          );
+        }
+      }
+      
+      // 普通情况
       return this.components.filter(component => component.gridCellId === cellId);
     },
     
@@ -1165,7 +1208,8 @@ export default {
       e.stopPropagation();
       e.dataTransfer.dropEffect = 'copy';
       const cellElement = e.target.closest('.grid-cell');
-      if (cellElement && !cellElement.classList.contains('merged')) {
+      if (cellElement) {
+        // 合并单元格和非合并单元格都可以拖放
         cellElement.style.borderColor = 'var(--primary-color)';
         cellElement.style.backgroundColor = 'rgba(255, 131, 38, 0.1)';
       }
@@ -1181,6 +1225,7 @@ export default {
       }
     },
     
+    // 修改：允许向合并单元格拖放组件
     handleGridCellDrop(e, cellId) {
       e.preventDefault();
       e.stopPropagation();
@@ -1201,7 +1246,42 @@ export default {
         return;
       }
       
+      // 检查单元格是否存在
+      if (this.gridContainer) {
+        const cell = this.gridContainer.config.cells.find(c => c.id === cellId);
+        if (!cell) {
+          ElMessage.warning('目标单元格不存在');
+          return;
+        }
+        
+        // 检查是否是合并单元格的子单元格（不是主单元格）
+        if (cell.merged) {
+          // 如果是合并单元格的子单元格，找到主单元格
+          const mainCell = this.findMainMergedCell(cell);
+          if (mainCell && mainCell.id !== cell.id) {
+            // 拖放到主单元格
+            this.createComponent(elementType, mainCell.id);
+            return;
+          }
+        }
+      }
+      
       this.createComponent(elementType, cellId);
+    },
+    
+    // 查找合并单元格的主单元格
+    findMainMergedCell(cell) {
+      if (!cell.merged || !this.gridContainer) return cell;
+      
+      // 查找跨行跨列范围的主单元格（左上角单元格）
+      const cells = this.gridContainer.config.cells;
+      const mainCell = cells.find(c => 
+        c.row <= cell.row && c.row + (c.rowSpan || 1) > cell.row &&
+        c.col <= cell.col && c.col + (c.colSpan || 1) > cell.col &&
+        c.merged
+      );
+      
+      return mainCell || cell;
     },
     
     // 创建组件
@@ -2232,6 +2312,7 @@ body {
   background-color: rgba(76, 175, 80, 0.05);
 }
 
+/* 单元格内容样式 */
 .cell-content {
   padding: 10px;
   min-height: 50px;
@@ -2243,6 +2324,36 @@ body {
   gap: 8px;
 }
 
+/* 合并单元格内容样式 */
+.merged-cell-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.merged-cell-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-size: 12px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 4px;
+  border: 1px dashed #ddd;
+  margin-bottom: 10px;
+}
+
+.merged-cell-indicator i {
+  font-size: 20px;
+  margin-bottom: 5px;
+  color: #aaa;
+}
+
+/* 空单元格提示样式 */
 .empty-cell-hint {
   height: 100%;
   display: flex;
@@ -2277,20 +2388,15 @@ body {
   margin: 0;
 }
 
-.merged-cell-indicator {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: #999;
-  font-size: 12px;
+/* 合并单元格的空提示样式 */
+.merged-empty-hint {
+  margin-top: 10px;
+  background-color: rgba(255, 131, 38, 0.03);
+  border-color: rgba(255, 131, 38, 0.3);
 }
 
-.merged-cell-indicator i {
-  font-size: 20px;
-  margin-bottom: 5px;
-  color: #aaa;
+.merged-empty-hint:hover {
+  background-color: rgba(255, 131, 38, 0.08);
 }
 
 /* 空画布提示 */
@@ -3101,7 +3207,6 @@ textarea.form-control {
   .panel-tabs {
     overflow-x: auto;
   }
-
   .tab-item {
     min-width: 80px;
     font-size: 12px;
