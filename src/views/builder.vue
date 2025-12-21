@@ -322,10 +322,10 @@
         </div>
 
         <div class="panel-tabs">
-          <div class="tab-item" :class="{ active: activeTab === 'layout' }" @click="activeTab = 'layout'">
+          <div class="tab-item" :class="{ active: activeTab === 'layout' }" @click="changeActiveTab('layout') ">
             <i class="fas fa-th"></i>布局
           </div>
-          <div class="tab-item" :class="{ active: activeTab === 'style' }" @click="activeTab = 'style'">
+          <div class="tab-item" :class="{ active: activeTab === 'style' }" @click="changeActiveTab('style')">
             <i class="fas fa-paint-brush"></i>样式
           </div>
           <div class="tab-item" :class="{ active: activeTab === 'content' }" @click="activeTab = 'content'">
@@ -337,28 +337,28 @@
         </div>
 
         <div v-if="selectedComponent" class="panel-content">
-          <div v-if="selectedComponent.type === 'grid'" class="setting-panel">
-            <!-- 网格容器属性 -->
+          <!-- 网格容器属性 -->
+          <div v-if="selectedComponent.type === 'grid'&&activeTab==='layout'" class="setting-panel">
             <div class="setting-group">
-              <h3 class="setting-title">网格设置</h3>
+              <h3 class="setting-title text-align-left">网格设置</h3>
               <div class="setting-item">
-                <label>行数</label>
+                <label class="text-align-left">行数</label>
                 <input type="number" v-model.number="selectedComponent.config.rows" min="1" max="12" class="form-control" @change="updateGridCells">
               </div>
               <div class="setting-item">
-                <label>列数</label>
+                <label class="text-align-left">列数</label>
                 <input type="number" v-model.number="selectedComponent.config.columns" min="1" max="12" class="form-control" @change="updateGridCells">
               </div>
               <div class="setting-item">
-                <label>间距</label>
+                <label class="text-align-left">间距</label>
                 <input type="text" v-model="selectedComponent.config.gap" class="form-control" @change="updateGridStyle">
               </div>
             </div>
 
             <div class="setting-group">
-              <h3 class="setting-title">尺寸设置</h3>
+              <h3 class="setting-title text-align-left">尺寸设置</h3>
               <div class="setting-item">
-                <label>宽度</label>
+                <label class="text-align-left">宽度</label>
                 <div class="range-input">
                   <input type="range" v-model.number="selectedComponent.config.width.value" min="10" max="2000" step="10">
                   <input type="text" v-model.number="selectedComponent.config.width.value" class="form-control">
@@ -370,7 +370,7 @@
                 </div>
               </div>
               <div class="setting-item">
-                <label>高度</label>
+                <label class="text-align-left">高度</label>
                 <div class="range-input">
                   <input type="range" v-model.number="selectedComponent.config.height.value" min="100" max="2000" step="10">
                   <input type="text" v-model.number="selectedComponent.config.height.value" class="form-control">
@@ -385,29 +385,29 @@
             </div>
 
             <div class="setting-group">
-              <h3 class="setting-title">边距设置</h3>
+              <h3 class="setting-title text-align-left">边距设置</h3>
               <div class="spacing-controls">
                 <div class="spacing-item">
-                  <label>上边距</label>
-                  <input type="text" v-model="selectedComponent.config.margin.top" class="form-control">
+                  <label class="text-align-left">上边距</label>
+                  <input type="text" v-model="selectedComponent.config.margin.top" class="form-control" @change="updateGridStyle">
                 </div>
                 <div class="spacing-item">
-                  <label>右边距</label>
-                  <input type="text" v-model="selectedComponent.config.margin.right" class="form-control">
+                  <label class="text-align-left">右边距</label>
+                  <input type="text" v-model="selectedComponent.config.margin.right" class="form-control" @change="updateGridStyle">
                 </div>
                 <div class="spacing-item">
-                  <label>下边距</label>
-                  <input type="text" v-model="selectedComponent.config.margin.bottom" class="form-control">
+                  <label class="text-align-left">下边距</label>
+                  <input type="text" v-model="selectedComponent.config.margin.bottom" class="form-control" @change="updateGridStyle">
                 </div>
                 <div class="spacing-item">
-                  <label>左边距</label>
-                  <input type="text" v-model="selectedComponent.config.margin.left" class="form-control">
+                  <label class="text-align-left">左边距</label>
+                  <input type="text" v-model="selectedComponent.config.margin.left" class="form-control" @change="updateGridStyle">
                 </div>
               </div>
             </div>
 
             <div class="setting-group">
-              <h3 class="setting-title">背景颜色</h3>
+              <h3 class="setting-title text-align-left">背景颜色</h3>
               <div class="color-picker">
                 <input type="color" v-model="selectedComponent.config.backgroundColor" @change="updateGridStyle">
                 <input type="text" v-model="selectedComponent.config.backgroundColor" class="form-control" placeholder="#ffffff">
@@ -418,29 +418,190 @@
           <!-- 网格单元格属性 -->
           <div v-else-if="selectedComponent.type === 'grid-cell'" class="setting-panel">
             <div class="setting-group">
-              <h3 class="setting-title">单元格设置</h3>
+              <h3 class="setting-title">单元格信息</h3>
+              <div class="setting-item">
+                <label>地址</label>
+                <div class="form-control" style="background: #f5f5f5;">
+                  {{ getCellAddress(selectedComponent.id) }}
+                </div>
+              </div>
+              <div class="setting-item">
+                <label>位置</label>
+                <div class="form-control" style="background: #f5f5f5;">
+                  行 {{ selectedComponent.row }} 列 {{ selectedComponent.col }}
+                </div>
+              </div>
+            </div>
+
+            <div class="setting-group">
+              <h3 class="setting-title">单元格跨度</h3>
               <div class="setting-item">
                 <label>跨行数</label>
-                <input type="number" v-model.number="selectedComponent.config.rowSpan" min="1" :max="gridContainer.config.rows" class="form-control" @change="updateCellSpan">
+                <div class="range-input">
+                  <input type="range" v-model.number="selectedComponent.rowSpan" min="1" :max="gridContainer.config.rows" step="1">
+                  <input type="number" v-model.number="selectedComponent.rowSpan" min="1" :max="gridContainer.config.rows" class="form-control">
+                  <span>行</span>
+                </div>
               </div>
               <div class="setting-item">
                 <label>跨列数</label>
-                <input type="number" v-model.number="selectedComponent.config.colSpan" min="1" :max="gridContainer.config.columns" class="form-control" @change="updateCellSpan">
+                <div class="range-input">
+                  <input type="range" v-model.number="selectedComponent.colSpan" min="1" :max="gridContainer.config.columns" step="1">
+                  <input type="number" v-model.number="selectedComponent.colSpan" min="1" :max="gridContainer.config.columns" class="form-control">
+                  <span>列</span>
+                </div>
               </div>
+            </div>
+
+            <div class="setting-group">
+              <h3 class="setting-title">合并状态</h3>
               <div class="setting-item">
                 <label>合并状态</label>
-                <div class="form-control">
-                  <span>{{ selectedComponent.config.merged ? '已合并' : '未合并' }}</span>
-                  <button v-if="selectedComponent.config.merged" class="btn btn-outline" @click="splitCell">
-                    拆分
-                  </button>
+                <div class="form-control" style="display: flex; justify-content: space-between; align-items: center;">
+                  <span>{{ selectedComponent.merged ? '已合并' : '未合并' }}</span>
+                  <div class="cell-action-buttons">
+                    <button v-if="selectedComponent.merged" 
+                            class="btn btn-outline btn-sm" 
+                            @click="splitCell">
+                      拆分
+                    </button>
+                    <button v-if="selectedComponent.merged" 
+                            class="btn btn-outline btn-sm" 
+                            @click="clearMerge">
+                      清除
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div v-if="selectedComponent.merged" class="setting-item">
+                <label>合并范围</label>
+                <div class="form-control" style="background: #f5f5f5;">
+                  {{ selectedComponent.rowSpan || 1 }}行 × {{ selectedComponent.colSpan || 1 }}列
+                </div>
+              </div>
+            </div>
+
+            <div class="setting-group">
+              <h3 class="setting-title">单元格内容</h3>
+              <div class="setting-item">
+                <label>组件数量</label>
+                <div class="form-control" style="background: #f5f5f5;">
+                  {{ getComponentsInGridCell(selectedComponent.id).length }} 个组件
+                </div>
+              </div>
+              <div v-if="getComponentsInGridCell(selectedComponent.id).length > 0" class="setting-item">
+                <label>组件列表</label>
+                <div class="cell-components-list">
+                  <div v-for="component in getComponentsInGridCell(selectedComponent.id)" 
+                       :key="component.id"
+                       class="cell-component-item">
+                    <i :class="component.icon"></i>
+                    <span>{{ component.name }}</span>
+                    <button class="btn btn-sm btn-outline" @click="selectComponent(component.id)">
+                      编辑
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="setting-group">
+              <h3 class="setting-title">单元格样式</h3>
+              <div class="setting-item">
+                <label>背景颜色</label>
+                <div class="color-picker">
+                  <input type="color" v-model="selectedComponent.backgroundColor" @change="updateCellStyle">
+                  <input type="text" v-model="selectedComponent.backgroundColor" class="form-control" placeholder="#ffffff">
+                </div>
+              </div>
+              <div class="setting-item">
+                <label>边框</label>
+                <div class="range-input">
+                  <input type="range" v-model.number="selectedComponent.borderWidth" min="0" max="10" step="1">
+                  <input type="number" v-model.number="selectedComponent.borderWidth" min="0" max="10" class="form-control">
+                  <span>px</span>
                 </div>
               </div>
             </div>
           </div>
+
           <!-- 普通组件属性 -->
           <div v-else class="setting-panel">
-            <!-- 内容保持不变 -->
+            <div class="setting-group">
+              <h3 class="setting-title text-align-left">基本信息</h3>
+              <div class="setting-item">
+                <label class="text-align-left">组件名称</label>
+                <input type="text" v-model="selectedComponent.name" class="form-control" @change="updateComponent">
+              </div>
+              <div class="setting-item">
+                <label  class="text-align-left">组件类型</label>
+                <div class="form-control" style="background: #f5f5f5;">
+                  {{ selectedComponent.type }}
+                </div>
+              </div>
+            </div>
+
+            <div v-if="activeTab === 'layout'" class="setting-group">
+              <h3 class="setting-title">尺寸设置</h3>
+              <div class="setting-item">
+                <label>宽度</label>
+                <div class="range-input">
+                  <input type="range" v-model.number="selectedComponent.config.width.value" min="10" max="1000" step="10">
+                  <input type="text" v-model.number="selectedComponent.config.width.value" class="form-control">
+                  <select v-model="selectedComponent.config.width.unit">
+                    <option value="%">%</option>
+                    <option value="px">px</option>
+                    <option value="auto">auto</option>
+                  </select>
+                </div>
+              </div>
+              <div class="setting-item">
+                <label>高度</label>
+                <div class="range-input">
+                  <input type="range" v-model.number="selectedComponent.config.height.value" min="20" max="500" step="10">
+                  <input type="text" v-model.number="selectedComponent.config.height.value" class="form-control">
+                  <select v-model="selectedComponent.config.height.unit">
+                    <option value="px">px</option>
+                    <option value="%">%</option>
+                    <option value="auto">auto</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div v-if="activeTab === 'style'" class="setting-group">
+              <h3 class="setting-title text-align-left">样式设置</h3>
+              <div class="setting-item">
+                <label class="text-align-left">背景颜色</label>
+                <div class="color-picker">
+                  <input type="color" v-model="selectedComponent.config.backgroundColor" @change="updateComponent">
+                  <input type="text" v-model="selectedComponent.config.backgroundColor" class="form-control" placeholder="#ffffff">
+                </div>
+              </div>
+              <div class="setting-item">
+                <label class="text-align-left">字体大小</label>
+                <div class="range-input">
+                  <input type="range" v-model.number="selectedComponent.config.fontSize" min="10" max="72" step="1">
+                  <input type="number" v-model.number="selectedComponent.config.fontSize" class="form-control">
+                  <span>px</span>
+                </div>
+              </div>
+              <div class="setting-item">
+                <label class="text-align-left">字体颜色</label>
+                <div class="color-picker">
+                  <input type="color" v-model="selectedComponent.config.color" @change="updateComponent">
+                  <input type="text" v-model="selectedComponent.config.color" class="form-control" placeholder="#333333">
+                </div>
+              </div>
+            </div>
+
+            <div v-if="activeTab === 'content'" class="setting-group">
+              <h3 class="setting-title text-align-left">内容编辑</h3>
+              <div class="setting-item">
+                <label class="text-align-left">内容</label>
+                <textarea v-model="selectedComponent.content" class="form-control" rows="4" @change="updateComponent"></textarea>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -509,11 +670,8 @@ export default {
                 type: 'grid-cell',
                 name: `网格单元格 (${this.getCellAddress(mainCell.id)})`,
                 icon: 'fas fa-th',
-                config: {
-                  rowSpan: mainCell.rowSpan || 1,
-                  colSpan: mainCell.colSpan || 1,
-                  merged: mainCell.merged || false
-                }
+                backgroundColor: mainCell.backgroundColor || '#ffffff',
+                borderWidth: mainCell.borderWidth || 1
               };
             }
           }
@@ -523,11 +681,8 @@ export default {
             type: 'grid-cell',
             name: `网格单元格 (${this.getCellAddress(cell.id)})`,
             icon: 'fas fa-th',
-            config: {
-              rowSpan: cell.rowSpan || 1,
-              colSpan: cell.colSpan || 1,
-              merged: cell.merged || false
-            }
+            backgroundColor: cell.backgroundColor || '#ffffff',
+            borderWidth: cell.borderWidth || 1
           };
         }
       }
@@ -575,6 +730,10 @@ export default {
     }
   },
   methods: {
+    changeActiveTab(activeTab){
+      this.activeTab=activeTab;
+      debugger;
+    },
     // 检查是否为合并单元格的主单元格
     isMainMergedCell(cell) {
       if (!cell.merged) return false;
@@ -702,7 +861,9 @@ export default {
             rowSpan: existingCell?.rowSpan || 1,
             colSpan: existingCell?.colSpan || 1,
             merged: existingCell?.merged || false,
-            components: existingCell?.components || []
+            components: existingCell?.components || [],
+            backgroundColor: existingCell?.backgroundColor || '#ffffff',
+            borderWidth: existingCell?.borderWidth || 1
           });
         }
       }
@@ -737,7 +898,9 @@ export default {
             rowSpan: existingCell?.rowSpan || 1,
             colSpan: existingCell?.colSpan || 1,
             merged: existingCell?.merged || false,
-            components: existingCell?.components || []
+            components: existingCell?.components || [],
+            backgroundColor: existingCell?.backgroundColor || '#ffffff',
+            borderWidth: existingCell?.borderWidth || 1
           });
         }
       }
@@ -753,15 +916,29 @@ export default {
     // 更新网格样式
     updateGridStyle() {
       // 样式更新会自动通过响应式更新视图
+      ElMessage.success('网格样式已更新');
+    },
+    
+    // 更新单元格样式
+    updateCellStyle() {
+      if (!this.selectedComponent || this.selectedComponent.type !== 'grid-cell') return;
+      
+      const cell = this.gridContainer.config.cells.find(c => c.id === this.selectedComponentId);
+      if (cell) {
+        // 更新单元格样式属性
+        cell.backgroundColor = this.selectedComponent.backgroundColor || '#ffffff';
+        cell.borderWidth = this.selectedComponent.borderWidth || 1;
+        
+        ElMessage.success('单元格样式已更新');
+      }
     },
     
     // 更新单元格跨度
     updateCellSpan() {
       if (!this.selectedComponent || this.selectedComponent.type !== 'grid-cell') return;
       
-      const cellConfig = this.selectedComponent.config;
-      const rowSpan = cellConfig.rowSpan || 1;
-      const colSpan = cellConfig.colSpan || 1;
+      const rowSpan = this.selectedComponent.rowSpan || 1;
+      const colSpan = this.selectedComponent.colSpan || 1;
       
       // 更新网格容器中的对应单元格
       if (this.gridContainer && this.gridContainer.config.cells) {
@@ -773,11 +950,12 @@ export default {
           // 如果跨度过大，自动标记为合并
           if (rowSpan > 1 || colSpan > 1) {
             cell.merged = true;
-            cellConfig.merged = true;
             
             // 标记其他单元格为合并的子单元格
             this.markSubMergedCells(cell);
           }
+          
+          ElMessage.success('单元格跨度已更新');
         }
       }
     },
@@ -1035,6 +1213,20 @@ export default {
       this.selectedCells = [cell.id];
     },
     
+    // 更新组件属性
+    updateComponent() {
+      if (!this.selectedComponent) return;
+      
+      if (this.selectedComponent.type !== 'grid-cell') {
+        // 更新普通组件
+        const componentIndex = this.components.findIndex(c => c.id === this.selectedComponentId);
+        if (componentIndex !== -1) {
+          this.components[componentIndex] = { ...this.selectedComponent };
+          ElMessage.success('组件已更新');
+        }
+      }
+    },
+    
     // 画布点击事件
     handleCanvasClick(event) {
       if (!event.target.closest('.grid-cell') && !event.target.closest('.layout-container')) {
@@ -1097,8 +1289,8 @@ export default {
       if (cell.merged) {
         // 主合并单元格显示边框
         if (this.isMainMergedCell(cell)) {
-          style.border = '1px solid var(--border-color)';
-          style.backgroundColor = 'white';
+          style.border = `${cell.borderWidth || 1}px solid var(--border-color)`;
+          style.backgroundColor = cell.backgroundColor || 'white';
         } else {
           // 子合并单元格隐藏边框和背景
           style.border = 'none';
@@ -1106,6 +1298,10 @@ export default {
           style.minHeight = '0';
           style.minWidth = '0';
         }
+      } else {
+        // 非合并单元格
+        style.border = `${cell.borderWidth || 1}px solid var(--border-color)`;
+        style.backgroundColor = cell.backgroundColor || 'white';
       }
 
       return style;
@@ -1511,9 +1707,9 @@ export default {
             <div class="grid-cell" style="
                 grid-row: ${cell.row} / span ${cell.rowSpan || 1};
                 grid-column: ${cell.col} / span ${cell.colSpan || 1};
-                border: 1px solid #ddd;
+                border: ${cell.borderWidth || 1}px solid #ddd;
                 border-radius: 6px;
-                background: white;
+                background: ${cell.backgroundColor || 'white'};
                 padding: 10px;
                 min-height: 80px;
             ">`;
@@ -1735,11 +1931,26 @@ export default {
   watch: {
     currentBreakpoint(newValue) {
       console.log('切换到断点:', newValue);
+    },
+    selectedComponent: {
+      handler(newVal) {
+        if (newVal && newVal.type === 'grid-cell') {
+          // 监听网格单元格属性变化
+          this.$nextTick(() => {
+            const watchers = ['rowSpan', 'colSpan', 'backgroundColor', 'borderWidth'];
+            watchers.forEach(prop => {
+              if (newVal[prop] !== undefined) {
+                this.updateCellSpan();
+              }
+            });
+          });
+        }
+      },
+      deep: true
     }
   }
 };
 </script>
-
 
 <style>
 :root {
@@ -1794,9 +2005,48 @@ body {
   display: none !important;
 }
 
+/* 单元格组件列表 */
+.cell-components-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
 
+.cell-component-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px;
+  background: #f5f5f5;
+  border-radius: 6px;
+  border: 1px solid #eee;
+}
 
+.cell-component-item i {
+  color: var(--primary-color);
+  margin-right: 8px;
+}
 
+.cell-component-item span {
+  flex: 1;
+  font-size: 12px;
+}
+
+.cell-component-item .btn-sm {
+  padding: 4px 8px;
+  font-size: 11px;
+}
+
+.cell-action-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-sm {
+  padding: 4px 8px;
+  font-size: 12px;
+}
 
 /* 头部样式 */
 .header {
@@ -3241,7 +3491,6 @@ textarea.form-control {
   .setting-group {
     margin-bottom: 16px;
   }
-
   .setting-title {
     font-size: 14px;
   }
