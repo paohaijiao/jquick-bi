@@ -1,29 +1,8 @@
 <template>
   <div class="container">
-    <!-- 顶部导航栏 -->
     <header class="header">
-      <div class="logo">
-        <i class="fas fa-chart-line"></i>
-        <span>JQuick BI</span>
-      </div>
-      <div class="header-actions">
-        <div class="search-box">
-          <el-icon><Search /></el-icon>
-          <input type="text" placeholder="搜索报表、数据源或文档...">
-        </div>
-        <div class="notification-icon">
-          <i class="far fa-bell"></i>
-          <span class="notification-badge">3</span>
-        </div>
-        <div class="user-info" @click="toggleUserMenu">
-          <div class="user-avatar">ZL</div>
-          <span class="user-name">张磊</span>
-          <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
-        </div>
-      </div>
+        <Header />
     </header>
-    
-    <!-- 主内容区 -->
       <div class="main-content">
       <SidebarMenu 
         :active-menu="activeMenu" 
@@ -31,8 +10,6 @@
         @menu-click="setActiveMenu"
         @submenu-click="setActiveSubmenu"
       />
-      
-      <!-- 右侧个人中心区域 -->
       <main class="content-area">
         <div class="page-header">
           <div>
@@ -40,8 +17,6 @@
             <p class="page-description">管理您的个人信息、安全设置和偏好配置</p>
           </div>
         </div>
-        
-        <!-- 个人信息卡片 -->
         <div class="profile-card">
           <div class="profile-avatar">
             {{userInfo.chineseName}}
@@ -81,16 +56,12 @@
             </button>
           </div>
         </div>
-        
-        <!-- 个人中心选项卡 -->
         <div class="profile-tabs">
           <div class="profile-tab" :class="{ active: activeTab === 'basic-info' }" @click="switchTab('basic-info')">基本信息</div>
           <div class="profile-tab" :class="{ active: activeTab === 'security-setting' }" @click="switchTab('security-setting')">安全设置</div>
           <div class="profile-tab" :class="{ active: activeTab === 'preference' }" @click="switchTab('preference')">偏好配置</div>
           <div class="profile-tab" :class="{ active: activeTab === 'activity' }" @click="switchTab('activity')">近期活动</div>
         </div>
-        
-        <!-- 基本信息表单 -->
         <div class="form-container" id="basic-info-tab" v-if="activeTab === 'basic-info'">
           <div class="form-title text-align-left">基本信息</div>
           <form id="basicInfoForm" @submit.prevent="saveBasicInfo">
@@ -105,7 +76,6 @@
                 <span class="form-hint text-align-left">显示在系统内的个性化名称</span>
               </div>
             </div>
-            
             <div class="form-row">
               <div class="form-group">
                 <label class="form-label text-align-left" for="email">电子邮箱 <span style="color: #ff4d4f;">*</span></label>
@@ -282,11 +252,8 @@
             <button type="button" class="btn btn-primary" @click="savePreferences">保存设置</button>
           </div>
         </div>
-        
-        <!-- 近期活动 -->
         <div class="activity-list" v-if="activeTab === 'activity'">
           <div class="activity-title">近期活动</div>
-          
           <div class="activity-item" v-for="(activity, index) in activities" :key="index">
             <div class="activity-icon">
               <i :class="activity.icon"></i>
@@ -299,8 +266,6 @@
         </div>
       </main>
     </div>
-    
-    <!-- 修改密码模态框 -->
     <div class="modal-overlay" :class="{ show: showChangePasswordModal }" @click="closeChangePasswordModal">
       <div class="modal" @click.stop>
         <div class="modal-header">
@@ -341,24 +306,16 @@ import { ref, reactive, onMounted } from 'vue';
 import SidebarMenu from '@/components/SidebarMenu.vue';
 import request from '../api/request';
 import { ElMessage } from 'element-plus';
+import Header from '@/components/Header.vue';
 const activeTab = ref('basic-info');
 const theme = ref([]);
 const userInfo = reactive({});
-
-
 const securitySettings = reactive({});
-
-// 偏好设置
 const preferences = reactive({});
 const originalPreferences = { ...preferences };
-
 const passwordForm = reactive({});
-
-// 模态框状态
 const showChangePasswordModal = ref(false);
-
 const activities = ref([]);
-
 const switchTab = (tab) => {
   activeTab.value = tab;
   if(tab==='security-setting'||tab==='preference'){
