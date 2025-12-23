@@ -769,7 +769,6 @@ body {
   background-color: #fff2f0;
 }
 
-/* 分页样式 */
 .pagination {
   display: flex;
   justify-content: space-between;
@@ -816,8 +815,6 @@ body {
   opacity: 0.5;
   cursor: not-allowed;
 }
-
-/* 模态框样式 */
 .modal-overlay {
   position: fixed;
   top: 0;

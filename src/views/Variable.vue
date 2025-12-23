@@ -1,6 +1,5 @@
 <template>
   <div class="container">
-    <!-- 顶部导航栏 -->
     <header class="header">
       <div class="logo">
         <i class="fas fa-chart-line"></i>
@@ -23,17 +22,13 @@
       </div>
     </header>
     
-    <!-- 主内容区 -->
     <div class="main-content">
-      <!-- 左侧菜单 -->
       <SidebarMenu 
         :active-menu="activeMenu" 
         :unread-count="unreadCount"
         @menu-click="setActiveMenu"
         @submenu-click="setActiveSubmenu"
       />
-      
-      <!-- 右侧变量管理区域 -->
       <main class="content-area">
         <div class="page-header">
           <div>
@@ -51,8 +46,6 @@
             </button>
           </div>
         </div>
-        
-        <!-- 筛选和搜索区域 -->
         <div class="filter-bar">
           <div class="filter-group">
             <div class="filter-item">
@@ -88,8 +81,6 @@
             <input type="text" v-model="searchKeyword" placeholder="搜索变量名称...">
           </div>
         </div>
-        
-        <!-- 变量列表 -->
         <div class="variable-list">
           <div class="table-header">
             <div class="text-align-left">变量名称</div>
@@ -122,26 +113,20 @@
             </div>
           </div>
           
-          <!-- 分页控件 -->
           <div class="pagination">
-            <div class="pagination-info">显示 {{ (currentPage - 1) * pageSize + 1 }}-{{ Math.min(currentPage * pageSize, totalItems) }} 条，共 {{ totalItems }} 条</div>
-            <div class="pagination-controls">
-              <button class="page-btn" :disabled="currentPage === 1" @click="changePage(currentPage - 1)">
-                <i class="fas fa-chevron-left"></i>
-              </button>
-              <button class="page-btn" v-for="page in pageCount" :key="page" :class="{ active: currentPage === page }" @click="changePage(page)">
-                {{ page }}
-              </button>
-              <button class="page-btn" :disabled="currentPage === pageCount" @click="changePage(currentPage + 1)">
-                <i class="fas fa-chevron-right"></i>
-              </button>
-            </div>
+            <el-pagination
+                v-model:current-page="currentPage"
+                v-model:page-size="pageSize"
+                :page-sizes="[5, 10, 20, 50]"  
+                :total="total"          
+                layout="total, sizes, prev, pager, next, jumper" 
+                @size-change="handleSizeChange"  
+                @current-change="handlePipLineQuery"  
+            />
           </div>
         </div>
       </main>
     </div>
-    
-    <!-- 新增/编辑变量模态框 -->
     <div class="modal-overlay" :class="{ show: variableModalVisible }" @click="closeModalOutside">
       <div class="modal" >
         <div class="modal-header">
@@ -190,7 +175,6 @@
       </div>
     </div>
     
-    <!-- 确认删除模态框 -->
     <div class="modal-overlay" :class="{ show: deleteModalVisible }" @click="closeModalOutside">
       <div class="modal" @click.stop>
         <div class="modal-header">
@@ -224,75 +208,27 @@ import { ref, computed,onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
 import SidebarMenu from '@/components/SidebarMenu.vue';
 import request from '../api/request';
-// 菜单状态管理
-const activeMenu = ref('variable');
-const activeSubMenu = ref('');
-const submenus = ref({
-  datasource: false
-});
-
-// 筛选条件
 const typeFilter = ref('');
 const statusFilter = ref('');
 const timeFilter = ref('');
 const searchKeyword = ref('');
 
-// 分页控制
 const currentPage = ref(1);
-const pageSize = ref(5);
+const pageSize = ref(10);
+const total = ref(0);
 
-// 模态框状态
 const variableModalVisible = ref(false);
 const deleteModalVisible = ref(false);
 const isEditing = ref(false);
 const currentVariableId = ref(null);
 
-// 表单数据
 const formData = ref({});
 
-// 变量数据
 const variables = ref([]);
 
 const variableType=ref([]);
 
-// 计算属性 - 总记录数
-const totalItems = computed(() => {
-  return variables.value.filter(variable => {
-    if (typeFilter.value && variable.type !== typeFilter.value) return false;
-    if (statusFilter.value && variable.status !== statusFilter.value) return false;
-    if (searchKeyword.value && !variable.name.includes(searchKeyword.value)) return false;
-    return true;
-  }).length;
-});
 
-// 计算属性 - 总页数
-const pageCount = computed(() => {
-  return Math.ceil(totalItems.value / pageSize.value);
-});
-
-// 菜单相关方法
-const setActiveMenu = (menu) => {
-  activeMenu.value = menu;
-  activeSubMenu.value = '';
-  // 关闭所有子菜单
-  Object.keys(submenus.value).forEach(key => {
-    submenus.value[key] = false;
-  });
-};
-
-
-const toggleUserMenu = () => {
-  // 这里可以实现用户菜单的展开/收起逻辑
-  console.log('用户菜单被点击');
-};
-
-// 分页方法
-const changePage = (page) => {
-  if (page < 1 || page > pageCount.value) return;
-  currentPage.value = page;
-};
-
-// 模态框相关方法
 const openAddModal = () => {
   isEditing.value = false;
   formData.value = {
@@ -407,6 +343,7 @@ const handleVariableQuery = () => {
   .then(response => {
     if(response.code==200){
       variables.value=response.data.records;
+      total.value=response.data.total;
     }
   }
 )
@@ -455,7 +392,6 @@ body {
   height: 100vh;
 }
 
-/* 顶部导航栏 */
 .header {
   height: var(--header-height);
   background-color: white;
@@ -505,6 +441,60 @@ body {
   outline: none;
   border-color: var(--primary-color);
   box-shadow: 0 0 0 2px rgba(255, 131, 38, 0.2);
+}
+.el-pagination {
+  margin-top: 16px;
+}
+.el-pagination button:enabled:not(.disabled):hover {
+  color:  var(--primary-color);
+  border-color:  var(--primary-color);
+}
+
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-top: 1px solid var(--border-color);
+}
+
+.pagination-info {
+  font-size: 14px;
+  color: #666;
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.page-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.page-btn:hover {
+  background-color: var(--secondary-color);
+  border-color: var(--primary-color);
+}
+
+.page-btn.active {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.page-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .search-box i {
@@ -573,14 +563,12 @@ body {
   justify-content: center;
 }
 
-/* 主内容区 */
 .main-content {
   display: flex;
   flex: 1;
   overflow: hidden;
 }
 
-/* 左侧菜单 */
 .sidebar {
   width: var(--sidebar-width);
   background-color: white;
@@ -670,7 +658,6 @@ body {
   font-weight: 500;
 }
 
-/* 变量管理区域 */
 .content-area {
   flex: 1;
   padding: 24px;
@@ -751,7 +738,6 @@ body {
   margin-right: 8px;
 }
 
-/* 筛选和搜索区域 */
 .filter-bar {
   background-color: white;
   border-radius: 12px;
@@ -809,7 +795,6 @@ body {
   color: #999;
 }
 
-/* 变量列表 */
 .variable-list {
   background-color: white;
   border-radius: 12px;
@@ -946,7 +931,6 @@ body {
   color: var(--danger-color);
 }
 
-/* 分页控件 */
 .pagination {
   display: flex;
   justify-content: space-between;
@@ -994,7 +978,6 @@ body {
   cursor: not-allowed;
 }
 
-/* 模态框样式 */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -1100,7 +1083,6 @@ body {
   gap: 10px;
 }
 
-/* 确认删除模态框 */
 .confirm-message {
   padding: 10px 0;
   line-height: 1.5;
@@ -1115,7 +1097,6 @@ body {
   font-size: 14px;
 }
 
-/* 旋转动画 */
 .rotate-180 {
   transform: rotate(180deg);
   transition: transform 0.3s;
