@@ -1,26 +1,7 @@
 <template>
   <div class="container">
-    <!-- 顶部导航栏 -->
     <header class="header">
-      <div class="logo">
-        <i class="fas fa-chart-line"></i>
-        <span>JQuick BI</span>
-      </div>
-      <div class="header-actions">
-        <div class="search-box">
-          <el-icon><Search /></el-icon>
-          <input type="text" placeholder="搜索报表、数据源或文档...">
-        </div>
-        <div class="notification-icon">
-          <i class="far fa-bell"></i>
-          <span class="notification-badge">3</span>
-        </div>
-        <div class="user-info" @click="toggleUserMenu">
-          <div class="user-avatar">ZL</div>
-          <span class="user-name">张磊</span>
-          <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
-        </div>
-      </div>
+          <Header />
     </header>
     
     <div class="main-content">
@@ -31,7 +12,6 @@
         @submenu-click="setActiveSubmenu"
       />
       
-      <!-- 右侧用户管理区域 -->
       <main class="content-area">
         <div class="page-header">
           <div>
@@ -49,8 +29,6 @@
             </button>
           </div>
         </div>
-        
-        <!-- 筛选和搜索区域 -->
         <div class="filter-bar">
           <div class="filter-group">
             <div class="filter-item">
@@ -82,15 +60,13 @@
             <input type="text" placeholder="搜索用户名或邮箱..." v-model="searchKeyword" @click="handleUserQuery()">
           </div>
         </div>
-        
-        <!-- 用户列表 -->
+      
         <div class="user-list">
           <div class="table-header">
             <div >登录名</div>
             <div>手机号</div>
             <div>邮箱</div>
             <div>状态</div>
-  
             <div>操作</div>
           </div>
           
@@ -119,21 +95,16 @@
               </button>
             </div>
           </div>
-          
-          <!-- 分页控件 -->
-          <div class="pagination">
-            <div class="pagination-info">显示 {{ (currentPage - 1) * pageSize + 1 }}-{{ Math.min(currentPage * pageSize, totalUsers) }} 条，共 {{ totalUsers }} 条</div>
-            <div class="pagination-controls">
-              <button class="page-btn" :disabled="currentPage === 1" @click="changePage(currentPage - 1)">
-                <i class="fas fa-chevron-left"></i>
-              </button>
-              <button class="page-btn" v-for="page in pageNumbers" :key="page" :class="{ active: currentPage === page }" @click="changePage(page)">
-                {{ page }}
-              </button>
-              <button class="page-btn" :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)">
-                <i class="fas fa-chevron-right"></i>
-              </button>
-            </div>
+           <div class="pagination">
+            <el-pagination
+                v-model:current-page="currentPage"
+                v-model:page-size="pageSize"
+                :page-sizes="[5, 10, 20, 50]"  
+                :total="total"          
+                layout="total, sizes, prev, pager, next, jumper" 
+                @size-change="handleSizeChange"  
+                @current-change="handlePipLineQuery"  
+            />
           </div>
         </div>
         <el-dialog 
@@ -167,60 +138,20 @@ import {ElDialog} from 'element-plus';
 import SidebarMenu from '@/components/SidebarMenu.vue';
 import UserForm from '@/components/UserForm.vue';  
 import request from '../api/request';
-// 菜单状态管理
-const activeMenu = ref('user');
+import Header from '@/components/Header.vue';
 const edit = ref(true);
-
 const editDialogVisible = ref (false);
 const currentEditUserId = ref (null);
-const submenus = ref({
-  dataSource: false,
-  report: false
-});
-const activeSubmenu = ref({
-  dataSource: '',
-  report: ''
-});
-
-// 筛选条件
 const filterUserType = ref('');
 const filterStatus = ref('');
 const filterTime = ref('');
 const searchKeyword = ref('');
-
-// 分页相关
 const currentPage = ref(1);
 const pageSize = ref(5);
-const totalUsers = ref(32);
-
-// 用户数据
+const total = ref(0);
 const users = ref([]);
 const userStatus = ref([]);
 const userType = ref([]);
-
-// 计算属性：总页数
-const totalPages = computed(() => {
-  return Math.ceil(totalUsers.value / pageSize.value);
-});
-
-// 计算属性：页码列表
-const pageNumbers = computed(() => {
-  const pages = [];
-  // 这里简化处理，只显示前5页
-  for (let i = 1; i <= Math.min(5, totalPages.value); i++) {
-    pages.push(i);
-  }
-  return pages;
-});
-
-
-
-
-const setActiveSubmenu = (parent, submenu) => {
-  activeSubmenu.value[parent] = submenu;
-  activeMenu.value = parent;
-  submenus.value[parent] = true;
-};
 
 
 const exportUsers = () => {
@@ -244,8 +175,6 @@ const resetPassword = (id) => {
 const moreActions = (id) => {
 
 };
-
-// 分页方法
 const changePage = (page) => {
   if (page < 1 || page > totalPages.value) return;
   currentPage.value = page;
@@ -281,6 +210,7 @@ const handleUserQuery = () => {
   .then(response => {
     if(response.code==200){
       users.value=response.data.records;
+      total.value=response.data.total;
     }
   }
 )
