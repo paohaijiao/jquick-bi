@@ -357,7 +357,7 @@ const saveBasicInfo = () => {
 };
 
 const resetForm = () => {
-  alert('个人信息保存成功');
+  ElMessage.success(`个人信息重置成功`);
 };
 
 const toggleSecuritySetting = (setting) => {
@@ -444,15 +444,12 @@ const handleMyPreference = () => {
           securitySettings.notificationEnabled=response.data.notificationEnabled;
           securitySettings.emailNotificationEnabled=response.data.emailNotificationEnabled;
           securitySettings.smsNotificationEnabled=response.data.smsNotificationEnabled;
-
           preferences.themeStyle=response.data.themeStyle;
           preferences.sidebarFoldEnabled=response.data.sidebarFoldEnabled;
           preferences.breadcrumbNavigationEnabled=response.data.breadcrumbNavigationEnabled;
           preferences.reportShareNotificationEnabled=response.data.reportShareNotificationEnabled;
           preferences.dataUpdateNotificationEnabled=response.data.dataUpdateNotificationEnabled;
           preferences.systemNotificationEnabled=response.data.systemNotificationEnabled;
-          
-          
         }else{
           ElMessage.success(`加载数据出错`);
         }
@@ -530,7 +527,6 @@ body {
   height: 100vh;
 }
 
-/* 顶部导航栏 */
 .header {
   height: var(--header-height);
   background-color: white;
@@ -648,14 +644,12 @@ body {
   justify-content: center;
 }
 
-/* 主内容区 */
 .main-content {
   display: flex;
   flex: 1;
   overflow: hidden;
 }
 
-/* 左侧菜单 */
 .sidebar {
   width: var(--sidebar-width);
   background-color: white;
@@ -745,7 +739,6 @@ body {
   font-weight: 500;
 }
 
-/* 右侧个人中心区域 */
 .content-area {
   flex: 1;
   padding: 24px;
@@ -772,7 +765,6 @@ body {
   margin-top: 4px;
 }
 
-/* 个人信息卡片 */
 .profile-card {
   background-color: white;
   border-radius: 12px;
@@ -934,7 +926,6 @@ body {
   border-bottom-color: var(--primary-color);
 }
 
-/* 表单样式 */
 .form-container {
   background-color: white;
   border-radius: 12px;
@@ -1002,7 +993,6 @@ body {
   border-top: 1px solid var(--border-color);
 }
 
-/* 安全设置特有样式 */
 .security-item {
   display: flex;
   justify-content: space-between;
@@ -1052,7 +1042,6 @@ body {
   gap: 4px;
 }
 
-/* 偏好设置特有样式 */
 .preference-group {
   margin-bottom: 24px;
 }
@@ -1090,7 +1079,6 @@ select.form-control {
   background-size: 16px;
 }
 
-/* 近期活动样式 */
 .activity-list {
   background-color: white;
   border-radius: 12px;
@@ -1143,7 +1131,6 @@ select.form-control {
   color: #999;
 }
 
-/* 模态框样式 */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -1219,7 +1206,6 @@ select.form-control {
   gap: 12px;
 }
 
-/* 响应式调整 */
 @media (max-width: 768px) {
   .profile-card {
     flex-direction: column;
@@ -1249,7 +1235,6 @@ select.form-control {
   }
 }
 
-/* 辅助样式 */
 .rotate-180 {
   transform: rotate(180deg);
   transition: transform 0.3s ease;
