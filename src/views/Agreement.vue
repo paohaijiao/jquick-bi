@@ -1,20 +1,16 @@
 <template>
   <div class="container">
-    <!-- 返回按钮 -->
     <a href="#" class="back-button" @click.prevent="handleBack">
       <i class="fas fa-arrow-left"></i>
       返回首页
     </a>
-    
-    <!-- 顶部导航栏（简化版） -->
+  
     <header class="header">
       <div class="logo">
         <i class="fas fa-chart-line"></i>
         <span>JQuick BI</span>
       </div>
     </header>
-    
-    <!-- 右侧内容区域 -->
     <main class="content-area">
       <div class="page-header">
         <div>
@@ -33,7 +29,6 @@
         </div>
       </div>
       
-      <!-- 协议内容 -->
       <div class="agreement-container">
         <div class="agreement-header">
           <h2 class="agreement-title">JQuick BI 服务使用协议</h2>
@@ -151,23 +146,14 @@ export default {
 }
 </script>
 <script setup>
-
-
-
-// 处理打印功能
 const handlePrint = () => {
   window.print();
 };
-
-// 处理下载PDF功能
 const handleDownloadPdf = () => {
   alert('PDF下载已开始。在实际应用中，这里会下载协议的PDF版本。');
 };
-
-// 处理返回首页
 const handleBack = () => {
   if(confirm('确定要返回首页吗？')) {
-    // 这里可以添加返回首页的逻辑
     alert('正在返回首页...');
   }
 };
@@ -203,8 +189,6 @@ body {
   max-width: 1200px;
   margin: 0 auto;
 }
-
-/* 顶部导航栏（简化版） */
 .header {
   height: 60px;
   background-color: white;
@@ -230,7 +214,6 @@ body {
   font-size: 26px;
 }
 
-/* 右侧内容区域 */
 .content-area {
   background-color: var(--light-bg);
 }
@@ -305,7 +288,6 @@ body {
   margin-right: 8px;
 }
 
-/* 协议内容区域 */
 .agreement-container {
   background-color: white;
   border-radius: 12px;
@@ -374,7 +356,6 @@ body {
   margin-top: 20px;
 }
 
-/* 接受协议复选框 */
 .accept-checkbox {
   display: flex;
   align-items: center;
@@ -393,7 +374,6 @@ body {
   color: #555;
 }
 
-/* 返回按钮 */
 .back-button {
   display: inline-flex;
   align-items: center;
