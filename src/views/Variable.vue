@@ -1,25 +1,7 @@
 <template>
   <div class="container">
     <header class="header">
-      <div class="logo">
-        <i class="fas fa-chart-line"></i>
-        <span>JQuick BI</span>
-      </div>
-      <div class="header-actions">
-        <div class="search-box">
-          <el-icon><Search /></el-icon>
-          <input type="text" placeholder="搜索报表、数据源或文档...">
-        </div>
-        <div class="notification-icon">
-          <i class="far fa-bell"></i>
-          <span class="notification-badge">3</span>
-        </div>
-        <div class="user-info" @click="toggleUserMenu">
-          <div class="user-avatar">ZL</div>
-          <span class="user-name">张磊</span>
-          <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
-        </div>
-      </div>
+            <Header />
     </header>
     
     <div class="main-content">
@@ -208,6 +190,7 @@ import { ref, computed,onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
 import SidebarMenu from '@/components/SidebarMenu.vue';
 import request from '../api/request';
+import Header from '@/components/Header.vue';
 const typeFilter = ref('');
 const statusFilter = ref('');
 const timeFilter = ref('');
@@ -275,8 +258,6 @@ const closeModalOutside = (e) => {
 
 // 保存变量
 const saveVariable = () => {
-    debugger;
-  //isEditing.value
   let param=new Object();
   param.id=formData.value.id;
   param.name=formData.value.name;
@@ -285,7 +266,6 @@ const saveVariable = () => {
   param.type=formData.value.type;
   param.description=formData.value.description;
   param.status=formData.value.status;
-
   request.post('/api/variable/saveOrUpdate',param)
   .then(response => {
     if(response.code==200){
@@ -297,13 +277,11 @@ const saveVariable = () => {
   variableModalVisible.value = false;
 };
 
-// 确认删除
 const confirmDelete = () => {
   variables.value = variables.value.filter(v => v.id !== currentVariableId.value);
   deleteModalVisible.value = false;
 };
 
-// 辅助方法 - 获取类型名称
 const getTypeName = (type) => {
   const typeMap = {
     'string': '字符串',
@@ -314,7 +292,6 @@ const getTypeName = (type) => {
   return typeMap[type] || type;
 };
 
-// 辅助方法 - 获取类型图标
 const getTypeIcon = (type) => {
   const iconMap = {
     'string': 'fa-font',

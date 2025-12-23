@@ -23,7 +23,6 @@
       </div>
     </header>
     
-    <!-- 主内容区 -->
     <div class="main-content">
       <SidebarMenu 
         :active-menu="activeMenu" 
