@@ -104,9 +104,9 @@ const routes = [
     component: () => import('../views/PipLine.vue')
   },
   {
-    path: '/builder',
-    name: 'builderPage',
-    component: () => import('../views/builder.vue')
+    path: '/report',
+    name: 'reportPage',
+    component: () => import('../views/Report.vue')
   }
 ]
 const router = createRouter({

@@ -337,7 +337,6 @@
         </div>
 
         <div v-if="selectedComponent" class="panel-content">
-          <!-- 网格容器属性 -->
           <div v-if="selectedComponent.type === 'grid'&&activeTab==='layout'" class="setting-panel">
             <div class="setting-group">
               <h3 class="setting-title text-align-left">网格设置</h3>
