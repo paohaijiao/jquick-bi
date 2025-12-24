@@ -1,6 +1,5 @@
 <template>
   <div class="container">
-    <!-- 顶部导航栏 -->
     <header class="header">
       <div class="logo">
         <i class="fas fa-chart-line"></i>
@@ -22,18 +21,13 @@
         </div>
       </div>
     </header>
-    
-    <!-- 主内容区 -->
     <div class="main-content">
-      <!-- 左侧菜单 -->
       <SidebarMenu 
         :active-menu="activeMenu" 
         :unread-count="unreadCount"
         @menu-click="setActiveMenu"
         @submenu-click="setActiveSubmenu"
       />
-      
-      <!-- 右侧视频教程区域 -->
       <main class="content-area">
         <div class="page-header">
           <div>
@@ -41,8 +35,6 @@
             <p class="page-description">观看教程视频，快速掌握JQuick BI的使用技巧</p>
           </div>
         </div>
-        
-        <!-- 视频分类筛选 -->
         <div class="video-filters">
           <div class="filter-title text-align-left">教程分类</div>
           <div class="filter-tags" >
@@ -56,8 +48,6 @@
             </div>
           </div>
         </div>
-        
-        <!-- 视频列表 -->
         <div class="video-list">
           <div 
             class="video-card" 
@@ -85,32 +75,17 @@
           </div>
         </div>
         
-        <!-- 分页控件 -->
-        <div class="pagination">
-          <div 
-            class="pagination-btn" 
-            :class="{ disabled: currentPage === 1 }"
-            @click="handlePrevPage"
-          >
-            <i class="fas fa-chevron-left"></i>
+           <div class="pagination">
+            <el-pagination
+                v-model:current-page="currentPage"
+                v-model:page-size="pageSize"
+                :page-sizes="[5, 10, 20, 50]"  
+                :total="total"          
+                layout="total, sizes, prev, pager, next, jumper" 
+                @size-change="handleSizeChange"  
+                @current-change="handleTutorial"  
+            />
           </div>
-          <div 
-            class="pagination-number" 
-            :class="{ active: currentPage === page }"
-            v-for="page in totalPages" 
-            :key="page"
-            @click="handlePageClick(page)"
-          >
-            {{ page }}
-          </div>
-          <div 
-            class="pagination-btn" 
-            :class="{ disabled: currentPage === totalPages }"
-            @click="handleNextPage"
-          >
-            <i class="fas fa-chevron-right"></i>
-          </div>
-        </div>
       </main>
     </div>
   </div>
@@ -125,56 +100,21 @@ import { ref,onMounted } from 'vue';
 import request from '../api/request';
 import SidebarMenu from '@/components/SidebarMenu.vue';
 import { ElMessage } from 'element-plus';
-// 侧边栏状态
 const isSidebarShow = ref(true);
-
-
-// 视频筛选状态
 const activeFilter = ref('all');
 const category = ref([]);
-// 处理筛选标签点击
 const handleFilterClick = (filter) => {
   activeFilter.value = filter;
   currentPage.value = 1;
   handleTutorial();
 };
-
-// 视频数据
 const videos = ref([]);
-
-// 分页相关
 const currentPage = ref(1);
 const pageSize = ref(4);
 const totalPages = ref(5);
-
-// 处理页码点击
-const handlePageClick = (page) => {
-  currentPage.value = page;
-  handleTutorial();
-};
-
-// 上一页
-const handlePrevPage = () => {
-  if (currentPage.value > 1) {
-    currentPage.value--;
-    handleTutorial();
-  }
-};
-
-// 下一页
-const handleNextPage = () => {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++;
-    handleTutorial();
-  }
-};
-
-// 处理视频点击
 const handleVideoClick = (video) => {
   alert(`准备播放视频: ${video.title}`);
 };
-
-// 响应式处理 - 移动端自动隐藏侧边栏
 const handleResize = () => {
   if (window.innerWidth <= 768) {
     isSidebarShow.value = false;
@@ -182,8 +122,6 @@ const handleResize = () => {
     isSidebarShow.value = true;
   }
 };
-
-// 初始化时检查窗口大小
 const initCategory = () => {
 request.get('/api/tutorial/category/list')
   .then(response => {
@@ -258,7 +196,6 @@ body {
   height: 100vh;
 }
 
-/* 顶部导航栏 */
 .header {
   height: var(--header-height);
   background-color: white;
@@ -375,15 +312,11 @@ body {
   align-items: center;
   justify-content: center;
 }
-
-/* 主内容区 */
 .main-content {
   display: flex;
   flex: 1;
   overflow: hidden;
 }
-
-/* 左侧菜单 */
 .sidebar {
   width: var(--sidebar-width);
   background-color: white;
@@ -473,7 +406,6 @@ body {
   font-weight: 500;
 }
 
-/* 右侧视频教程区域 */
 .content-area {
   flex: 1;
   padding: 24px;
@@ -500,7 +432,6 @@ body {
   margin-top: 4px;
 }
 
-/* 视频分类筛选 */
 .video-filters {
   background-color: white;
   border-radius: 12px;
@@ -540,7 +471,6 @@ body {
   border-color: var(--primary-color);
 }
 
-/* 视频列表 */
 .video-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -645,7 +575,6 @@ body {
   white-space: nowrap;
 }
 
-/* 分页控件 */
 .pagination {
   display: flex;
   justify-content: center;
@@ -699,7 +628,6 @@ body {
   color: white;
 }
 
-/* 响应式调整 */
 @media (max-width: 768px) {
   .sidebar {
     width: 0;
