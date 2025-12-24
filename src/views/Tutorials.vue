@@ -1,25 +1,7 @@
 <template>
   <div class="container">
     <header class="header">
-      <div class="logo">
-        <i class="fas fa-chart-line"></i>
-        <span>JQuick BI</span>
-      </div>
-      <div class="header-actions">
-        <div class="search-box">
-          <el-icon><Search /></el-icon>
-          <input type="text" placeholder="搜索报表、数据源或文档...">
-        </div>
-        <div class="notification-icon">
-          <i class="far fa-bell"></i>
-          <span class="notification-badge">3</span>
-        </div>
-        <div class="user-info" @click="handleUserClick">
-          <div class="user-avatar">ZL</div>
-          <span class="user-name">张磊</span>
-          <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
-        </div>
-      </div>
+       <Header />
     </header>
     <div class="main-content">
       <SidebarMenu 
@@ -100,8 +82,10 @@ import { ref,onMounted } from 'vue';
 import request from '../api/request';
 import SidebarMenu from '@/components/SidebarMenu.vue';
 import { ElMessage } from 'element-plus';
+import Header from '@/components/Header.vue';
 const isSidebarShow = ref(true);
 const activeFilter = ref('all');
+const total = ref(0);
 const category = ref([]);
 const handleFilterClick = (filter) => {
   activeFilter.value = filter;
@@ -146,7 +130,7 @@ request.post('/api/tutorial/page',param)
     debugger;
     if(200==response.code){
       videos.value=response.data.records;
-      totalPages.value=response.data.pages;
+      total.value=response.data.total;
     }else{
       ElMessage.success(`加载数据出错`);
     }
