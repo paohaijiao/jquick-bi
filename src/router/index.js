@@ -100,7 +100,7 @@ const routes = [
   },
   {
     path: '/pipLine',
-    name: 'dataSetList',
+    name: 'pipLine',
     component: () => import('../views/PipLine.vue')
   },
   {

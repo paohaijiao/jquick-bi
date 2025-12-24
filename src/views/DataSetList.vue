@@ -1,14 +1,10 @@
 <template>
   <div class="container">
-    <!-- 顶部导航栏 -->
     <header class="header">
-      <Header 
-      />
+      <Header />
     </header>
     
-    <!-- 主内容区 -->
     <div class="main-content">
-      <!-- 左侧菜单 -->
       <SidebarMenu 
         :active-menu="activeMenu" 
         :unread-count="unreadCount"
@@ -16,7 +12,6 @@
         @submenu-click="setActiveSubmenu"
       />
       
-      <!-- 右侧数据集内容区域 -->
       <main class="content-area">
         <div class="page-header">
           <div>
@@ -35,9 +30,7 @@
           </div>
         </div>
         
-        <!-- 数据集列表 -->
         <div class="dataset-list">
-          <!-- 数据集表头 -->
           <div class="table-header dataset-header">
             <div>ID</div>
             <div>数据集名称</div>
@@ -47,7 +40,6 @@
             <div>操作</div>
           </div>
           
-          <!-- 数据集行 -->
           <div 
             class="table-row dataset-row" 
             :data-id="item.id" 
@@ -84,31 +76,20 @@
           </div>
         </div>
         
-        <!-- 分页控件 -->
-        <div class="pagination">
-          <div class="pagination-info">显示 {{ startItem }}-{{ endItem }} 条，共 {{ totalItems }} 条</div>
-          <div class="pagination-controls">
-            <button class="page-btn" :disabled="currentPage === 1" @click="prevPage">
-              <i class="fas fa-chevron-left"></i>
-            </button>
-            <button 
-              class="page-btn" 
-              :class="{ active: currentPage === page }" 
-              v-for="page in totalPages" 
-              :key="page"
-              @click="changePage(page)"
-            >
-              {{ page }}
-            </button>
-            <button class="page-btn" :disabled="currentPage === totalPages" @click="nextPage">
-              <i class="fas fa-chevron-right"></i>
-            </button>
+           <div class="pagination">
+            <el-pagination
+                v-model:current-page="currentPage"
+                v-model:page-size="pageSize"
+                :page-sizes="[5, 10, 20, 50]"  
+                :total="total"          
+                layout="total, sizes, prev, pager, next, jumper" 
+                @size-change="handleSizeChange"  
+                @current-change="handlePipLineQuery"  
+            />
           </div>
-        </div>
       </main>
     </div>
     
-    <!-- 新增/编辑数据集模态框 -->
     <div class="modal-overlay" id="datasetModal" :style="{ display: showDatasetModal ? 'flex' : 'none' }">
       <div class="modal">
         <div class="modal-header">
@@ -186,7 +167,6 @@
       </div>
     </div>
     
-    <!-- 查看数据集详情模态框 -->
     <div class="modal-overlay" id="detailModal" :style="{ display: showDetailModal ? 'flex' : 'none' }">
       <div class="modal">
         <div class="modal-header">
@@ -244,7 +224,6 @@
       </div>
     </div>
     
-    <!-- 删除确认模态框 -->
     <div class="modal-overlay" id="confirmModal" :style="{ display: showConfirmModal ? 'flex' : 'none' }">
       <div class="modal confirm-modal">
         <div class="modal-header">
@@ -273,7 +252,6 @@
 import { ref, reactive, onMounted } from 'vue';
 import Header from '@/components/Header.vue';
 import SidebarMenu from '@/components/SidebarMenu.vue';
-// 图标列表
 const iconList = [
   'fa-table', 'fa-users', 'fa-box', 'fa-chart-bar','fa-cart-shopping',
   'fa-gear','fa-clock-rotate-left','fa-code-branch','fa-plug','fa-table',
@@ -289,7 +267,6 @@ const iconList = [
   'fa-comment-dots', 'fa-user-plus', 'fa-folder-open', 'fa-spinner', 'fa-mobile-screen', 'fa-check-circle', 'fa-minus-circle', 'fa-upload'
 ];
 
-// 数据集列表数据
 const datasetList = ref([
   {
     id: 1,
@@ -340,16 +317,13 @@ const totalItems = ref(4);
 const totalPages = ref(1);
 const startItem = ref(1);
 const endItem = ref(4);
-
-// 模态框显示控制
+const total = ref(0);
 const showDatasetModal = ref(false);
 const showDetailModal = ref(false);
 const showConfirmModal = ref(false);
 
-// 编辑模式标识
 const isEditMode = ref(false);
 
-// 表单数据
 const formData = reactive({
   id: '',
   name: '',
@@ -359,7 +333,6 @@ const formData = reactive({
   status: 'active'
 });
 
-// 详情数据
 const detailData = reactive({
   id: '',
   name: '',
@@ -371,50 +344,14 @@ const detailData = reactive({
   updateTime: ''
 });
 
-// 待删除ID
 const deleteId = ref('');
 
-// 初始化
 onMounted(() => {
-  calculatePagination();
 });
 
-// 计算分页信息
-const calculatePagination = () => {
-  totalPages.value = Math.ceil(totalItems.value / pageSize.value);
-  startItem.value = (currentPage.value - 1) * pageSize.value + 1;
-  endItem.value = Math.min(currentPage.value * pageSize.value, totalItems.value);
-};
 
-// 分页控制
-const prevPage = () => {
-  if (currentPage.value > 1) {
-    currentPage.value--;
-    calculatePagination();
-  }
-};
-
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++;
-    calculatePagination();
-  }
-};
-
-const changePage = (page) => {
-  currentPage.value = page;
-  calculatePagination();
-};
-
-// 刷新列表
-const refreshList = () => {
-  console.log('刷新数据集列表');
-};
-
-// 打开新增模态框
 const openAddModal = () => {
   isEditMode.value = false;
-  // 重置表单
   formData.id = '';
   formData.name = '';
   formData.code = '';
@@ -425,10 +362,8 @@ const openAddModal = () => {
   showDatasetModal.value = true;
 };
 
-// 打开编辑模态框
 const openEditModal = (id) => {
   isEditMode.value = true;
-  // 查找对应的数据
   const item = datasetList.value.find(item => item.id === id);
   if (item) {
     formData.id = item.id;
@@ -442,15 +377,12 @@ const openEditModal = (id) => {
   showDatasetModal.value = true;
 };
 
-// 关闭数据集模态框
 const closeDatasetModal = () => {
   showDatasetModal.value = false;
 };
 
-// 保存数据集
 const saveDataset = () => {
   if (isEditMode.value) {
-    // 编辑操作
     const index = datasetList.value.findIndex(item => item.id === formData.id);
     if (index !== -1) {
       datasetList.value[index] = {
@@ -460,7 +392,6 @@ const saveDataset = () => {
       };
     }
   } else {
-    // 新增操作
     const newId = Math.max(...datasetList.value.map(item => item.id)) + 1;
     const now = new Date().toLocaleString();
     datasetList.value.push({
@@ -476,7 +407,6 @@ const saveDataset = () => {
   showDatasetModal.value = false;
 };
 
-// 查看详情
 const viewDetail = (id) => {
   const item = datasetList.value.find(item => item.id === id);
   if (item) {
@@ -485,23 +415,19 @@ const viewDetail = (id) => {
   showDetailModal.value = true;
 };
 
-// 关闭详情模态框
 const closeDetailModal = () => {
   showDetailModal.value = false;
 };
 
-// 打开删除确认模态框
 const openDeleteModal = (id) => {
   deleteId.value = id;
   showConfirmModal.value = true;
 };
 
-// 关闭确认模态框
 const closeConfirmModal = () => {
   showConfirmModal.value = false;
 };
 
-// 确认删除
 const confirmDelete = () => {
   datasetList.value = datasetList.value.filter(item => item.id !== deleteId.value);
   totalItems.value--;

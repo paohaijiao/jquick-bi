@@ -1,22 +1,15 @@
 <template>
   <div class="container">
-    <!-- 顶部导航栏 -->
     <header class="header">
-      <Header 
-      />
+      <Header />
     </header>
-    
-    <!-- 主内容区 -->
     <div class="main-content">
-      <!-- 左侧菜单 -->
      <SidebarMenu 
         :active-menu="activeMenu" 
         :unread-count="unreadCount"
         @menu-click="setActiveMenu"
         @submenu-click="setActiveSubmenu"
       />
-      
-      <!-- 右侧列表内容区域 -->
       <main class="content-area">
         <div class="page-header">
           <div>
@@ -100,8 +93,6 @@
         </div>
       </main>
     </div>
-    
-    <!-- 编辑/新增连接器模态框 -->
     <div 
       class="modal-overlay" 
       :class="{ active: isModalActive }"
@@ -131,14 +122,9 @@
             </div>
             <div class="form-group">
               <label class="text-align-left">管道编码 <span class="required-mark">*</span></label>
-              <input 
-                type="text" 
-                class="form-control" 
-                v-model="formData.code" 
-                placeholder="请输入管道编码"
-              >
+              <input  type="text"   class="form-control"   v-model="formData.code"   placeholder="请输入管道编码">
             </div>
-                        <div class="form-group">
+             <div class="form-group">
               <label class="text-align-left">图标选择</label>
               <div class="icon-selector">
                 <div 
@@ -187,7 +173,6 @@
           <div class="form-card">
             <h2 class="form-section-title text-align-left">字段配置</h2>
             <p class="help-text" style="margin-bottom: 16px;">配置表字段信息，包括字段名称、数据类型、长度等属性</p>
-        
             <div class="fields-container">
               <div class="fields-header">
                 <div>字段名称 <span class="required-mark">*</span></div>
@@ -195,7 +180,6 @@
                 <div>映射器</div>
                 <div>操作</div>
               </div>
-              <!-- 字段行 -->
               <div 
                 class="field-row" 
                 v-for="(field, index) in formData.fields" 
@@ -222,21 +206,14 @@
                   placeholder=""
                 >
                 <div class="field-actions">
-                  <button 
-                    class="field-btn delete-field" 
-                    title="删除"
-                    @click="removeField(index)"
-                  >
+                  <button  class="field-btn delete-field"   title="删除" @click="removeField(index)">
                     <i class="fas fa-trash"></i>
                   </button>
                 </div>
               </div>
             </div>
             
-            <button 
-              class="add-field-btn" 
-              @click="addField"
-            >
+            <button class="add-field-btn"  @click="addField">
               <i class="fas fa-plus"></i>
               <span>添加字段</span>
             </button>
@@ -257,7 +234,6 @@ import Header from '@/components/Header.vue';
 import SidebarMenu from '@/components/SidebarMenu.vue';
 import request from '../api/request';
 import { ElMessage } from 'element-plus';
-// 状态管理
 const activeMenu = ref('pipeline-list');
 const isModalActive = ref(false);
 const modalTitle = ref('');
@@ -281,7 +257,6 @@ const formData = ref({
   fields: []
 });
 const openModal = (isEdit = false, id ) => {
-  console.log('当前的主键是:'+id);
   debugger;
   isModalActive.value = true;
   currentEditingId.value = id;
@@ -292,11 +267,11 @@ const openModal = (isEdit = false, id ) => {
     modalTitle.value = '新增连接器表字段';
     resetForm();
   }
-  document.body.style.overflow = 'hidden';// 阻止背景滚动
+  document.body.style.overflow = 'hidden';
 };
 const closeModal = () => {
   isModalActive.value = false;
-  document.body.style.overflow = 'auto';// 恢复背景滚动
+  document.body.style.overflow = 'auto';
 };
 
 const resetForm = () => {
