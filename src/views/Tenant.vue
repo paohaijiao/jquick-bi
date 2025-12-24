@@ -1,39 +1,15 @@
 <template>
   <div class="container">
-    <!-- 顶部导航栏 -->
     <header class="header">
-      <div class="logo">
-        <i class="fas fa-chart-line"></i>
-        <span>JQuick BI</span>
-      </div>
-      <div class="header-actions">
-        <div class="search-box">
-          <el-icon><Search /></el-icon>
-          <input type="text" placeholder="搜索报表、数据源或文档...">
-        </div>
-        <div class="notification-icon">
-          <i class="far fa-bell"></i>
-          <span class="notification-badge">3</span>
-        </div>
-        <div class="user-info" @click="toggleUserMenu">
-          <div class="user-avatar">ZL</div>
-          <span class="user-name">张磊</span>
-          <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
-        </div>
-      </div>
+         <Header />
     </header>
-    
-    <!-- 主内容区 -->
     <div class="main-content">
-      <!-- 左侧菜单 -->
       <SidebarMenu 
         :active-menu="activeMenu" 
         :unread-count="unreadCount"
         @menu-click="setActiveMenu"
         @submenu-click="setActiveSubmenu"
       />
-      
-      <!-- 右侧租户管理区域 -->
       <main class="content-area">
         <div class="page-header">
           <div>
@@ -47,8 +23,6 @@
             </button>
           </div>
         </div>
-        
-        <!-- 筛选和搜索区域 -->
         <div class="filter-bar">
           <div class="filter-group">
             <div class="filter-item">
@@ -138,28 +112,19 @@
           </div>
         </div>
         
-        <!-- 分页控件 -->
-        <div class="pagination">
-          <div class="pagination-info">
-            显示 {{ currentPage === 1 ? 1 : (currentPage - 1) * pageSize + 1 }} - {{ Math.min(currentPage * pageSize, totalTenants) }} 条，共 {{ totalTenants }} 条
+           <div class="pagination">
+            <el-pagination
+                v-model:current-page="currentPage"
+                v-model:page-size="pageSize"
+                :page-sizes="[5, 10, 20, 50]"  
+                :total="total"          
+                layout="total, sizes, prev, pager, next, jumper" 
+                @size-change="handleSizeChange"  
+                @current-change="handleTutorial"  
+            />
           </div>
-          <div class="pagination-controls">
-            <button class="page-btn" :disabled="currentPage === 1" @click="changePage(currentPage - 1)">
-              <i class="fas fa-chevron-left" style="font-size: 12px;"></i>
-            </button>
-            <button class="page-btn" :class="{ active: currentPage === 1 }" @click="changePage(1)">1</button>
-            <button class="page-btn" :class="{ active: currentPage === 2 }" @click="changePage(2)">2</button>
-            <button class="page-btn" :class="{ active: currentPage === 3 }" @click="changePage(3)">3</button>
-            <button class="page-btn" :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)">
-              <i class="fas fa-chevron-right" style="font-size: 12px;"></i>
-            </button>
-          </div>
-        </div>
       </main>
     </div>
-  
-    
-    <!-- 配置租户模态框 -->
     <div class="modal-overlay" :class="{ show: showConfigModal }" @click="closeConfigModal">
       <div class="modal" @click.stop>
         <div class="modal-header">
@@ -219,70 +184,39 @@ import { ref, computed,onMounted } from 'vue';
 import SidebarMenu from '@/components/SidebarMenu.vue';
 import request from '../api/request';
 import { ElMessage } from 'element-plus';
-// 租户数据
-const tenants = ref([
- 
-]);
-
-// 筛选条件
+import Header from '@/components/Header.vue';
+const tenants = ref([]);
 const filterStatus = ref('');
 const filterType = ref('');
 const filterTime = ref('');
 const searchKeyword = ref('');
-
-// 分页控制
 const currentPage = ref(1);
 const pageSize = ref(10);
-const totalTenants = computed(() => filteredTenants.value.length);
-const totalPages = computed(() => Math.ceil(totalTenants.value / pageSize.value));
-
-// 筛选后的租户列表
+const total = ref(0);
 const filteredTenants = computed(() => {
   return tenants.value.filter(tenant => {
-    // 状态筛选
     if (filterStatus.value && tenant.status !== filterStatus.value) {
       return false;
     }
-    // 类型筛选
     if (filterType.value && tenant.type !== filterType.value) {
       return false;
     }
-    // 搜索关键词筛选
     if (searchKeyword.value && !(
       tenant.name.includes(searchKeyword.value) || 
       tenant.domain.includes(searchKeyword.value)
     )) {
       return false;
     }
-    // 时间筛选（实际项目中需要根据实际时间处理）
     if (filterTime.value) {
-      // 这里简化处理，实际项目中需要根据createTime进行筛选
     }
     return true;
   });
 });
-
-// 分页处理
-/**
-const paginatedTenants = computed(() => {
-  const startIndex = (currentPage.value - 1) * pageSize.value;
-  return filteredTenants.value.slice(startIndex, startIndex + pageSize.value);
-});
-**/
-const changePage = (page) => {
-  if (page < 1 || page > totalPages.value) return;
-  currentPage.value = page;
-};
-
-// 导出租户
 const exportTenants = () => {
   console.log('导出所有租户数据');
 };
-
-// 配置租户相关
 const showConfigModal = ref(false);
 const currentTenant = ref({});
-
 const handleConfig = (tenantId) => {
   const tenant = tenants.value.find(t => t.id === tenantId);
   if (tenant) {
@@ -298,7 +232,6 @@ const closeConfigModal = () => {
 const saveTenantConfig = () => {
   const index = tenants.value.findIndex(t => t.id === currentTenant.value.id);
   if (index !== -1) {
-    // 更新logo文本
     currentTenant.value.logoText = currentTenant.value.name.substring(0, 2);
     tenants.value[index] = { ...currentTenant.value };
     showConfigModal.value = false;
@@ -314,6 +247,7 @@ const handleUserQuery = () => {
   .then(response => {
     if(response.code==200){
       tenants.value=response.data.records;
+      total.value=response.data.total;
     }else{
       ElMessage.error(`查询租户失败`);
     }
@@ -361,7 +295,6 @@ body {
   height: 100vh;
 }
 
-/* 顶部导航栏 */
 .header {
   height: var(--header-height);
   background-color: white;
@@ -479,14 +412,12 @@ body {
   justify-content: center;
 }
 
-/* 主内容区 */
 .main-content {
   display: flex;
   flex: 1;
   overflow: hidden;
 }
 
-/* 左侧菜单 */
 .sidebar {
   width: var(--sidebar-width);
   background-color: white;
@@ -576,7 +507,6 @@ body {
   font-weight: 500;
 }
 
-/* 右侧租户管理区域 */
 .content-area {
   flex: 1;
   padding: 24px;
@@ -647,7 +577,6 @@ body {
   margin-right: 8px;
 }
 
-/* 筛选和搜索区域 */
 .filter-bar {
   background-color: white;
   border-radius: 12px;
@@ -708,7 +637,6 @@ body {
   color: #999;
 }
 
-/* 租户列表 - 卡片式布局 */
 .tenant-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
@@ -883,7 +811,6 @@ body {
   border-color: var(--border-color);
 }
 
-/* 分页控件 */
 .pagination {
   display: flex;
   justify-content: space-between;
@@ -931,7 +858,6 @@ body {
   cursor: not-allowed;
 }
 
-/* 模态框样式 */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -1007,7 +933,6 @@ body {
   gap: 12px;
 }
 
-/* 表单样式 */
 .form-group {
   margin-bottom: 20px;
 }
@@ -1068,7 +993,6 @@ textarea.form-control {
   border-bottom: 1px solid var(--border-color);
 }
 
-/* 响应式调整 */
 @media (max-width: 1200px) {
   .tenant-list {
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -1099,7 +1023,6 @@ textarea.form-control {
   }
 }
 
-/* 动画相关 */
 .rotate-180 {
   transform: rotate(180deg);
   transition: transform 0.3s ease;
