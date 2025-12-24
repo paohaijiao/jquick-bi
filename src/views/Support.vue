@@ -1,39 +1,15 @@
 <template>
   <div class="container">
-    <!-- 顶部导航栏 -->
     <header class="header">
-      <div class="logo">
-        <i class="fas fa-chart-line"></i>
-        <span>JQuick BI</span>
-      </div>
-      <div class="header-actions">
-        <div class="search-box">
-          <el-icon><Search /></el-icon>
-          <input type="text" placeholder="搜索报表、数据源或文档...">
-        </div>
-        <div class="notification-icon">
-          <i class="far fa-bell"></i>
-          <span class="notification-badge">3</span>
-        </div>
-        <div class="user-info" @click="handleUserClick">
-          <div class="user-avatar">ZL</div>
-          <span class="user-name">张磊</span>
-          <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
-        </div>
-      </div>
+      <Header />
     </header>
-    
-    <!-- 主内容区 -->
     <div class="main-content">
-      <!-- 左侧菜单 -->
      <SidebarMenu 
         :active-menu="activeMenu" 
         :unread-count="unreadCount"
         @menu-click="setActiveMenu"
         @submenu-click="setActiveSubmenu"
       />
-      
-      <!-- 右侧联系客服区域 -->
       <main class="content-area">
         <div class="page-header">
           <div>
@@ -41,8 +17,6 @@
             <p class="page-description">如有任何问题或建议，请通过以下方式联系我们</p>
           </div>
         </div>
-        
-        <!-- 联系信息卡片 -->
         <div class="contact-card">
           <div class="contact-info">
             <div class="contact-item">
@@ -73,8 +47,6 @@
             包括问题截图、操作步骤和系统版本等信息。我们的技术支持团队会尽快为您提供帮助。
           </p>
         </div>
-        
-        <!-- 发送邮件表单 -->
         <div class="email-form-container">
           <div class="form-title text-align-left" >发送邮件咨询</div>
           <form @submit.prevent="handleFormSubmit">
@@ -127,8 +99,6 @@
             </div>
           </form>
         </div>
-        
-        <!-- 常见问题 -->
         <div class="faq-section">
           <div class="form-title text-align-left">常见问题</div>
           
@@ -154,7 +124,7 @@ export default {
 <script setup>
 import {  reactive } from 'vue';
 import SidebarMenu from '@/components/SidebarMenu.vue';
-
+import Header from '@/components/Header.vue';
 const formData = reactive({
   subject: '',
   from: '',
@@ -181,48 +151,35 @@ const faqs = reactive([
   }
 ]);
 
-// 处理用户信息点击
 const handleUserClick = () => {
 
 };
 
-// 处理文件上传
 const handleFileChange = (e) => {
   formData.attachments = Array.from(e.target.files);
   console.log('选中的文件:', formData.attachments);
 };
 
-// 表单提交处理
 const handleFormSubmit = () => {
-  // 表单验证
   if (!formData.subject || !formData.message || !formData.from || !formData.category) {
     alert('请填写所有必填字段');
     return;
   }
-  
-  // 这里可以添加实际的表单提交逻辑
+
   console.log('表单提交数据:', formData);
-  
-  // 模拟邮件发送
   alert('邮件准备发送，将打开您的邮件客户端');
-  
-  // 构建mailto链接
   const mailtoLink = `mailto:support@jquickbi.com?subject=${encodeURIComponent(formData.subject)}&body=${encodeURIComponent(formData.message)}&from=${encodeURIComponent(formData.from)}`;
   window.location.href = mailtoLink;
 };
 
-// 重置表单
 const resetForm = () => {
   formData.subject = '';
   formData.category = '';
   formData.message = '';
   formData.attachments = [];
-  // 清空文件输入
   const fileInput = document.getElementById('emailAttachment');
   if (fileInput) fileInput.value = '';
 };
-
-// 切换FAQ展开/收起
 const toggleFaq = (index) => {
   faqs[index].open = !faqs[index].open;
 };
@@ -263,7 +220,6 @@ body {
   height: 100vh;
 }
 
-/* 顶部导航栏 */
 .header {
   height: var(--header-height);
   background-color: white;
@@ -381,14 +337,12 @@ body {
   justify-content: center;
 }
 
-/* 主内容区 */
 .main-content {
   display: flex;
   flex: 1;
   overflow: hidden;
 }
 
-/* 左侧菜单 */
 .sidebar {
   width: var(--sidebar-width);
   background-color: white;
@@ -478,7 +432,6 @@ body {
   font-weight: 500;
 }
 
-/* 右侧联系客服区域 */
 .content-area {
   flex: 1;
   padding: 24px;
@@ -505,7 +458,6 @@ body {
   margin-top: 4px;
 }
 
-/* 联系客服卡片 */
 .contact-card {
   background-color: white;
   border-radius: 12px;
@@ -560,7 +512,6 @@ body {
   text-decoration: underline;
 }
 
-/* 邮件表单样式 */
 .email-form-container {
   background-color: white;
   border-radius: 12px;
@@ -662,7 +613,6 @@ textarea.form-control {
   margin-right: 8px;
 }
 
-/* 常见问题 */
 .faq-section {
   background-color: white;
   border-radius: 12px;
@@ -701,8 +651,6 @@ textarea.form-control {
   font-size: 14px;
   padding-left: 24px;
 }
-
-/* 响应式调整 */
 @media (max-width: 768px) {
   .sidebar {
     width: 0;
