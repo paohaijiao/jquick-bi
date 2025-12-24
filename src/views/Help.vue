@@ -1,39 +1,16 @@
 <template>
   <div class="container">
-    <!-- 顶部导航栏 -->
     <header class="header">
-      <div class="logo">
-        <i class="fas fa-chart-line"></i>
-        <span>JQuick BI</span>
-      </div>
-      <div class="header-actions">
-        <div class="search-box">
-            <el-icon><search /></el-icon>
-          <input type="text" placeholder="搜索报表、数据源或文档...">
-        </div>
-        <div class="notification-icon">
-          <i class="far fa-bell"></i>
-          <span class="notification-badge">3</span>
-        </div>
-        <div class="user-info" @click="toggleUserMenu">
-          <div class="user-avatar">ZL</div>
-          <span class="user-name">张磊</span>
-          <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
-        </div>
-      </div>
+      <Header />
     </header>
     
-    <!-- 主内容区 -->
     <div class="main-content">
-      <!-- 左侧菜单 -->
       <SidebarMenu 
         :active-menu="activeMenu" 
         :unread-count="unreadCount"
         @menu-click="setActiveMenu"
         @submenu-click="setActiveSubmenu"
       />
-      
-      <!-- 右侧帮助文档区域 -->
       <main class="content-area">
         <div class="page-header">
           <div>
@@ -267,45 +244,8 @@ export default {
 <script setup>
 import { ref } from 'vue';
 import SidebarMenu from '@/components/SidebarMenu.vue';
-// 菜单状态管理
-const activeMenu = ref('help'); // 默认激活帮助文档
-const submenus = ref({
-  dataSource: false,
-  report: false
-});
-const activeSubmenu = ref({
-  dataSource: '',
-  report: ''
-});
-
-
-
-// 设置激活的主菜单
-const setActiveMenu = (menu) => {
-  activeMenu.value = menu;
-  // 关闭所有子菜单
-  Object.keys(submenus.value).forEach(key => {
-    submenus.value[key] = false;
-  });
-  // 清空子菜单激活状态
-  Object.keys(activeSubmenu.value).forEach(key => {
-    activeSubmenu.value[key] = '';
-  });
-};
-
-// 设置激活的子菜单
-const setActiveSubmenu = (parentMenu, submenu) => {
-  activeMenu.value = parentMenu;
-  activeSubmenu.value[parentMenu] = submenu;
-};
-
-// 用户菜单切换
-const toggleUserMenu = () => {
-  // 实际项目中可以实现用户菜单的显示/隐藏逻辑
-  console.log('用户菜单被点击');
-};
+import Header from '@/components/Header.vue';
 </script>
-
 <style>
 :root {
   --primary-color: #ff8326;
@@ -340,8 +280,6 @@ body {
   flex-direction: column;
   height: 100vh;
 }
-
-/* 顶部导航栏 */
 .header {
   height: var(--header-height);
   background-color: white;
@@ -459,14 +397,12 @@ body {
   justify-content: center;
 }
 
-/* 主内容区 */
 .main-content {
   display: flex;
   flex: 1;
   overflow: hidden;
 }
 
-/* 左侧菜单 */
 .sidebar {
   width: var(--sidebar-width);
   background-color: white;
@@ -557,7 +493,6 @@ body {
   font-weight: 500;
 }
 
-/* 右侧帮助文档区域 */
 .content-area {
   flex: 1;
   padding: 24px;
@@ -813,7 +748,6 @@ body {
   text-align: center;
 }
 
-/* 旋转动画类 */
 .rotate-180 {
   transform: rotate(180deg);
 }
