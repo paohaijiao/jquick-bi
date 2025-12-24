@@ -1,21 +1,9 @@
 <template>
   <div class="login-page">
     <div class="container">
-      <!-- 顶部导航栏 -->
       <header class="header">
-        <div class="logo">
-          <i class="fas fa-chart-line"></i>
-          <span>JQuick BI</span>
-        </div>
-        <div class="header-actions">
-          <div class="search-box">
-            <el-icon><search /></el-icon>
-            <input type="text" placeholder="搜索报表、数据集或文档...">
-          </div>
-        </div>
+         <Header />
       </header>
-      
-      <!-- 主内容区 -->
       <div class="main-content">
         <div class="login-container">
           <div class="login-card">
@@ -49,7 +37,6 @@
                 </div>
               </div>
               
-              <!-- 验证码区域 -->
               <div class="form-group">
                 <div class="captcha-group">
                   <div class="captcha-input input-group">
@@ -155,6 +142,7 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 const router = useRouter();
 import request from '../api/request';
+import Header from '@/components/Header.vue';
 const username = ref('');
 const password = ref('');
 const rememberMe = ref(true);
@@ -201,7 +189,6 @@ function handleLogin() {
   params.append('scope', 'all');
   params.append('captcha', captchaInput.value);
   params.append('deviceId', deviceId.value);
-
   const config = {
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
@@ -220,8 +207,6 @@ function handleLogin() {
       ElMessage.error('登录失败，请检查用户名密码');
     });
 }
-
-// 组件挂载时初始化验证码
 onMounted(() => {
   generateCaptcha();
 });
@@ -258,7 +243,6 @@ body {
   height: 100vh;
 }
 
-/* 顶部导航栏 */
 .header {
   height: var(--header-height);
   background-color: white;
@@ -318,7 +302,6 @@ body {
   color: #999;
 }
 
-/* 主内容区 */
 .main-content {
   display: flex;
   flex: 1;
@@ -396,7 +379,6 @@ body {
   box-shadow: 0 0 0 2px rgba(255, 131, 38, 0.2);
 }
 
-/* 验证码区域 */
 .captcha-group {
   display: flex;
   gap: 12px;
@@ -627,7 +609,6 @@ body {
   .captcha-image {
     width: 100%;
   }
-  
   .header-actions {
     display: none;
   }
