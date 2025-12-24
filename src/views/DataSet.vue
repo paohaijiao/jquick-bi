@@ -1,12 +1,10 @@
 <template>
   <div class="container">
-    <!-- 顶部导航栏 -->
     <header class="header">
        <Header 
       />
     </header>
     
-    <!-- 主内容区 -->
     <div class="main-content">
       <SidebarMenu 
         :active-menu="activeMenu" 
@@ -15,7 +13,6 @@
         @submenu-click="setActiveSubmenu"
       />
       
-      <!-- 右侧数据集内容区域 -->
       <main class="content-area">
         <div class="page-header">
           <div>
@@ -34,7 +31,6 @@
           </div>
         </div>
         
-        <!-- SQL查询区域 -->
         <div class="query-section">
           <div class="query-header">
             <div class="query-title">
@@ -55,7 +51,6 @@
           </div>
         </div>
         
-        <!-- 数据集关系可视化 -->
         <div class="relationship-visualization">
           <div class="relationship-title">
             <i class="fas fa-project-diagram"></i>
@@ -121,7 +116,6 @@
           </div>
         </div>
         
-        <!-- 数据集列表 -->
         <div class="dataset-list">
           <div class="dataset-tabs">
             <div 
@@ -147,7 +141,6 @@
             </div>
           </div>
           
-          <!-- 使用 DatasetTable 组件 -->
           <DatasetTable
             :data="getCurrentData()"
             :columns="getCurrentColumns()"
@@ -160,7 +153,6 @@
           />
         </div>
         
-        <!-- 分页控件 -->
         <div class="pagination">
           <div class="pagination-info">
             显示 {{ (currentPage - 1) * pageSize + 1 }} - {{ Math.min(currentPage * pageSize, totalItems) }} 条，共 {{ totalItems }} 条
@@ -208,7 +200,6 @@
       </main>
     </div>
     
-    <!-- 新建/编辑数据集模态框 -->
     <div class="modal-overlay" :class="{ 'd-flex': isModalOpen }" @click="closeModal($event)">
       <div class="modal" @click.stop>
         <div class="modal-header">
@@ -234,7 +225,6 @@
         </div>
         
         <div class="modal-body">
-          <!-- 用户数据表单 -->
           <div class="tab-content" :class="{ active: modalTab === 'user' }">
             <div class="form-group">
               <label for="userId">ID</label>
@@ -258,7 +248,6 @@
             </div>
           </div>
           
-          <!-- 订单数据表单 -->
           <div class="tab-content" :class="{ active: modalTab === 'order' }">
             <div class="form-group">
               <label for="orderId">订单ID</label>
@@ -294,7 +283,6 @@
       </div>
     </div>
     
-    <!-- 确认删除模态框 -->
     <div class="modal-overlay" :class="{ 'd-flex': isConfirmOpen }" @click="closeConfirmModal($event)">
       <div class="modal confirm-modal" @click.stop>
         <div class="modal-header">
@@ -323,14 +311,12 @@ import { ref,computed, onMounted } from 'vue';
 import SidebarMenu from '@/components/SidebarMenu.vue';
 import Header from '@/components/Header.vue';
 import DatasetTable from '@/components/DatasetTable.vue';
-// 状态管理
 const activeMenu = ref('dataset-list');
 const activeTab = ref('users');
 const sqlQuery = ref("select * from user a inner join user_order b on a.id = b.user_id order by b.user_id");
 const currentPage = ref(1);
 const pageSize = ref(10);
 
-// 数据管理
 const users = ref([
   { id: 1, name: '张三', age: 25, city: '北京', salary: 8000.0 },
   { id: 2, name: '李四', age: 30, city: '上海', salary: 12000.0 }
@@ -344,8 +330,6 @@ const orders = ref([
 ]);
 
 const joinedData = ref([]);
-
-// 模态框状态
 const isModalOpen = ref(false);
 const isConfirmOpen = ref(false);
 const isEditing = ref(false);
@@ -353,8 +337,6 @@ const modalTab = ref('user');
 const formData = ref({});
 const itemToDelete = ref(null);
 const deleteType = ref('');
-
-// 列定义
 const userColumns = [
   { key: 'id', label: 'id', type: 'Integer' },
   { key: 'name', label: 'name', type: 'String' },
@@ -362,7 +344,6 @@ const userColumns = [
   { key: 'city', label: 'city', type: 'String' },
   { key: 'salary', label: 'salary', type: 'Double' }
 ];
-
 const orderColumns = [
   { key: 'order_id', label: 'order_id', type: 'Integer' },
   { key: 'user_id', label: 'user_id', type: 'Integer' },
@@ -371,7 +352,6 @@ const orderColumns = [
   { key: 'price', label: 'price', type: 'Double' },
   { key: 'order_date', label: 'order_date', type: 'String' }
 ];
-
 const joinedColumns = [
   { key: 'id', label: 'id', type: 'Integer' },
   { key: 'name', label: 'name', type: 'String' },
@@ -384,8 +364,6 @@ const joinedColumns = [
   { key: 'price', label: 'price', type: 'Double' },
   { key: 'order_date', label: 'order_date', type: 'String' }
 ];
-
-// 计算属性
 const totalItems = computed(() => {
   if (activeTab.value === 'users') return users.value.length;
   if (activeTab.value === 'orders') return orders.value.length;
@@ -394,32 +372,27 @@ const totalItems = computed(() => {
 
 const totalPages = computed(() => Math.ceil(totalItems.value / pageSize.value));
 
-// 生命周期钩子
 onMounted(() => {
   executeQuery();
 });
 
-// 方法
 const switchTab = (tab) => {
   activeTab.value = tab;
   currentPage.value = 1;
 };
 
-// 获取当前数据
 const getCurrentData = () => {
   if (activeTab.value === 'users') return users.value;
   if (activeTab.value === 'orders') return orders.value;
   return joinedData.value;
 };
 
-// 获取当前列配置
 const getCurrentColumns = () => {
   if (activeTab.value === 'users') return userColumns;
   if (activeTab.value === 'orders') return orderColumns;
   return joinedColumns;
 };
 
-// 表格编辑事件处理
 const handleTableEdit = (item, dataType) => {
   if (dataType === 'users') {
     editUser(item);
@@ -430,7 +403,6 @@ const handleTableEdit = (item, dataType) => {
   }
 };
 
-// 表格删除事件处理
 const handleTableDelete = (item, dataType) => {
   if (dataType === 'users') {
     deleteUser(item.id);
@@ -442,7 +414,6 @@ const handleTableDelete = (item, dataType) => {
 };
 
 const formatSql = () => {
-  // 简单的SQL格式化实现
   let formatted = sqlQuery.value
     .replace(/select /gi, 'SELECT ')
     .replace(/from /gi, '\nFROM ')
@@ -454,9 +425,7 @@ const formatSql = () => {
 };
 
 const executeQuery = () => {
-  // 模拟SQL查询执行，实际项目中会替换为真实的API调用
   joinedData.value = [];
-  
   users.value.forEach(user => {
     const userOrders = orders.value.filter(order => order.user_id === user.id);
     userOrders.forEach(order => {
@@ -466,9 +435,7 @@ const executeQuery = () => {
       });
     });
   });
-  
-  // 按user_id排序
-  joinedData.value.sort((a, b) => a.user_id - b.user_id);
+    joinedData.value.sort((a, b) => a.user_id - b.user_id);
 };
 
 const exportResults = () => {
@@ -563,18 +530,16 @@ const closeConfirmModal = (e) => {
 const confirmDelete = () => {
   if (deleteType.value === 'user') {
     users.value = users.value.filter(u => u.id !== itemToDelete.value);
-    // 同时删除相关订单
     orders.value = orders.value.filter(o => o.user_id !== itemToDelete.value);
   } else if (deleteType.value === 'order') {
     orders.value = orders.value.filter(o => o.order_id !== itemToDelete.value);
   } else if (deleteType.value === 'joined') {
-    // 从订单中删除
     orders.value = orders.value.filter(
       o => o.order_id !== itemToDelete.value.orderId
     );
   }
   
-  executeQuery(); // 更新关联数据
+  executeQuery(); 
   isConfirmOpen.value = false;
   itemToDelete.value = null;
   deleteType.value = '';
@@ -616,7 +581,6 @@ body {
   height: 100vh;
 }
 
-/* 顶部导航栏 */
 .header {
   height: var(--header-height);
   background-color: white;
@@ -709,14 +673,12 @@ body {
   font-size: 14px;
 }
 
-/* 主内容区 */
 .main-content {
   display: flex;
   flex: 1;
   overflow: hidden;
 }
 
-/* 左侧菜单 */
 .sidebar {
   width: var(--sidebar-width);
   background-color: white;
@@ -799,7 +761,6 @@ body {
   font-weight: 500;
 }
 
-/* 右侧数据集列表区域 */
 .content-area {
   flex: 1;
   padding: 24px;
@@ -870,7 +831,6 @@ body {
   margin-right: 8px;
 }
 
-/* SQL查询区域 */
 .query-section {
   background-color: white;
   border-radius: 12px;
@@ -915,7 +875,6 @@ body {
   gap: 12px;
 }
 
-/* 数据集列表 */
 .dataset-list {
   background-color: white;
   border-radius: 12px;
@@ -946,7 +905,6 @@ body {
   background-color: var(--secondary-color);
 }
 
-/* 数据集关系图 */
 .relationship-visualization {
   background-color: white;
   border-radius: 12px;
@@ -1046,7 +1004,6 @@ body {
   transform: translateY(-50%);
 }
 
-/* 结果预览区 */
 .results-section {
   background-color: white;
   border-radius: 12px;
@@ -1083,7 +1040,6 @@ body {
   color: #666;
 }
 
-/* 分页控件 */
 .pagination {
   display: flex;
   justify-content: space-between;
@@ -1131,7 +1087,6 @@ body {
   cursor: not-allowed;
 }
 
-/* 模态框样式 */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -1185,7 +1140,6 @@ body {
   color: var(--primary-color);
 }
 
-/* Tab 样式 */
 .modal-tabs {
   display: flex;
   border-bottom: 1px solid var(--border-color);
@@ -1226,7 +1180,6 @@ body {
   display: block;
 }
 
-/* 表单样式 */
 .form-group {
   margin-bottom: 16px;
 }
@@ -1265,7 +1218,6 @@ textarea.form-control {
   gap: 12px;
 }
 
-/* 确认对话框样式 */
 .confirm-modal {
   width: 400px;
   max-width: 90%;

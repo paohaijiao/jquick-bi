@@ -1,29 +1,9 @@
 <template>
   <div class="container">
-    <!-- 顶部导航栏 -->
     <header class="header">
-      <div class="logo">
-        <i class="fas fa-chart-line"></i>
-        <span>JQuick BI</span>
-      </div>
-      <div class="header-actions">
-        <div class="search-box">
-          <el-icon><Search /></el-icon>
-          <input type="text" placeholder="搜索报表、数据源或文档...">
-        </div>
-        <div class="notification-icon">
-          <i class="far fa-bell"></i>
-          <span class="notification-badge">3</span>
-        </div>
-        <div class="user-info" @click="toggleUserMenu">
-          <div class="user-avatar">ZL</div>
-          <span class="user-name">张磊</span>
-          <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
-        </div>
-      </div>
+        <Header />
     </header>
-    
-    <!-- 主内容区 -->
+  
     <div class="main-content">
       <SidebarMenu 
         :active-menu="activeMenu" 
@@ -116,24 +96,20 @@
           </div>
         </div>
         
-        <div class="pagination">
-          <div class="pagination-info">显示 {{ (currentPage-1)*pageSize + 1 }}-{{ Math.min(currentPage*pageSize, totalItems) }} 条，共 {{ totalItems }} 条</div>
-          <div class="pagination-controls">
-            <button class="page-btn" :disabled="currentPage === 1" @click="changePage(currentPage - 1)">
-              <i class="fas fa-chevron-left"></i>
-            </button>
-            <button class="page-btn" v-for="page in pageCount" :key="page" :class="{ active: currentPage === page }" @click="changePage(page)">
-              {{ page }}
-            </button>
-            <button class="page-btn" :disabled="currentPage === pageCount" @click="changePage(currentPage + 1)">
-              <i class="fas fa-chevron-right"></i>
-            </button>
+           <div class="pagination">
+            <el-pagination
+                v-model:current-page="currentPage"
+                v-model:page-size="pageSize"
+                :page-sizes="[5, 10, 20, 50]"  
+                :total="total"          
+                layout="total, sizes, prev, pager, next, jumper" 
+                @size-change="handleSizeChange"  
+                @current-change="handleTutorial"  
+            />
           </div>
-        </div>
       </main>
     </div>
 
-    <!-- 新增/编辑连接器模态框 -->
     <div class="modal-overlay" :class="{ 'modal-visible': isModalVisible }" @click="closeModal(true)">
       <div class="modal" @click.stop>
         <div class="modal-header">
@@ -150,7 +126,6 @@
         </div>
         
         <div class="modal-body">
-          <!-- 基本信息Tab -->
           <div class="tab-content" :class="{ active: activeTab === 'basic' }" id="basic-tab">
             <input type="hidden" v-model="formData.id">
             <div class="form-group">
@@ -175,7 +150,6 @@
             </div>
           </div>
           
-          <!-- 属性设置Tab -->
           <div class="tab-content" :class="{ active: activeTab === 'properties' }" id="properties-tab">
             <button class="add-property" @click="addProperty">
               <i class="fas fa-plus"></i>
@@ -191,7 +165,6 @@
         
           </div>
           
-          <!-- 高级配置Tab -->
           <div class="tab-content" :class="{ active: activeTab === 'advanced' }" id="advanced-tab">
             <div class="form-group">
               <label class="text-align-left">超时时间(秒)</label>
@@ -219,7 +192,6 @@
       </div>
     </div>
     
-    <!-- 确认删除模态框 -->
     <div class="modal-overlay" :class="{ 'modal-visible': isDeleteConfirmVisible }" @click="closeDeleteConfirm(true)">
       <div class="modal confirm-modal" @click.stop>
         <div class="modal-header">
@@ -253,9 +225,8 @@ import { ref, computed, onMounted } from 'vue';
 import SidebarMenu from '@/components/SidebarMenu.vue';
 import request from '../api/request';
 import { ElMessage } from 'element-plus';
+import Header from '@/components/Header.vue';
 const connectors = ref([]);
-
-// 筛选条件
 const filter = ref({
   type: '',
   status: '',
@@ -265,20 +236,11 @@ const filter = ref({
 });
 const connectorType=ref([]);
 const connectorStatus=ref([]);
-
-// 分页相关
 const currentPage = ref(1);
 const pageSize = ref(4);
-const totalItems = computed(() => connectors.value.length);
+const total = ref(0);
 const pageCount = computed(() => Math.ceil(totalItems.value / pageSize.value));
 
-// 切换页码
-const changePage = (page) => {
-  if (page < 1 || page > pageCount.value) return;
-  currentPage.value = page;
-};
-
-// 模态框相关
 const isModalVisible = ref(false);
 const modalType = ref('add'); // 'add' 或 'edit'
 const modalTitle = computed(() => modalType.value === 'add' ? '新增连接器' : '编辑连接器');
@@ -297,28 +259,21 @@ const formData = ref({
   notes: ''
 });
 
-// 打开模态框
 const openModal = (type, item = null) => {
   modalType.value = type;
   activeTab.value = 'basic';
   debugger;
-  // 如果是编辑模式，填充表单数据
   if (type === 'edit' && item) {
     handleConnectorDetail(item);
   }
-  
   isModalVisible.value = true;
 };
-
-// 关闭模态框
 const closeModal = (isOverlay = false) => {
-  // 如果点击的是遮罩层才关闭（避免点击模态框内部也关闭）
+
   if (!isOverlay || isOverlay) {
     isModalVisible.value = false;
   }
 };
-
-// 设置激活的Tab
 const setActiveTab = (tab) => {
   if(tab==='properties'){
     if(formData.value.type===''){
@@ -337,18 +292,11 @@ const setActiveTab = (tab) => {
   }
   activeTab.value = tab;
 };
-
-// 处理数据源类型变化
 const handleTypeChange = () => {
 };
-
-
-// 添加属性
 const addProperty = () => {
   formData.value.attrs.push({ name: '', value: '' });
 };
-
-// 移除属性
 const removeProperty = (index) => {
   formData.value.attrs.splice(index, 1);
 };
@@ -373,26 +321,18 @@ const saveConnector = () => {
 )
   closeModal();
 };
-
-
 const isDeleteConfirmVisible = ref(false);
 const idToDelete = ref(null);
-
-// 显示删除确认
 const showDeleteConfirm = (id) => {
   idToDelete.value = id;
   isDeleteConfirmVisible.value = true;
 };
-
-// 关闭删除确认
 const closeDeleteConfirm = (isOverlay = false) => {
   if (!isOverlay || isOverlay) {
     isDeleteConfirmVisible.value = false;
     idToDelete.value = null;
   }
 };
-
-// 执行删除
 const deleteDataSource = () => {
 };
 const handleConnectorDetail = (item) => {
@@ -492,8 +432,6 @@ body {
   flex-direction: column;
   height: 100vh;
 }
-
-/* 顶部导航栏 */
 .header {
   height: var(--header-height);
   background-color: white;
@@ -610,15 +548,11 @@ body {
   align-items: center;
   justify-content: center;
 }
-
-/* 主内容区 */
 .main-content {
   display: flex;
   flex: 1;
   overflow: hidden;
 }
-
-/* 左侧BI菜单 */
 .sidebar {
   width: var(--sidebar-width);
   background-color: white;
@@ -628,12 +562,10 @@ body {
   overflow-y: auto;
   height: calc(100vh - var(--header-height));
 }
-
 .menu-section {
   padding: 12px 0;
   border-bottom: 1px solid var(--border-color);
 }
-
 .menu-section-title {
   padding: 0 20px;
   font-size: 12px;
@@ -642,7 +574,6 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-
 .menu-item {
   display: flex;
   align-items: center;
@@ -652,24 +583,20 @@ body {
   transition: all 0.2s;
   cursor: pointer;
 }
-
 .menu-item:hover {
   background-color: var(--secondary-color);
   color: var(--primary-color);
 }
-
 .menu-item.active {
   background-color: var(--secondary-color);
   color: var(--primary-color);
   border-left: 3px solid var(--primary-color);
 }
-
 .menu-item i {
   width: 20px;
   margin-right: 12px;
   text-align: center;
 }
-
 .menu-item .menu-badge {
   margin-left: auto;
   padding: 2px 8px;
@@ -678,17 +605,14 @@ body {
   border-radius: 10px;
   font-size: 12px;
 }
-
 .submenu {
   background-color: #fff9f2;
   padding: 0 0 0 52px;
   display: none;
 }
-
 .submenu.show {
   display: block;
 }
-
 .submenu-item {
   display: flex;
   align-items: center;
@@ -698,7 +622,6 @@ body {
   font-size: 14px;
   transition: color 0.2s;
 }
-
 .submenu-item:hover {
   color: var(--primary-color);
 }
@@ -707,8 +630,6 @@ body {
   color: var(--primary-color);
   font-weight: 500;
 }
-
-/* 右侧数据源列表区域 */
 .content-area {
   flex: 1;
   padding: 24px;
@@ -778,8 +699,6 @@ body {
 .btn i {
   margin-right: 8px;
 }
-
-/* 筛选和搜索区域 */
 .filter-bar {
   background-color: white;
   border-radius: 12px;
@@ -836,8 +755,6 @@ body {
   transform: translateY(-50%);
   color: #999;
 }
-
-/* 数据源列表 */
 .data-source-list {
   background-color: white;
   border-radius: 12px;
@@ -854,7 +771,6 @@ body {
   font-weight: 600;
   font-size: 14px;
 }
-
 .table-row {
   display: grid;
   grid-template-columns: 3fr 1fr 1fr 1fr 120px;
@@ -867,7 +783,6 @@ body {
 .table-row:hover {
   background-color: var(--secondary-color);
 }
-
 .table-row:last-child {
   border-bottom: none;
 }
@@ -877,7 +792,6 @@ body {
   align-items: center;
   gap: 12px;
 }
-
 .data-source-icon {
   width: 36px;
   height: 36px;
@@ -889,42 +803,34 @@ body {
   justify-content: center;
   font-size: 18px;
 }
-
 .data-source-icon.mysql {
   background-color: #f6f6f6;
   color: #0061a8;
 }
-
 .data-source-icon.oracle {
   background-color: #fef7e0;
   color: #f80000;
 }
-
 .data-source-icon.api {
   background-color: #e6f7ff;
   color: #1890ff;
 }
-
 .data-source-icon.excel {
   background-color: #e8f4e9;
   color: #4caf50;
 }
-
 .data-source-info {
   display: flex;
   flex-direction: column;
 }
-
 .source-name {
   font-weight: 500;
   margin-bottom: 4px;
 }
-
 .source-desc {
   font-size: 12px;
   color: #666;
 }
-
 .status-badge {
   display: inline-flex;
   align-items: center;
@@ -933,17 +839,14 @@ body {
   font-size: 12px;
   font-weight: 500;
 }
-
 .status-online {
   background-color: #f0f9eb;
   color: #52c41a;
 }
-
 .status-offline {
   background-color: #fff2f0;
   color: #ff4d4f;
 }
-
 .operation-buttons {
   display: flex;
   gap: 8px;
@@ -968,8 +871,6 @@ body {
   background-color: var(--secondary-color);
   color: var(--primary-color);
 }
-
-/* 分页控件 */
 .pagination {
   display: flex;
   justify-content: space-between;
@@ -1016,8 +917,6 @@ body {
   opacity: 0.5;
   cursor: not-allowed;
 }
-
-/* 模态框样式 */
 .modal-overlay {
   display: none;
   position: fixed;
@@ -1070,8 +969,6 @@ body {
 .modal-close:hover {
   color: var(--primary-color);
 }
-
-/* Tab 样式 */
 .modal-tabs {
   display: flex;
   border-bottom: 1px solid var(--border-color);
@@ -1111,8 +1008,6 @@ body {
 .tab-content.active {
   display: block;
 }
-
-/* 表单样式 */
 .form-group {
   margin-bottom: 16px;
 }
@@ -1142,8 +1037,6 @@ textarea.form-control {
   resize: vertical;
   min-height: 80px;
 }
-
-/* 属性设置样式 */
 .property-item {
   display: flex;
   gap: 10px;
@@ -1189,8 +1082,6 @@ textarea.form-control {
 .add-property:hover {
   background-color: rgba(255, 131, 38, 0.15);
 }
-
-/* 模态框底部 */
 .modal-footer {
   padding: 16px 20px;
   border-top: 1px solid var(--border-color);
@@ -1198,8 +1089,6 @@ textarea.form-control {
   justify-content: flex-end;
   gap: 12px;
 }
-
-/* 确认删除模态框 */
 .confirm-modal {
   width: 400px;
 }
