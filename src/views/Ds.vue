@@ -1,31 +1,10 @@
 <template>
   <div class="container">
-    <!-- 顶部导航栏 -->
     <header class="header">
-      <div class="logo">
-        <i class="fas fa-chart-line"></i>
-        <span>JQuick BI</span>
-      </div>
-      <div class="header-actions">
-        <div class="search-box">
-             <el-icon><Search /></el-icon>
-          <input type="text" placeholder="搜索报表、数据源或文档...">
-        </div>
-        <div class="notification-icon">
-          <i class="far fa-bell"></i>
-          <span class="notification-badge">3</span>
-        </div>
-        <div class="user-info" @click="toggleUserMenu">
-          <div class="user-avatar">ZL</div>
-          <span class="user-name">张磊</span>
-          <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
-        </div>
-      </div>
+           <Header />
     </header>
     
-    <!-- 主内容区 -->
     <div class="main-content">
-      <!-- 左侧BI菜单 -->
       <aside class="sidebar">
         <div class="menu-section">
           <div class="menu-section-title">主导航</div>
@@ -98,7 +77,6 @@
         </div>
       </aside>
       
-      <!-- 右侧数据源列表区域 -->
       <main class="content-area">
         <div class="page-header">
           <div>
@@ -117,7 +95,6 @@
           </div>
         </div>
         
-        <!-- 筛选和搜索区域 -->
         <div class="filter-bar">
           <div class="filter-group">
             <div class="filter-item">
@@ -153,7 +130,6 @@
           </div>
         </div>
         
-        <!-- 数据源列表 -->
         <div class="data-source-list">
           <div class="table-header">
             <div>数据源名称</div>
@@ -191,20 +167,16 @@
             </div>
           </div>
           
-          <!-- 分页控件 -->
-          <div class="pagination">
-            <div class="pagination-info">显示 {{ (currentPage - 1) * pageSize + 1 }}-{{ Math.min(currentPage * pageSize, totalItems) }} 条，共 {{ totalItems }} 条</div>
-            <div class="pagination-controls">
-              <button class="page-btn" :disabled="currentPage === 1" @click="changePage(currentPage - 1)">
-                <i class="fas fa-chevron-left"></i>
-              </button>
-              <button class="page-btn" v-for="page in pageCount" :key="page" :class="{ active: currentPage === page }" @click="changePage(page)">
-                {{ page }}
-              </button>
-              <button class="page-btn" :disabled="currentPage === pageCount" @click="changePage(currentPage + 1)">
-                <i class="fas fa-chevron-right"></i>
-              </button>
-            </div>
+           <div class="pagination">
+            <el-pagination
+                v-model:current-page="currentPage"
+                v-model:page-size="pageSize"
+                :page-sizes="[5, 10, 20, 50]"  
+                :total="total"          
+                layout="total, sizes, prev, pager, next, jumper" 
+                @size-change="handleSizeChange"  
+                @current-change="handlePipLineQuery"  
+            />
           </div>
         </div>
       </main>
@@ -218,7 +190,7 @@ export default {
 </script>
 <script setup>
 import { ref, computed } from 'vue';
-
+import Header from '@/components/Header.vue';
 // 菜单状态管理
 const activeMainMenu = ref('dataSource');
 const showSubMenu = ref({
@@ -316,7 +288,6 @@ const dataSources = ref([
   }
 ]);
 
-// 筛选条件
 const filter = ref({
   type: '',
   status: '',
@@ -324,31 +295,9 @@ const filter = ref({
   keyword: ''
 });
 
-// 分页相关
 const currentPage = ref(1);
 const pageSize = ref(5);
-const totalItems = ref(24); // 模拟总条数
-
-// 计算总页数
-const pageCount = computed(() => {
-  return Math.ceil(totalItems.value / pageSize.value);
-});
-
-// 筛选后的数据
-const filteredDataSources = computed(() => {
-  // 实际项目中这里应该根据筛选条件过滤数据
-  // 这里简化处理，仅返回所有数据
-  return dataSources.value;
-});
-
-// 分页切换
-const changePage = (page) => {
-  if (page < 1 || page > pageCount.value) return;
-  currentPage.value = page;
-  // 实际项目中这里应该根据页码加载对应数据
-};
-
-// 按钮事件
+const total = ref(0); 
 const exportList = () => {
   console.log('导出列表');
 };
@@ -401,8 +350,6 @@ body {
   flex-direction: column;
   height: 100vh;
 }
-
-/* 顶部导航栏 */
 .header {
   height: var(--header-height);
   background-color: white;
@@ -520,14 +467,12 @@ body {
   justify-content: center;
 }
 
-/* 主内容区 */
 .main-content {
   display: flex;
   flex: 1;
   overflow: hidden;
 }
 
-/* 左侧BI菜单 */
 .sidebar {
   width: var(--sidebar-width);
   background-color: white;
@@ -617,7 +562,6 @@ body {
   font-weight: 500;
 }
 
-/* 右侧数据源列表区域 */
 .content-area {
   flex: 1;
   padding: 24px;
@@ -688,7 +632,6 @@ body {
   margin-right: 8px;
 }
 
-/* 筛选和搜索区域 */
 .filter-bar {
   background-color: white;
   border-radius: 12px;
@@ -746,7 +689,6 @@ body {
   color: #999;
 }
 
-/* 数据源列表 */
 .data-source-list {
   background-color: white;
   border-radius: 12px;
@@ -878,7 +820,6 @@ body {
   color: var(--primary-color);
 }
 
-/* 分页控件 */
 .pagination {
   display: flex;
   justify-content: space-between;
@@ -909,18 +850,15 @@ body {
   cursor: pointer;
   transition: all 0.2s;
 }
-
 .page-btn:hover {
   border-color: var(--primary-color);
   color: var(--primary-color);
 }
-
 .page-btn.active {
   background-color: var(--primary-color);
   color: white;
   border-color: var(--primary-color);
 }
-
 .page-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;

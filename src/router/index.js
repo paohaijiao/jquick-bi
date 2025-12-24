@@ -89,6 +89,11 @@ const routes = [
     component: () => import('../views/DataSet.vue')
   },
   {
+    path: '/ds',
+    name: 'ds',
+    component: () => import('../views/Ds.vue')
+  },
+  {
     path: '/dataSetList',
     name: 'dataSetList',
     component: () => import('../views/DataSetList.vue')
