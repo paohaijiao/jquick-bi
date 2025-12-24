@@ -1,29 +1,8 @@
 <template>
   <div class="container">
-    <!-- 顶部导航栏 -->
     <header class="header">
-      <div class="logo">
-        <i class="fas fa-chart-line"></i>
-        <span>JQuick BI</span>
-      </div>
-      <div class="header-actions">
-        <div class="search-box">
-          <el-icon><Search /></el-icon>
-          <input type="text" placeholder="搜索报表、数据源或文档...">
-        </div>
-        <div class="notification-icon active">
-          <i class="far fa-bell"></i>
-          <span class="notification-badge">{{ unreadCount }}</span>
-        </div>
-        <div class="user-info">
-          <div class="user-avatar">{{ userNameInitials }}</div>
-          <span class="user-name">{{ userName }}</span>
-          <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
-        </div>
-      </div>
+       <Header />
     </header>
-    
-    <!-- 主内容区 -->
     <div class="main-content">
       <SidebarMenu 
         :active-menu="activeMenu" 
@@ -31,8 +10,6 @@
         @menu-click="setActiveMenu"
         @submenu-click="setActiveSubmenu"
       />
-      
-      <!-- 右侧消息列表区域 -->
       <main class="content-area">
         <div class="page-header">
           <div>
@@ -50,8 +27,6 @@
             </button>
           </div>
         </div>
-        
-        <!-- 筛选和搜索区域 -->
         <div class="filter-bar">
           <div class="filter-group">
             <div class="filter-item">
@@ -84,8 +59,6 @@
             <input type="text" placeholder="搜索消息内容..." v-model="filter.searchText">
           </div>
         </div>
-        
-        <!-- 消息列表 -->
         <div class="message-list">
           <div class="table-header">
             <div>消息内容</div>
@@ -150,26 +123,16 @@
             </div>
           </div>
           
-          <!-- 分页控件 -->
           <div class="pagination">
-            <div class="pagination-info">显示 {{ startItem }}-{{ endItem }} 条，共 {{ totalMessages }} 条</div>
-            <div class="pagination-controls">
-              <button class="page-btn" :disabled="currentPage === 1" @click="changePage(currentPage - 1)">
-                <i class="fas fa-chevron-left"></i>
-              </button>
-              <button 
-                class="page-btn" 
-                :class="{ active: currentPage === page }" 
-                v-for="page in totalPages" 
-                :key="page"
-                @click="changePage(page)"
-              >
-                {{ page }}
-              </button>
-              <button class="page-btn" :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)">
-                <i class="fas fa-chevron-right"></i>
-              </button>
-            </div>
+            <el-pagination
+                v-model:current-page="currentPage"
+                v-model:page-size="pageSize"
+                :page-sizes="[5, 10, 20, 50]"  
+                :total="total"          
+                layout="total, sizes, prev, pager, next, jumper" 
+                @size-change="handleSizeChange"  
+                @current-change="handleTutorial"  
+            />
           </div>
         </div>
       </main>
@@ -181,17 +144,9 @@
 import { ref, computed ,onMounted} from 'vue';
 import SidebarMenu from '@/components/SidebarMenu.vue';
 import request from '../api/request';
-// 用户信息
-const userName = ref('张磊');
+import Header from '@/components/Header.vue';
 const userNameInitials = computed(() => {
   return userName.value.substring(0, 2);
-});
-
-// 菜单状态
-const activeMenu = ref('message');
-const activeSubmenu = ref({
-  datasource: '',
-  report: ''
 });
 
 const messages = ref([]);
@@ -206,79 +161,31 @@ const filter = ref({
 
 const currentPage = ref(1);
 const pageSize = ref(5);
-
-// 计算未读消息数量
+const total = ref(0);
 const unreadCount = computed(() => {
   return messages.value.filter(msg => msg.unread).length;
 });
-
-// 计算总消息数
-const totalMessages = computed(() => {
-  return filteredMessages.value.length;
-});
-
-// 计算总页数
-const totalPages = computed(() => {
-  return Math.ceil(totalMessages.value / pageSize.value);
-});
-
-// 计算当前页显示的起始和结束条目
-const startItem = computed(() => {
-  return (currentPage.value - 1) * pageSize.value + 1;
-});
-
-const endItem = computed(() => {
-  return Math.min(currentPage.value * pageSize.value, totalMessages.value);
-});
-
-// 计算筛选后的消息
 const filteredMessages = computed(() => {
   return messages.value.filter(msg => {
-    // 类型筛选
     if (filter.value.type && msg.type !== filter.value.type) {
       return false;
     }
-    
-    // 状态筛选
-    if (filter.value.status === 'unread' && !msg.unread) {
+        if (filter.value.status === 'unread' && !msg.unread) {
       return false;
     }
     if (filter.value.status === 'read' && msg.unread) {
       return false;
     }
-    
-    // 搜索内容筛选
-    if (filter.value.searchText && !msg.content.includes(filter.value.searchText)) {
+        if (filter.value.searchText && !msg.content.includes(filter.value.searchText)) {
       return false;
     }
-    
-    // 时间范围筛选（简化实现）
-    // 实际应用中需要根据具体时间逻辑实现
+
     return true;
   }).slice(
     (currentPage.value - 1) * pageSize.value,
     currentPage.value * pageSize.value
   );
 });
-
-// 菜单相关方法
-const setActiveMenu = (menu) => {
-  activeMenu.value = menu;
-};
-/**
-const toggleSubmenu = (menu) => {
-  showSubmenu.value[menu] = !showSubmenu.value[menu];
-};
-**/
-const setActiveSubmenu = (parent, sub) => {
-  activeSubmenu.value[parent] = sub;
-};
-
-// 分页方法
-const changePage = (page) => {
-  if (page < 1 || page > totalPages.value) return;
-  currentPage.value = page;
-};
 
 // 消息操作方法
 const handleMessageClick = (message) => {
@@ -338,6 +245,7 @@ const handleMsg = () => {
   .then(response => {
     if(response.code==200){
       messages.value=response.data.records;
+      total.value=response.data.total;
     }
   }
 )
