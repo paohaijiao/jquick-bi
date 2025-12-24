@@ -102,12 +102,7 @@ const routes = [
     path: '/builder',
     name: 'builderPage',
     component: () => import('../views/builder.vue')
-  },
-    {
-        path: '/layout',
-        name: 'layoutPage',
-        component: () => import('../views/layout.vue')
-    }
+  }
 ]
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
