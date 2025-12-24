@@ -1,29 +1,8 @@
 <template>
   <div class="container">
-    <!-- 顶部导航栏 -->
     <header class="header">
-      <div class="logo">
-        <i class="fas fa-chart-line"></i>
-        <span>JQuick BI</span>
-      </div>
-      <div class="header-actions">
-        <div class="search-box">
-          <el-icon><search /></el-icon>
-          <input type="text" placeholder="搜索报表、数据源或文档...">
-        </div>
-        <div class="notification-icon">
-          <i class="far fa-bell"></i>
-          <span class="notification-badge">3</span>
-        </div>
-        <div class="user-info" @click="toggleUserMenu">
-          <div class="user-avatar">ZL</div>
-          <span class="user-name">张磊</span>
-          <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
-        </div>
-      </div>
+         <Header />
     </header>
-    
-    <!-- 主内容区 -->
     <div class="main-content">
        <SidebarMenu 
         :active-menu="activeMenu" 
@@ -48,8 +27,6 @@
             </button>
           </div>
         </div>
-        
-        <!-- 核心统计卡片 -->
         <div class="stats-cards">
           <div class="stat-card" v-for="stat in stats" :key="stat.id" :class="stat.color">
             <div class="stat-title">
@@ -63,8 +40,6 @@
             </div>
           </div>
         </div>
-        
-        <!-- 使用趋势图表 -->
         <div class="usage-trends">
           <div class="chart-card">
             <div class="chart-header">
@@ -83,8 +58,6 @@
             </div>
           </div>
         </div>
-        
-        <!-- 最近活动 -->
         <div class="recent-activity">
           <div class="activity-header">
             <div class="activity-title">最近操作记录</div>
@@ -102,8 +75,6 @@
             </div>
           </div>
         </div>
-        
-        <!-- 常用资源 -->
         <div class="frequent-resources">
           <div class="resources-header">
             <div class="resources-title">常用资源</div>
@@ -136,6 +107,7 @@ export default {
 }
 </script>
 <script setup>
+import Header from '@/components/Header.vue';
 import { ref,onMounted,nextTick } from 'vue';
 import SidebarMenu from '@/components/SidebarMenu.vue';
 import request from '../api/request';
@@ -151,7 +123,6 @@ const initRadarChart = () => {
     data: ['Allocated Budget', 'Actual Spending']
   },
   radar: {
-    // shape: 'circle',
     indicator: [
       { name: 'Sales', max: 6500 },
       { name: 'Administration', max: 16000 },
@@ -191,7 +162,6 @@ const valueList = data.map(function (item) {
   return item[1];
 });
 let option = {
-  // Make gradient line here
   visualMap: [
     {
       show: false,
@@ -264,34 +234,21 @@ let option = {
   chartInstance.setOption(option);
 };
 
-// 资源标签切换
 const activeResourceTab = ref('report');
 const setResourceTab = (tab) => {
   activeResourceTab.value = tab;
 };
 
-// 统计数据
 const stats = ref([]);
-
-// 活动记录
 const activities = ref([]);
-
-// 资源列表
 const resources = ref([]);
-
-// 按钮事件处理
-const exportReport = () => {
-};
-
+const exportReport = () => {};
 const createReport = () => {
 };
-
 const viewAllActivities = () => {
 };
-
 const manageResources = () => {
 };
-
 const openResource = (resource) => {
   console.log('打开资源:', resource.name);
 };
@@ -365,7 +322,6 @@ body {
   height: 100vh;
 }
 
-/* 顶部导航栏 */
 .header {
   height: var(--header-height);
   background-color: white;
@@ -483,14 +439,12 @@ body {
   justify-content: center;
 }
 
-/* 主内容区 */
 .main-content {
   display: flex;
   flex: 1;
   overflow: hidden;
 }
 
-/* 左侧BI菜单 */
 .sidebar {
   width: var(--sidebar-width);
   background-color: white;
@@ -585,7 +539,6 @@ body {
   transform: rotate(180deg);
 }
 
-/* 右侧用户统计信息区域 */
 .content-area {
   flex: 1;
   padding: 24px;
@@ -656,7 +609,6 @@ body {
   margin-right: 8px;
 }
 
-/* 核心统计卡片 */
 .stats-cards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -727,7 +679,6 @@ body {
   margin-right: 4px;
 }
 
-/* 使用趋势图表区域 */
 .usage-trends {
   display: grid;
   grid-template-columns: 2fr 1fr;
@@ -769,8 +720,8 @@ body {
 }
 
 .chart-container {
-  height: 300px; /* 已存在，确认是否生效 */
-  position: relative; /* 新增 */
+  height: 300px; 
+  position: relative; 
 }
 #line {
   width: 100%;
@@ -791,7 +742,6 @@ body {
   opacity: 0.3;
 }
 
-/* 最近活动区域 */
 .recent-activity {
   background-color: white;
   border-radius: 12px;
@@ -875,7 +825,6 @@ body {
   color: #999;
 }
 
-/* 常用资源区域 */
 .frequent-resources {
   background-color: white;
   border-radius: 12px;
