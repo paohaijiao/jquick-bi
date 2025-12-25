@@ -464,9 +464,7 @@
                             @click="splitCell">
                       拆分
                     </button>
-                    <button v-if="selectedComponent.merged" 
-                            class="btn btn-outline btn-sm" 
-                            @click="clearMerge">
+                    <button v-if="selectedComponent.merged" class="btn btn-outline btn-sm" @click="clearMerge">
                       清除
                     </button>
                   </div>
@@ -791,7 +789,6 @@ export default {
     // 创建网格容器
     createGridContainer() {
       const gridId = `grid_${Date.now()}`;
-      
       this.gridContainer = {
         id: gridId,
         type: 'grid',
@@ -815,10 +812,8 @@ export default {
           cells: []
         }
       };
-      
       this.initializeGridCells();
       this.selectedComponentId = gridId;
-      ElMessage.success('网格容器创建成功');
     },
     
     // 应用网格配置
