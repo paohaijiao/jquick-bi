@@ -1,8 +1,17 @@
 <template>
   <div class="login-page">
     <div class="container">
-      <header class="header">
-         <Header />
+     <header class="header">
+        <div class="logo">
+          <i class="fas fa-chart-line"></i>
+          <span>JQuick BI</span>
+        </div>
+        <div class="header-actions">
+          <div class="search-box">
+            <el-icon><search /></el-icon>
+            <input type="text" placeholder="搜索报表、数据集或文档...">
+          </div>
+        </div>
       </header>
       <div class="main-content">
         <div class="login-container">
