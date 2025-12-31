@@ -114,7 +114,7 @@
                             <select 
                               v-model="tenantForm.industryId" 
                               required
-                              class="form-control"
+                              class="form-control line-Height-With-19px"
                               @change="validateField('industryId')"
                             >
                               <option value="" disabled>请选择所属行业</option>
@@ -133,7 +133,7 @@
                             v-model="tenantForm.address" 
                             placeholder="请输入企业详细地址" 
                             required
-                            class="form-control"
+                            class="form-control textarea-wrapper"
                             rows="2"
                             @blur="validateField('address')"
                           ></textarea>
@@ -148,7 +148,7 @@
                           <textarea 
                             v-model="tenantForm.remark" 
                             placeholder="请输入备注信息（可选）" 
-                            class="form-control"
+                            class="form-control  textarea-wrapper"
                             rows="2"
                           ></textarea>
                         </div>
@@ -346,7 +346,7 @@
                           <textarea 
                             v-model="adminForm.intro" 
                             placeholder="个人简介" 
-                            class="form-control"
+                            class="form-control  textarea-wrapper"
                             rows="2"
                           ></textarea>
                         </div>
@@ -375,7 +375,7 @@
                       </div>
                       
                       <div class="form-group">
-                        <label class="form-label text-align-left">验证码 <span class="required">*</span></label>
+                        <label class="form-label">验证码 <span class="required">*</span></label>
                         <div class="captcha-group">
                           <div class="captcha-input">
                             <div class="input-group">
@@ -1014,7 +1014,9 @@ onMounted(() => {
   font-size: 14px;
   transition: all 0.3s;
 }
-
+.line-Height-With-19px{
+  line-height: 19px !important;
+}
 .register-page .search-box input:focus {
   outline: none;
   border-color: var(--primary-color);
@@ -1649,7 +1651,9 @@ onMounted(() => {
   color: #999;
   background-color: white;
 }
-
+.textarea-wrapper{
+  align-content: center !important;
+}
 @media (max-width: 1024px) {
   .register-page .register-container {
     gap: 40px;
