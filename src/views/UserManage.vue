@@ -103,7 +103,7 @@
                 :total="total"          
                 layout="total, sizes, prev, pager, next, jumper" 
                 @size-change="handleSizeChange"  
-                @current-change="handlePipLineQuery"  
+                @current-change="handlePage"  
             />
           </div>
         </div>
@@ -175,11 +175,6 @@ const resetPassword = (id) => {
 const moreActions = (id) => {
 
 };
-const changePage = (page) => {
-  if (page < 1 || page > totalPages.value) return;
-  currentPage.value = page;
-  handleUserQuery();
-};
 const initStatus= () => {
   request.get('/api/uaa-user/getUserStatus')
   .then(response => {
@@ -199,7 +194,7 @@ const initUserType= () => {
 };
 
 
-const handleUserQuery = () => {
+const handlePage = () => {
   let query=new Object();
   query.pageNum=currentPage.value;
   query.pageSize=pageSize.value;
@@ -218,7 +213,7 @@ const handleUserQuery = () => {
 onMounted(() => {
   initStatus();
   initUserType();
-  handleUserQuery();
+  handlePage();
 });
 </script>
 
