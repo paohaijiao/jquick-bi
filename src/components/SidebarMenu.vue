@@ -2,7 +2,11 @@
   <aside class="sidebar">
 
     <div class="sidebar-header">
-      <span class="sidebar-logo">JQuick BI</span>
+      <div class="sidebar-logo-wrapper">
+        <i class="fas fa-rocket sidebar-engine-icon"></i>
+        <span class="sidebar-logo">Quick</span>
+        <span class="sidebar-engine-tag">引擎</span>
+      </div>
     </div>
 
     <div class="menu-wrapper">
