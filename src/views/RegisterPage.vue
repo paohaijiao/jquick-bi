@@ -83,7 +83,6 @@
                               placeholder="请输入营业执照或机构代码" 
                               required
                               class="form-control"
-                              @blur="checkTenantCode"
                             >
                           </div>
                           <div class="error-message" v-if="errors.tenantCode">{{ errors.tenantCode }}</div>
@@ -182,7 +181,6 @@
                               placeholder="用于登录系统的用户名" 
                               required
                               class="form-control"
-                              @blur="checkLoginName"
                             >
                           </div>
                           <div class="error-message" v-if="errors.loginName">{{ errors.loginName }}</div>
@@ -526,9 +524,9 @@ import {
   Location, Document, User, UserFilled, Message,
   Iphone, Lock, OfficeBuilding, EditPen, Promotion
 } from '@element-plus/icons-vue';
+import { ElMessage } from 'element-plus';
 
 const router = useRouter();
-
 const activeTab = ref(1);
 
 const captchaInput = ref('');
@@ -621,35 +619,6 @@ function getIndustry() {
   });
 }
 
-function checkTenantCode() {
-  if (!tenantForm.code) return;
-  request.get(`/api/pub/tenant/check-code?code=${tenantForm.code}`)
-  .then(response => {
-    if (response.data.exists) {
-      errors.tenantCode = '该租户代码已被使用，请更换其他代码';
-    } else {
-      errors.tenantCode = '';
-    }
-  })
-  .catch(error => {
-    console.error('检查租户代码失败:', error);
-  });
-}
-
-function checkLoginName() {
-  if (!adminForm.loginName) return;
-  request.get(`/api/pub/user/check-login-name?loginName=${adminForm.loginName}`)
-  .then(response => {
-    if (response.data.exists) {
-      errors.loginName = '该登录名已被使用，请更换其他登录名';
-    } else {
-      errors.loginName = '';
-    }
-  })
-  .catch(error => {
-    console.error('检查登录名失败:', error);
-  });
-}
 
 function validateField(field) {
   switch (field) {
@@ -785,7 +754,6 @@ function validateCurrentTab() {
 
 const handleRegister = async () => {
   if (!validateAll()) {
-    // 如果有错误，跳转到第一个有错误的Tab
     if (errors.tenantName || errors.tenantCode || errors.tenantTel || errors.industryId || errors.address) {
       activeTab.value = 1;
     } else if (errors.loginName || errors.email || errors.phone || errors.passwd || errors.confirmPassword) {
@@ -795,8 +763,6 @@ const handleRegister = async () => {
     }
     return;
   }
-  
-  isSubmitting.value = true;
   
   try {
     const tenantData = {
@@ -840,27 +806,15 @@ const handleRegister = async () => {
     };
     
     const response = await request.post('/api/pub/tenant/create', param);
-    
+    debugger;
     if (response.code === 200) {
       alert('注册成功！请登录系统。');
       router.push('/login');
     } else {
-      if (response.code === 4001) {
-        errors.captcha = '验证码错误，请重新输入';
-        generateCaptcha();
-      } else if (response.code === 4002) {
-        errors.loginName = '登录名已存在';
-      } else if (response.code === 4003) {
-        errors.tenantCode = '租户代码已存在';
-      } else {
-        alert(response.message || '注册失败，请稍后重试');
-      }
+    
     }
   } catch (error) {
     console.error('注册失败:', error);
-    alert('网络错误，请检查网络连接后重试');
-  } finally {
-    isSubmitting.value = false;
   }
 };
 
@@ -1706,7 +1660,9 @@ onMounted(() => {
     margin-top: 30px;
   }
 }
-
+.tabs-header{
+  height: 64px;
+}
 @media (max-width: 768px) {
   .register-page .main-content {
     padding: 20px 16px;
