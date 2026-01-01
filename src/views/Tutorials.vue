@@ -112,6 +112,7 @@ request.get('/api/tutorial/category/list')
     console.log(response)
     if(200==response.code){
       category.value=response.data
+      total.value=response.total
     }else{
       ElMessage.success(`分类加载出错`);
     }

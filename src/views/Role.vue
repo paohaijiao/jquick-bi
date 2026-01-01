@@ -1,31 +1,10 @@
 <template>
   <div class="container">
-    <!-- 顶部导航栏 -->
     <header class="header">
-      <div class="logo">
-        <i class="fas fa-chart-line"></i>
-        <span>JQuick BI</span>
-      </div>
-      <div class="header-actions">
-        <div class="search-box">
-          <el-icon><Search /></el-icon>
-          <input type="text" placeholder="搜索报表、数据源或文档...">
-        </div>
-        <div class="notification-icon">
-          <i class="far fa-bell"></i>
-          <span class="notification-badge">3</span>
-        </div>
-        <div class="user-info" @click="toggleUserMenu">
-          <div class="user-avatar">ZL</div>
-          <span class="user-name">张磊</span>
-          <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
-        </div>
-      </div>
+      <Header />
     </header>
     
-    <!-- 主内容区 -->
     <div class="main-content">
-      <!-- 左侧菜单 -->
       <SidebarMenu 
         :active-menu="activeMenu" 
         :unread-count="unreadCount"
@@ -33,7 +12,6 @@
         @submenu-click="setActiveSubmenu"
       />
       
-      <!-- 右侧角色权限管理区域 -->
       <main class="content-area">
         <div class="page-header">
           <div>
@@ -52,7 +30,6 @@
           </div>
         </div>
         
-        <!-- 筛选和搜索区域 -->
         <div class="filter-bar">
           <div class="filter-group">
             <div class="filter-item">
@@ -76,7 +53,6 @@
           </div>
         </div>
         
-        <!-- 角色列表 -->
         <div class="role-list">
           <div class="table-header">
             <div>角色信息</div>
@@ -116,25 +92,21 @@
           </div>
         </div>
         
-        <!-- 分页控件 -->
         <div class="pagination">
-          <div class="pagination-info">显示 {{ (currentPage - 1) * pageSize + 1 }}-{{ Math.min(currentPage * pageSize, totalRoles) }} 条，共 {{ totalRoles }} 条</div>
-          <div class="pagination-controls">
-            <button class="page-btn" :disabled="currentPage === 1" @click="changePage(currentPage - 1)">
-              <i class="fas fa-chevron-left"></i>
-            </button>
-            <button class="page-btn" :class="{ active: currentPage === 1 }" @click="changePage(1)">1</button>
-            <button class="page-btn" :class="{ active: currentPage === 2 }" @click="changePage(2)">2</button>
-            <button class="page-btn" :class="{ active: currentPage === 3 }" @click="changePage(3)">3</button>
-            <button class="page-btn" :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)">
-              <i class="fas fa-chevron-right"></i>
-            </button>
-          </div>
+            <el-pagination
+                v-model:current-page="currentPage"
+                v-model:page-size="pageSize"
+                :page-sizes="[5, 10, 20, 50]"  
+                :total="total"          
+                layout="total, sizes, prev, pager, next, jumper" 
+                @size-change="handleSizeChange"  
+                @current-change="handlePageChange"  
+                
+            />
         </div>
       </main>
     </div>
-    
-    <!-- 新增/编辑角色模态框 -->
+  
     <div class="modal-overlay" :class="{ show: isAddRoleModalVisible }" @click="closeModal('isAddRoleModalVisible')">
       <div class="modal" @click.stop>
         <div class="modal-header">
@@ -186,8 +158,7 @@
         </div>
       </div>
     </div>
-    
-    <!-- 权限配置模态框 -->
+  
     <div class="modal-overlay permission-config-modal" :class="{ show: isPermissionModalVisible }" @click="closeModal('isPermissionModalVisible')">
       <div class="modal" @click.stop>
         <div class="modal-header">
@@ -202,7 +173,6 @@
           </div>
          
           <div class="permission-tree-container">
-            <!-- 系统权限树形结构 -->
             <el-tree 
                 :data="treeData" 
                 :props="defaultProps" 
@@ -232,25 +202,21 @@ import { ref, computed, onMounted } from 'vue';
 import SidebarMenu from '@/components/SidebarMenu.vue';
 import { ElMessage } from 'element-plus';
 import request from '../api/request';
-
-// 筛选条件
+import Header from '@/components/Header.vue';
 const roleStatus = ref('');
 const roleType = ref('');
 const searchKeyword = ref('');
 const status = ref([]);
 const type = ref([]);
 
-// 分页控制
 const currentPage = ref(1);
 const pageSize = ref(5);
+const total = ref(0);
 
-// 模态框状态
 const isAddRoleModalVisible = ref(false);
 const isPermissionModalVisible = ref(false);
 const currentRole = ref({});
 
-
-// 角色列表
 const roles = ref([]);
 const defaultProps = ref({
   children: 'children',
@@ -272,19 +238,10 @@ const filteredRoles = computed(() => {
   });
 });
 
-// 计算属性 - 总角色数
-const totalRoles = computed(() => filteredRoles.value.length);
 
-// 计算属性 - 总页数
-const totalPages = computed(() => Math.ceil(totalRoles.value / pageSize.value));
 
-// 左侧菜单相关
-const activeMenu = ref('role');
-const unreadCount = ref(5);
 
-// 角色操作方法
 const showAddRoleModal = () => {
-  // 重置当前角色对象
   currentRole.value = {
     id: '',
     roleName: '',
@@ -311,12 +268,11 @@ const saveOrUpdateRole = () => {
   param.uaaRoleType = currentRole.value.uaaRoleType;
   param.icon = currentRole.value.icon;
   param.status = currentRole.value.status;
-  
   request.post('/api/role/saveOrUpdate', param)
     .then(response => {
       if (200 === response.code) {
         ElMessage.success(`保存成功`);
-        handleRole(); // 重新加载角色列表
+        handleRole(); 
       } else {
         ElMessage.error(`加载数据出错: ${response.message}`);
       }
@@ -354,15 +310,6 @@ const saveRoleMenus = () => {
     ElMessage.error(`请求失败: ${error.message}`);
   });
 };
-
-// 分页方法
-const changePage = (page) => {
-  if (page < 1 || page > totalPages.value) return;
-  currentPage.value = page;
-  handleRole(); // 切换页码时重新加载数据
-};
-
-// 关闭模态框
 const closeModal = (modalName) => {
   if (modalName === 'isAddRoleModalVisible') {
     isAddRoleModalVisible.value = false;
@@ -397,10 +344,6 @@ const handleRoleMenu = (roleId) => {
       ElMessage.error(`请求失败: ${error.message}`);
     });
 };
-
-
-
-// 加载角色类型
 const handleRoleType = () => {
   request.get('/api/role/getRoleType')
     .then(response => {
@@ -415,7 +358,6 @@ const handleRoleType = () => {
     });
 };
 
-// 加载角色状态
 const handleRoleStatus = () => {
   request.get('/api/role/getRoleStatus')
     .then(response => {
@@ -430,19 +372,18 @@ const handleRoleStatus = () => {
     });
 };
 
-// 加载角色列表
-const handleRole = () => {
+const handlePageChange = () => {
   let param = new Object();
   param.pageNum = currentPage.value;
   param.pageSize = pageSize.value;
   param.status = roleStatus.value;
   param.type = roleType.value;
   param.keyword = searchKeyword.value;
-  
   request.post('/api/role/page', param)
     .then(response => {
       if (200 === response.code) {
         roles.value = response.data.records;
+        total.value = response.data.total;
       } else {
         ElMessage.error(`加载角色列表出错: ${response.message}`);
       }
@@ -451,10 +392,8 @@ const handleRole = () => {
       ElMessage.error(`请求失败: ${error.message}`);
     });
 };
-
-// 页面加载时初始化数据
 onMounted(() => {
-  handleRole();
+  handlePageChange();
   handleRoleType();
   handleRoleStatus();
 });
@@ -495,7 +434,6 @@ body {
   height: 100vh;
 }
 
-/* 顶部导航栏 */
 .header {
   height: var(--header-height);
   background-color: white;
@@ -613,14 +551,12 @@ body {
   justify-content: center;
 }
 
-/* 主内容区 */
 .main-content {
   display: flex;
   flex: 1;
   overflow: hidden;
 }
 
-/* 左侧菜单 */
 .sidebar {
   width: var(--sidebar-width);
   background-color: white;
@@ -710,7 +646,6 @@ body {
   font-weight: 500;
 }
 
-/* 右侧角色权限管理区域 */
 .content-area {
   flex: 1;
   padding: 24px;
@@ -781,7 +716,6 @@ body {
   margin-right: 8px;
 }
 
-/* 筛选和搜索区域 */
 .filter-bar {
   background-color: white;
   border-radius: 12px;
@@ -842,7 +776,6 @@ body {
   color: #999;
 }
 
-/* 角色列表 */
 .role-list {
   background-color: white;
   border-radius: 12px;
@@ -959,7 +892,6 @@ body {
   color: var(--primary-color);
 }
 
-/* 分页控件 */
 .pagination {
   display: flex;
   justify-content: space-between;
@@ -1007,7 +939,6 @@ body {
   cursor: not-allowed;
 }
 
-/* 模态框样式 */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -1083,7 +1014,6 @@ body {
   gap: 12px;
 }
 
-/* 权限配置模态框样式 */
 .permission-config-modal .modal-body {
   padding: 0;
 }
@@ -1126,7 +1056,6 @@ body {
   overflow-y: auto;
 }
 
-/* 表单样式 */
 .form-group {
   margin-bottom: 20px;
 }
@@ -1175,7 +1104,6 @@ textarea.form-control {
   margin-bottom: 20px;
 }
 
-/* 响应式调整 */
 @media (max-width: 1200px) {
   .permission-groups {
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -1214,12 +1142,10 @@ textarea.form-control {
   }
 }
 
-/* 旋转动画 */
 .rotate-180 {
   transform: rotate(180deg);
   transition: transform 0.3s ease;
 }
-/* 权限树美化样式 */
 .el-tree {
   --tree-node-padding: 12px 0;
   --tree-line-color: #e5e7eb;
@@ -1229,7 +1155,6 @@ textarea.form-control {
   --tree-depth-indent: 24px;
 }
 
-/* 节点整体样式 */
 .el-tree-node {
   padding: var(--tree-node-padding);
   transition: background-color 0.2s;
@@ -1239,14 +1164,12 @@ textarea.form-control {
   background-color: var(--tree-hover-bg);
 }
 
-/* 节点内容样式 */
 .el-tree-node__content {
   height: auto !important;
   padding: 4px 0 !important;
   align-items: center;
 }
 
-/* 复选框样式优化 */
 .el-tree .el-checkbox {
   margin-right: 10px;
 }
@@ -1261,7 +1184,6 @@ textarea.form-control {
   font-weight: 500;
 }
 
-/* 节点文本样式 */
 .el-tree-node__label {
   font-size: 14px;
   color: var(--tree-text-color);
@@ -1274,7 +1196,6 @@ textarea.form-control {
   color: var(--tree-active-color);
 }
 
-/* 连接线样式 */
 .el-tree-node__children {
   padding-left: var(--tree-depth-indent) !important;
 }
@@ -1293,7 +1214,6 @@ textarea.form-control {
   background-color: var(--tree-line-color);
 }
 
-/* 展开/折叠图标样式 */
 .el-tree-node__expand-icon {
   color: #9ca3af;
   width: 20px;
@@ -1313,7 +1233,6 @@ textarea.form-control {
   visibility: hidden;
 }
 
-/* 选中节点样式 */
 .el-tree-node.is-current > .el-tree-node__content {
   background-color: rgba(255, 131, 38, 0.1);
 }
