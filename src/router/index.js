@@ -18,9 +18,9 @@ const routes = [
     component: () => import('../views/RegisterPage.vue')
   },
   {
-    path: '/index',
-    name: 'IndexPage',
-    component: () => import('../views/Index.vue')
+    path: '/home',
+    name: 'homePage',
+    component: () => import('../views/home.vue')
   },
   {
     path: '/myReport',
