@@ -3,7 +3,7 @@ import { ElMessage } from 'element-plus'
 
 const service = axios.create({
   baseURL: '', // 直接使用相对路径
-  timeout: 10000
+  timeout: 1000000
 })
 const whiteList = [
   '/api/pub/captcha/image' // 获取验证码接口

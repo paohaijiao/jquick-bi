@@ -1625,69 +1625,52 @@ export default {
       this.isDraggingOver = false;
       const elementType = this.draggingElementType || e.dataTransfer.getData('text/plain');
       if (!elementType) return;
-      
-      // 如果还没有网格容器，先创建
-      if (!this.gridContainer) {
+      if (!this.gridContainer) {// 如果还没有网格容器，先创建
         this.createGridContainer();
       }
-      
-      // 创建不在网格中的组件
-      this.createComponent(elementType);
+      this.createComponent(elementType); // 创建不在网格中的组件
     },
-    
-    // 保存布局
     saveLayout() {
+      let container=this.gridContainer;
+      container.reportId=this.reportId;
       const layoutData = {
+        reportId:this.reportId,
         gridContainer: this.gridContainer,
         components: this.components,
         gridConfig: this.gridConfig,
         timestamp: new Date().toISOString()
       };
-      
-      const jsonStr = JSON.stringify(layoutData, null, 2);
-      const blob = new Blob([jsonStr], {type: 'application/json'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `jquick-bi-layout-${Date.now()}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-      ElMessage.success('布局已保存！');
-    },
-    
-    // 加载布局
-    loadLayout() {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.json';
-      input.onchange = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          try {
-            const layoutData = JSON.parse(e.target.result);
-            this.gridContainer = layoutData.gridContainer || null;
-            this.components = layoutData.components || [];
-            this.gridConfig = layoutData.gridConfig || { rows: 3, columns: 3, gapValue: 10, gapUnit: 'px' };
-            this.selectedComponentId = '';
-            this.selectedCells = [];
-            ElMessage.success('布局加载成功！');
-          } catch (error) {
-            console.error('加载布局失败:', error);
-            ElMessage.error('加载布局失败，请检查文件格式是否正确');
+      request.post('/api/layout/save',layoutData)
+        .then(response => {
+          if(response.code==200){
+              ElMessage.success('布局已保存！');
+          }else{
+            ElMessage.error(`操作失败`);
           }
-        };
-        reader.readAsText(file);
-      };
-      input.click();
+        });
+  
     },
     
-    // 初始化DOM元素
+    loadLayout() {
+      let reportId=this.reportId;
+      request.get('/api/layout/loadByReportId/'+reportId)
+        .then(response => {
+          if(response.code==200){
+              const layoutData = response.data;
+              this.gridContainer = layoutData.gridContainer || null;
+              this.components = layoutData.components || [];
+              this.gridConfig = layoutData.gridConfig || { rows: 3, columns: 3, gapValue: 10, gapUnit: 'px' };
+              this.selectedComponentId = '';
+              this.selectedCells = [];
+              ElMessage.success('布局已保存！');
+          }else{
+            ElMessage.error(`操作失败`);
+          }
+        });
+    },
+    
     async initializeDomElements() {
       try {
-        // 这里可以调用API获取元素数据
-        // 暂时使用模拟数据
         this.containerElements = [
           { type: 'div', name: '容器', icon: 'fas fa-square' },
           { type: 'section', name: '区块', icon: 'fas fa-columns' }
@@ -1723,7 +1706,6 @@ export default {
       }
     },
     
-    // HTML编辑器相关方法
     openHtmlEditor() {
       this.htmlEditorContent = this.generateHtml();
       this.activeModal = 'HTML编辑器';
@@ -1775,7 +1757,6 @@ export default {
     selectedComponent: {
       handler(newVal) {
         if (newVal && newVal.type === 'grid-cell') {
-          // 监听网格单元格属性变化
           this.$nextTick(() => {
             const watchers = ['rowSpan', 'colSpan', 'backgroundColor', 'borderWidth'];
             watchers.forEach(prop => {

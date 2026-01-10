@@ -209,7 +209,7 @@ function handleLogin() {
       ElMessage.success('登录成功');
       localStorage.setItem('tokenInfo', JSON.stringify(response));
       localStorage.setItem('token', response.access_token);
-      router.push('/index');
+      router.push('/home');
     })
     .catch(error => {
       console.log(error);
