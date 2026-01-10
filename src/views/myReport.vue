@@ -195,6 +195,7 @@
         <el-dialog
           v-model="detailDialogVisible"
           title="报表详情"
+          class="text-align-left"
           width="800px"
           :before-close="handleDetailClose"
         >
@@ -377,7 +378,7 @@ const filter = reactive({
 })
 
 const currentPage = ref(1)
-const pageSize = ref(10)
+const pageSize = ref(4)
 const total = ref(0)
 const dialogVisible = ref(false)
 const detailDialogVisible = ref(false)
@@ -964,7 +965,6 @@ body {
   color: var(--primary-color);
   font-weight: 500;
 }
-/* 内容区域 */
 .content-area {
   flex: 1;
   overflow-y: auto;
@@ -972,7 +972,6 @@ body {
   background-color: var(--light-bg);
 }
 
-/* 页面头部 */
 .page-header {
   display: flex;
   justify-content: space-between;
@@ -997,7 +996,6 @@ body {
   gap: 12px;
 }
 
-/* 按钮样式 */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -1035,47 +1033,40 @@ body {
   color: var(--primary-color);
 }
 
-/* 过滤栏 */
 .filter-bar {
+  background-color: white;
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-shadow: var(--card-shadow);
+  margin-bottom: 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
-  padding: 16px;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: var(--card-shadow);
 }
 
 .filter-group {
   display: flex;
-  gap: 20px;
+  gap: 16px;
+  align-items: center;
 }
 
 .filter-item {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  align-items: center;
+  gap: 8px;
 }
 
 .filter-item label {
-  font-size: 12px;
+  font-size: 14px;
   color: #666;
 }
 
-.filter-item select,
-.filter-item input {
-  padding: 8px 12px;
+.filter-item select, .filter-item input {
+  padding: 6px 12px;
   border: 1px solid var(--border-color);
   border-radius: 6px;
   font-size: 14px;
-  min-width: 120px;
-}
-
-.filter-item select:focus,
-.filter-item input:focus {
-  outline: none;
-  border-color: var(--primary-color);
+  color: #333;
 }
 
 .search-filter {
@@ -1096,125 +1087,6 @@ body {
   font-size: 14px;
 }
 
-/* 报表网格 */
-.reports-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 20px;
-  margin-bottom: 24px;
-}
-
-/* 报表卡片 */
-.report-card {
-  background-color: white;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: var(--card-shadow);
-  transition: transform 0.2s, box-shadow 0.2s;
-  display: flex;
-  flex-direction: column;
-}
-
-.report-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.report-preview {
-  height: 120px;
-  background-color: #f8f9fa;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.report-preview-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  color: #999;
-}
-
-.report-preview-placeholder i {
-  font-size: 32px;
-}
-
-.report-preview-placeholder span {
-  font-size: 12px;
-}
-
-.report-favorite {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.9);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: #ccc;
-  transition: all 0.2s;
-}
-
-.report-favorite:hover {
-  background-color: white;
-  color: #ffd700;
-}
-
-.report-favorite.active {
-  color: #ffd700;
-}
-
-/* 报表信息区域 */
-.report-info {
-  padding: 16px;
-  flex: 1;
-}
-
-.report-name {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-color);
-  margin-bottom: 8px;
-}
-
-.report-meta {
-  display: flex;
-  gap: 12px;
-  font-size: 12px;
-  color: #999;
-  margin-bottom: 12px;
-}
-
-.report-desc {
-  font-size: 14px;
-  color: #666;
-  line-height: 1.5;
-  margin-bottom: 12px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.report-tags {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.report-tag {
-  padding: 4px 8px;
-  background-color: #f5f5f5;
-  border-radius: 4px;
-  font-size: 12px;
-  color: #666;
-}
 
 .type-dashboard {
   background-color: #e6f7ff;
@@ -1231,7 +1103,6 @@ body {
   color: #fa8c16;
 }
 
-/* 报表操作区域 */
 .report-actions {
   display: flex;
   justify-content: space-between;
@@ -1282,7 +1153,6 @@ body {
   color: var(--primary-color);
 }
 
-/* 图标选择器 */
 .icon-selector {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -1320,7 +1190,6 @@ body {
   font-size: 12px;
 }
 
-/* 报表详情对话框 */
 .report-detail {
   display: flex;
   flex-direction: column;
@@ -1367,7 +1236,6 @@ body {
   font-weight: 500;
 }
 
-/* 详情内容区域 */
 .detail-content {
   display: flex;
   flex-direction: column;
@@ -1416,7 +1284,6 @@ body {
   color: #666;
 }
 
-/* 详情操作按钮 */
 .detail-actions {
   padding-top: 20px;
   border-top: 1px solid var(--border-color);
@@ -1468,14 +1335,514 @@ body {
   border-color: var(--danger-color);
 }
 
-/* 分页器样式 */
 .pagination {
   display: flex;
   justify-content: flex-end;
   margin-top: 20px;
 }
+.reports-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); 
+  gap: 20px;
+  margin-bottom: 24px;
+}
 
-/* 响应式设计 */
+.report-card {
+  background: white;
+  border-radius: 14px; 
+  overflow: hidden;
+  box-shadow: 
+    0 3px 12px rgba(255, 131, 38, 0.06),
+    0 1px 3px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(255, 131, 38, 0.1);
+  position: relative;
+  min-height: 300px; 
+}
+
+.report-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 25px rgba(255, 131, 38, 0.12),
+    0 3px 8px rgba(0, 0, 0, 0.05);
+  border-color: rgba(255, 131, 38, 0.3);
+}
+
+.report-preview {
+  height: 120px; 
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(255, 131, 38, 0.1);
+}
+
+.report-preview-placeholder i {
+  font-size: 40px; 
+  color: var(--primary-color);
+  opacity: 0.8;
+  filter: drop-shadow(0 2px 4px rgba(255, 131, 38, 0.2));
+}
+
+.report-preview-placeholder span {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  background: rgba(255, 131, 38, 0.1);
+  color: var(--primary-color);
+  padding: 3px 14px; 
+  border-radius: 14px;
+  border: 1px solid rgba(255, 131, 38, 0.2);
+}
+
+.report-favorite {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 32px; 
+  height: 32px;
+  border-radius: 50%;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #ccc;
+  transition: all 0.3s ease;
+  z-index: 3;
+  border: 1px solid rgba(255, 131, 38, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.report-info {
+  padding: 18px;
+  flex: 1;
+  position: relative;
+}
+
+.report-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 10px;
+  line-height: 1.4;
+  position: relative;
+  padding-left: 14px;
+}
+
+.report-name::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 3px;
+  bottom: 3px;
+  width: 3px;
+  background: linear-gradient(to bottom, var(--primary-color), #ffb347);
+  border-radius: 2px;
+}
+
+.report-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 131, 38, 0.1);
+}
+
+.report-meta span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px; 
+  color: #8c8c8c;
+  font-weight: 500;
+}
+
+.report-meta span i {
+  color: var(--primary-color);
+  opacity: 0.7;
+  font-size: 13px;
+}
+
+.report-desc {
+  font-size: 13px; 
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 14px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  position: relative;
+  padding-left: 18px;
+}
+
+.report-desc::before {
+  content: '📝';
+  position: absolute;
+  left: 0;
+  top: 2px;
+  font-size: 12px;
+  color: var(--primary-color);
+  opacity: 0.6;
+}
+
+.report-tags {
+  display: flex;         
+  flex-wrap: nowrap;     
+  gap: 8px;            
+  align-items: center;    
+  overflow: hidden;       
+  white-space: nowrap;   
+  margin-top: 8px;
+}
+
+.report-tag {
+ display: inline-flex;  
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;    
+  flex-shrink: 0;        
+  max-width: calc(50% - 4px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.report-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px; 
+  background: #fffaf5;
+  border-top: 1px solid rgba(255, 131, 38, 0.1);
+  position: relative;
+  flex-wrap: nowrap; 
+}
+
+.report-status {
+  font-size: 11px; 
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap; 
+  gap: 5px;
+}
+
+.action-group {
+  display: flex;
+  gap: 8px; 
+   white-space: nowrap;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 12px; 
+  background: white;
+  border: 1px solid rgba(255, 131, 38, 0.2);
+  color: #666;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 70px;
+  justify-content: center;
+   white-space: nowrap;
+}
+
+.action-btn i {
+  font-size: 13px; 
+}
+
+@media (max-width: 1400px) {
+  .reports-grid {
+    grid-template-columns: repeat(3, 1fr); 
+  }
+}
+
+@media (max-width: 1100px) {
+  .reports-grid {
+    grid-template-columns: repeat(2, 1fr); 
+  }
+}
+
+@media (max-width: 768px) {
+  .reports-grid {
+    grid-template-columns: 1fr; 
+    gap: 16px;
+  }
+  
+  .report-card {
+    min-height: 280px;
+  }
+  
+  .report-actions {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+  
+  .action-group {
+    justify-content: center;
+  }
+  
+  .action-btn {
+    flex: 1;
+    min-width: auto;
+  }
+}
+@media (max-width: 480px) {
+  .report-card {
+    min-height: 260px;
+  }
+  
+  .report-info {
+    padding: 14px;
+  }
+  
+  .report-actions {
+    padding: 12px 14px;
+  }
+}
+.action-group {
+  display: flex;
+  gap: 6px; 
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px; 
+  background: white;
+  border: 1px solid rgba(255, 131, 38, 0.2);
+  color: #666;
+  font-size: 11px; 
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 60px; 
+  justify-content: center;
+}
+
+.action-btn i {
+  font-size: 12px; 
+}
+
+@media (max-width: 1600px) {
+  .reports-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 1200px) {
+  .reports-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .reports-grid {
+    grid-template-columns: repeat(2, 1fr); 
+  }
+}
+
+@media (max-width: 600px) {
+  .reports-grid {
+    grid-template-columns: 1fr; 
+  }
+  
+  .report-actions {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+  
+  .action-group {
+    justify-content: center;
+  }
+  
+  .action-btn {
+    flex: 1;
+    min-width: auto;
+  }
+}
+
+.type-dashboard {
+  background: rgba(255, 131, 38, 0.08);
+  color: #ff6a00;
+  border: 1px solid rgba(255, 131, 38, 0.2);
+}
+
+.type-dashboard::before {
+  content: '📊';
+  opacity: 0.8;
+}
+
+.type-report {
+  background: rgba(255, 107, 53, 0.08);
+  color: #ff5500;
+  border: 1px solid rgba(255, 107, 53, 0.2);
+}
+
+.type-report::before {
+  content: '📈';
+  opacity: 0.8;
+}
+
+.type-analysis {
+  background: rgba(255, 123, 37, 0.08);
+  color: #e65c00;
+  border: 1px solid rgba(255, 123, 37, 0.2);
+}
+
+.type-analysis::before {
+  content: '🔍';
+  opacity: 0.8;
+}
+
+.report-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  background: #fffaf5;
+  border-top: 1px solid rgba(255, 131, 38, 0.1);
+  position: relative;
+}
+
+.report-status {
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-normal {
+  background: rgba(82, 196, 26, 0.1);
+  color: #52c41a;
+  border: 1px solid rgba(82, 196, 26, 0.2);
+}
+
+.status-normal::before {
+  content: '●';
+  font-size: 10px;
+  color: #52c41a;
+}
+
+.status-deleted {
+  background: rgba(255, 77, 79, 0.1);
+  color: #ff4d4f;
+  border: 1px solid rgba(255, 77, 79, 0.2);
+}
+
+.status-deleted::before {
+  content: '●';
+  font-size: 10px;
+  color: #ff4d4f;
+}
+
+.action-group {
+  display: flex;
+  gap: 8px;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: white;
+  border: 1px solid rgba(255, 131, 38, 0.2);
+  color: #666;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 80px;
+  justify-content: center;
+}
+
+.action-btn:hover {
+  background: rgba(255, 131, 38, 0.05);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.action-btn i {
+  font-size: 14px;
+  transition: transform 0.2s ease;
+}
+
+.action-btn:hover i {
+  transform: scale(1.1);
+}
+
+.report-card:hover {
+  border-color: rgba(255, 131, 38, 0.4);
+}
+
+.report-card:hover .report-name {
+  color: var(--primary-color);
+}
+
+.report-card:hover .report-preview {
+  background: linear-gradient(135deg, #fff9f0, #ffead9);
+}
+
+.report-card:hover .report-actions {
+  background: rgba(255, 131, 38, 0.02);
+}
+
+.report-card:hover .action-btn {
+  background: white;
+}
+
+.report-card:hover .action-btn:hover {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 12px rgba(255, 131, 38, 0.2);
+}
+
+@media (max-width: 768px) {
+  .reports-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .report-actions {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+  
+  .action-group {
+    justify-content: center;
+  }
+  
+  .action-btn {
+    flex: 1;
+    min-width: auto;
+  }
+}
 @media (max-width: 768px) {
   .filter-bar {
     flex-direction: column;
