@@ -73,17 +73,17 @@
               </div>
             </div>
             <div class="report-info">
-              <div class="report-name">{{ report.name }}</div>
+              <div class="report-name text-align-left">{{ report.name }}</div>
               <div class="report-meta">
                 <span>v{{ report.version }}</span>
                 <span>{{ formatDateShort(report.created_time) }}</span>
               </div>
-              <p class="report-desc">{{ report.description || '暂无描述' }}</p>
+              <p class="report-desc text-align-left">{{ report.description || '暂无描述' }}</p>
               <div class="report-tags">
                 <span class="report-tag" :class="getTypeClass(report.report_type)">
                   {{ getTypeText(report.report_type) }}
                 </span>
-                <span class="report-tag">
+                <span class="report-tag text-align-left">
                   {{ report.code }}
                 </span>
               </div>
@@ -316,59 +316,7 @@ import Header from '@/components/Header.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import SidebarMenu from '@/components/SidebarMenu.vue';
 import request from '../api/request';
-const reports = ref([
-  {
-    id: 1,
-    code: 'DATA_REPORT_001',
-    name: '数据处理报表',
-    description: '业务数据处理统计分析报表',
-    icon: 'chart-bar',
-    report_type: 'report',
-    status: 1,
-    version: 1,
-    created_time: new Date().toISOString(),
-    favorite: false,
-    creator: '张三',
-    view_count: 124,
-    data_source: '业务数据库',
-    refresh_rate: '每小时',
-    permission: '公开'
-  },
-  {
-    id: 2,
-    code: 'SUPPORT_SERVICE_002',
-    name: '支持服务报表',
-    description: '客户支持服务质量监控报表',
-    icon: 'users',
-    report_type: 'dashboard',
-    status: 1,
-    version: 1,
-    created_time: new Date().toISOString(),
-    favorite: true,
-    creator: '李四',
-    view_count: 89,
-    data_source: '客户服务系统',
-    refresh_rate: '每日',
-    permission: '部门可见'
-  },
-  {
-    id: 3,
-    code: 'SYSTEM_MGMT_003',
-    name: '系统管理报表',
-    description: '系统运行状态及资源占用分析',
-    icon: 'table',
-    report_type: 'analysis',
-    status: 0,
-    version: 2,
-    created_time: new Date().toISOString(),
-    favorite: false,
-    creator: '王五',
-    view_count: 256,
-    data_source: '系统监控',
-    refresh_rate: '实时',
-    permission: '管理员可见'
-  }
-])
+const reports = ref([])
 
 const filter = reactive({
   type: '',
@@ -457,10 +405,12 @@ const formatDate = (date) => {
 const handleSizeChange = (size) => {
   pageSize.value = size
   currentPage.value = 1
+  loadReports();
 }
 
 const handleCurrentChange = (page) => {
   currentPage.value = page
+  loadReports();
 }
 
 const handleSearch = () => {
@@ -512,7 +462,6 @@ const copyReport = async (report) => {
     
     const newReport = {
       ...report,
-      id: Date.now(),
       code: `${report.code}_COPY_${Math.floor(Math.random() * 1000)}`,
       name: `${report.name} (副本)`,
       version: 1,
@@ -521,8 +470,7 @@ const copyReport = async (report) => {
       view_count: 0
     }
     
-    reports.value.unshift(newReport)
-    total.value = reports.value.length
+    loadReports();
     ElMessage.success('复制报表成功')
   } catch (error) {
     ElMessage.info('已取消复制')
