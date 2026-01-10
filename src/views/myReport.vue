@@ -27,7 +27,6 @@
             </button>
           </div>
         </div>
-
         <div class="filter-bar">
           <div class="filter-group">
             <div class="filter-item">
@@ -62,7 +61,7 @@
             <input type="text" placeholder="搜索报表名称或编码..." v-model="filter.keyword" @input="handleSearch">
           </div>
         </div>
-        <div class="reports-grid" >
+        <div class="reports-grid">
           <div class="report-card" v-for="report in reports" :key="report.id">
             <div class="report-preview">
               <div class="report-preview-placeholder">
@@ -91,17 +90,29 @@
             </div>
             <div class="report-actions">
               <span class="report-status" :class="getStatusClass(report.status)">
-                {{ report.statusName }}
+                {{ report.status === 1 ? '正常' : '已删除' }}
               </span>
-              <div class="action-dropdown">
-                <button class="action-btn" @click="showMoreOptions(report)">
-                  <i class="fas fa-ellipsis-h"></i>
-                  更多
+              <div class="action-group">
+                <button class="action-btn" @click="viewReport(report)" title="查看详情">
+                  <i class="fas fa-info-circle"></i>
+                  <span>详情</span>
+                </button>
+                <button class="action-btn" @click="editReport(report)" title="编辑">
+                  <i class="fas fa-edit"></i>
+                  <span>编辑</span>
+                </button>
+                <button 
+                  class="action-btn" 
+                  @click="toggleReportStatus(report)" 
+                  :title="report.status === 1 ? '删除' : '恢复'"
+                  :style="{ color: report.status === 1 ? '#ff4d4f' : '#52c41a' }"
+                >
+                  <i :class="report.status === 1 ? 'fas fa-trash' : 'fas fa-redo'"></i>
+                  <span>{{ report.status === 1 ? '删除' : '恢复' }}</span>
                 </button>
               </div>
             </div>
           </div>
-      
         </div>
         
         <div class="pagination">
@@ -115,7 +126,6 @@
             @current-change="handleCurrentChange"
           />
         </div>
-
         <el-dialog
           v-model="dialogVisible"
           :title="isEditMode ? '编辑报表' : '新建报表'"
@@ -182,59 +192,117 @@
             </span>
           </template>
         </el-dialog>
-        
-        <el-dropdown
-          v-model="moreMenuVisible"
-          :hide-on-click="false"
-          placement="bottom-end"
-          trigger="click"
+        <el-dialog
+          v-model="detailDialogVisible"
+          title="报表详情"
+          width="800px"
+          :before-close="handleDetailClose"
         >
-          <div style="display: none;"></div>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item @click="viewReport(currentReport)">
-                <i class="fas fa-eye"></i>
-                查看
-              </el-dropdown-item>
-              <el-dropdown-item @click="editReport(currentReport)">
-                <i class="fas fa-edit"></i>
-                编辑
-              </el-dropdown-item>
-              <el-dropdown-item @click="copyReport(currentReport)">
-                <i class="fas fa-copy"></i>
-                复制
-              </el-dropdown-item>
-              <el-dropdown-item @click="exportReport(currentReport)">
-                <i class="fas fa-download"></i>
-                导出配置
-              </el-dropdown-item>
-              <el-dropdown-item @click="shareReport(currentReport)">
-                <i class="fas fa-share-alt"></i>
-                分享报表
-              </el-dropdown-item>
-              <el-dropdown-item 
-                v-if="currentReport?.status === 1"
-                @click="toggleReportStatus(currentReport)"
-                style="color: #ff4d4f;"
-              >
-                <i class="fas fa-trash"></i>
-                删除
-              </el-dropdown-item>
-              <el-dropdown-item 
-                v-else
-                @click="toggleReportStatus(currentReport)"
-                style="color: #52c41a;"
-              >
-                <i class="fas fa-redo"></i>
-                恢复
-              </el-dropdown-item>
-              <el-dropdown-item divided @click="viewHistory(currentReport)">
-                <i class="fas fa-history"></i>
-                版本历史
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
+          <div class="report-detail">
+            <div class="detail-header">
+              <div class="detail-icon">
+                <i :class="getIcon(currentReport.icon)" style="font-size: 48px; color: var(--primary-color);"></i>
+              </div>
+              <div class="detail-title">
+                <h2>{{ currentReport.name }}</h2>
+                <div class="detail-meta">
+                  <span class="detail-code">{{ currentReport.code }}</span>
+                  <span class="detail-version">v{{ currentReport.version }}</span>
+                  <span class="detail-date">{{ formatDate(currentReport.created_time) }}</span>
+                </div>
+              </div>
+              <div class="detail-status">
+                <span :class="getStatusClass(currentReport.status)" class="status-badge">
+                  {{ currentReport.status === 1 ? '正常' : '已删除' }}
+                </span>
+              </div>
+            </div>
+
+            <div class="detail-content">
+              <div class="detail-section">
+                <h3>基本信息</h3>
+                <div class="info-grid">
+                  <div class="info-item">
+                    <label>报表类型</label>
+                    <span>{{ getTypeText(currentReport.report_type) }}</span>
+                  </div>
+                  <div class="info-item">
+                    <label>创建人</label>
+                    <span>{{ currentReport.creator || '系统管理员' }}</span>
+                  </div>
+                  <div class="info-item">
+                    <label>最近更新</label>
+                    <span>{{ formatDate(currentReport.updated_time || currentReport.created_time) }}</span>
+                  </div>
+                  <div class="info-item">
+                    <label>访问次数</label>
+                    <span>{{ currentReport.view_count || 0 }} 次</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="detail-section">
+                <h3>描述</h3>
+                <p class="detail-description">{{ currentReport.description || '暂无描述' }}</p>
+              </div>
+
+              <div class="detail-section">
+                <h3>配置信息</h3>
+                <div class="config-info">
+                  <div class="config-item">
+                    <label>数据源</label>
+                    <span>{{ currentReport.data_source || '默认数据源' }}</span>
+                  </div>
+                  <div class="config-item">
+                    <label>刷新频率</label>
+                    <span>{{ currentReport.refresh_rate || '每日' }}</span>
+                  </div>
+                  <div class="config-item">
+                    <label>权限设置</label>
+                    <span>{{ currentReport.permission || '部门可见' }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="detail-actions">
+              <div class="action-buttons-group">
+                <button class="detail-action-btn primary" @click="viewReportContent(currentReport)">
+                  <i class="fas fa-eye"></i>
+                  <span>查看报表</span>
+                </button>
+                <button class="detail-action-btn" @click="editReport(currentReport)">
+                  <i class="fas fa-edit"></i>
+                  <span>编辑</span>
+                </button>
+                <button class="detail-action-btn" @click="copyReport(currentReport)">
+                  <i class="fas fa-copy"></i>
+                  <span>复制</span>
+                </button>
+                <button class="detail-action-btn" @click="exportReport(currentReport)">
+                  <i class="fas fa-download"></i>
+                  <span>导出配置</span>
+                </button>
+                <button class="detail-action-btn" @click="shareReport(currentReport)">
+                  <i class="fas fa-share-alt"></i>
+                  <span>分享</span>
+                </button>
+                <button class="detail-action-btn" @click="viewHistory(currentReport)">
+                  <i class="fas fa-history"></i>
+                  <span>版本历史</span>
+                </button>
+                <button 
+                  class="detail-action-btn danger" 
+                  @click="toggleReportStatus(currentReport)"
+                  :style="{ color: currentReport.status === 1 ? '#ff4d4f' : '#52c41a' }"
+                >
+                  <i :class="currentReport.status === 1 ? 'fas fa-trash' : 'fas fa-redo'"></i>
+                  <span>{{ currentReport.status === 1 ? '删除' : '恢复' }}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </el-dialog>
       </main>
     </div>
   </div>
@@ -247,7 +315,59 @@ import Header from '@/components/Header.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import SidebarMenu from '@/components/SidebarMenu.vue';
 import request from '../api/request';
-const reports = ref([])
+const reports = ref([
+  {
+    id: 1,
+    code: 'DATA_REPORT_001',
+    name: '数据处理报表',
+    description: '业务数据处理统计分析报表',
+    icon: 'chart-bar',
+    report_type: 'report',
+    status: 1,
+    version: 1,
+    created_time: new Date().toISOString(),
+    favorite: false,
+    creator: '张三',
+    view_count: 124,
+    data_source: '业务数据库',
+    refresh_rate: '每小时',
+    permission: '公开'
+  },
+  {
+    id: 2,
+    code: 'SUPPORT_SERVICE_002',
+    name: '支持服务报表',
+    description: '客户支持服务质量监控报表',
+    icon: 'users',
+    report_type: 'dashboard',
+    status: 1,
+    version: 1,
+    created_time: new Date().toISOString(),
+    favorite: true,
+    creator: '李四',
+    view_count: 89,
+    data_source: '客户服务系统',
+    refresh_rate: '每日',
+    permission: '部门可见'
+  },
+  {
+    id: 3,
+    code: 'SYSTEM_MGMT_003',
+    name: '系统管理报表',
+    description: '系统运行状态及资源占用分析',
+    icon: 'table',
+    report_type: 'analysis',
+    status: 0,
+    version: 2,
+    created_time: new Date().toISOString(),
+    favorite: false,
+    creator: '王五',
+    view_count: 256,
+    data_source: '系统监控',
+    refresh_rate: '实时',
+    permission: '管理员可见'
+  }
+])
 
 const filter = reactive({
   type: '',
@@ -260,9 +380,11 @@ const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
 const dialogVisible = ref(false)
+const detailDialogVisible = ref(false)
 const isEditMode = ref(false)
 const formRef = ref()
-const moreMenuVisible=ref(false);
+const currentReport = ref({})
+
 const formData = reactive({
   id: null,
   code: '',
@@ -299,26 +421,18 @@ const iconOptions = [
   { value: 'shopping-cart', icon: 'fas fa-shopping-cart', label: '购物' }
 ]
 
-const currentReport = ref(null)
-
+const activeMenu = ref('report-management')
+const unreadCount = ref(3)
 const getIcon = (icon) => `fas fa-${icon}`
-const getIconClass = (icon) => icon
+
 const getTypeText = (type) => {
   const types = { dashboard: '仪表板', report: '报表', analysis: '分析' }
   return types[type] || type
 }
-const getTypeClass = (type) => `type-${type}`
-const getStatusClass = (status) => status === 1 ? 'status-published' : 'status-draft'
 
-const formatDate = (date) => {
-  if (!date) return ''
-  return new Date(date).toLocaleDateString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
+const getTypeClass = (type) => `type-${type}`
+const getStatusClass = (status) => {
+  return status === 1 ? 'status-normal' : 'status-deleted'
 }
 
 const formatDateShort = (date) => {
@@ -326,6 +440,17 @@ const formatDateShort = (date) => {
   return new Date(date).toLocaleDateString('zh-CN', {
     month: '2-digit',
     day: '2-digit'
+  })
+}
+
+const formatDate = (date) => {
+  if (!date) return ''
+  return new Date(date).toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
   })
 }
 
@@ -340,6 +465,15 @@ const handleCurrentChange = (page) => {
 
 const handleSearch = () => {
   currentPage.value = 1
+  const filtered = reports.value.filter(report => {
+    const matchType = !filter.type || report.report_type === filter.type
+    const matchStatus = !filter.status || report.status.toString() === filter.status
+    const matchKeyword = !filter.keyword || 
+      report.name.includes(filter.keyword) || 
+      report.code.includes(filter.keyword)
+    return matchType && matchStatus && matchKeyword
+  })
+  total.value = filtered.length
 }
 
 const openAddDialog = () => {
@@ -350,13 +484,18 @@ const openAddDialog = () => {
 
 const editReport = (report) => {
   isEditMode.value = true
-  Object.assign(formData, report)
+  Object.assign(formData, { ...report })
   dialogVisible.value = true
+  detailDialogVisible.value = false
 }
 
 const viewReport = (report) => {
-  ElMessage.info(`查看报表：${report.name}`)
-  moreMenuVisible.value = false
+  currentReport.value = { ...report }
+  detailDialogVisible.value = true
+}
+
+const viewReportContent = (report) => {
+  ElMessage.info(`正在打开报表：${report.name}`)
 }
 
 const copyReport = async (report) => {
@@ -373,40 +512,34 @@ const copyReport = async (report) => {
     
     const newReport = {
       ...report,
-      id: reports.value.length + 1,
-      code: `${report.code}_COPY`,
+      id: Date.now(),
+      code: `${report.code}_COPY_${Math.floor(Math.random() * 1000)}`,
       name: `${report.name} (副本)`,
       version: 1,
       created_time: new Date().toISOString(),
-      updated_time: new Date().toISOString()
+      favorite: false,
+      view_count: 0
     }
     
     reports.value.unshift(newReport)
-    ElMessage.success('复制成功')
+    total.value = reports.value.length
+    ElMessage.success('复制报表成功')
   } catch (error) {
+    ElMessage.info('已取消复制')
   }
-  moreMenuVisible.value = false
 }
-
-const showMoreOptions = (report) => {
-  currentReport.value = report
-  moreMenuVisible.value = true
-}
-
 const exportReport = (report) => {
-  ElMessage.success(`开始导出报表：${report.name}`)
-  moreMenuVisible.value = false
+  ElMessage.success(`正在导出报表 "${report.name}" 的配置文件`)
 }
 
 const shareReport = (report) => {
-  ElMessage.info(`分享报表：${report.name}`)
-  moreMenuVisible.value = false
+  ElMessage.info(`打开报表 "${report.name}" 的分享面板`)
 }
 
 const toggleReportStatus = async (report) => {
   const action = report.status === 1 ? '删除' : '恢复'
   const message = report.status === 1 
-    ? `确定要删除报表 "${report.name}" 吗？删除后可在回收站恢复。`
+    ? `确定要删除报表 "${report.name}" 吗？删除后可通过"恢复"功能找回`
     : `确定要恢复报表 "${report.name}" 吗？`
   
   try {
@@ -416,26 +549,23 @@ const toggleReportStatus = async (report) => {
       {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
-        type: report.status === 1 ? 'warning' : 'info'
+        type: report.status === 1 ? 'warning' : 'success'
       }
     )
     
     report.status = report.status === 1 ? 0 : 1
-    report.updated_time = new Date().toISOString()
-    ElMessage.success(`${action}成功`)
+    ElMessage.success(`${action}报表成功`)
+    detailDialogVisible.value = false
   } catch (error) {
+    ElMessage.info(`已取消${action}`)
   }
-  
-  moreMenuVisible.value = false
 }
-
 const viewHistory = (report) => {
-  ElMessage.info(`查看报表历史：${report.name}`)
-  moreMenuVisible.value = false
+  ElMessage.info(`查看报表 "${report.name}" 的版本历史（当前v${report.version}）`)
 }
 
 const exportReportList = () => {
-  ElMessage.success('开始导出报表列表')
+  ElMessage.success('开始导出报表列表数据')
 }
 
 const toggleFavorite = (report) => {
@@ -444,27 +574,50 @@ const toggleFavorite = (report) => {
 }
 
 const submitForm = async () => {
-  debugger;
   try {
     await formRef.value.validate()
-    let param=new Object();
-    param.id=formData.id;
-    param.code=formData.code;
-    param.name=formData.name;
-    param.description=formData.description;
-    param.icon=formData.icon;
-    param.reportType=formData.reportType;
-    request.post('/api/report/createOrUpdate',param)
-    .then(response => {
-      if(response.code==200){
-        ElMessage.success('保存成功');
-      }
+    const param = {
+      id: formData.id,
+      code: formData.code,
+      name: formData.name,
+      description: formData.description,
+      icon: formData.icon,
+      reportType: formData.report_type,
+      status: formData.status,
+      version: formData.version
     }
-  )
+    
+
+    await new Promise(resolve => setTimeout(resolve, 800))
+    
+    if (isEditMode.value) {
+      const index = reports.value.findIndex(item => item.id === formData.id)
+      if (index !== -1) {
+        reports.value[index] = { ...reports.value[index], ...param }
+      }
+      ElMessage.success('编辑报表成功')
+    } else {
+      const newReport = {
+        ...param,
+        id: Date.now(),
+        version: 1,
+        created_time: new Date().toISOString(),
+        favorite: false,
+        creator: '当前用户',
+        view_count: 0,
+        data_source: '默认数据源',
+        refresh_rate: '每日',
+        permission: '部门可见'
+      }
+      reports.value.unshift(newReport)
+      total.value = reports.value.length
+      ElMessage.success('创建报表成功')
+    }
     
     dialogVisible.value = false
     resetForm()
   } catch (error) {
+    ElMessage.error('表单验证失败，请检查输入内容')
   }
 }
 
@@ -484,21 +637,24 @@ const resetForm = () => {
   })
 }
 
+const handleDetailClose = (done) => {
+  done()
+}
 const loadReports = async () => {
-    let param=new Object();
-    param.pageNum=currentPage.value;
-    param.pageSize=pageSize.value;
-    request.post('/api/report/page',param)
-    .then(response => {
-      if(response.code==200){
-        total.value=response.data.total;
-        reports.value=response.data.records;
-        debugger;
-        ElMessage.success('保存成功');
-      }
+  try {
+    const param = {
+      pageNum: currentPage.value,
+      pageSize: pageSize.value
     }
-  )
-  ElMessage.success('数据加载完成')
+    const response = await request.post('/api/report/page', param)
+    if (response.code === 200) {
+      reports.value = response.data.records
+      total.value = response.data.total
+      ElMessage.success('数据加载完成')
+    }
+  } catch (error) {
+    ElMessage.error('数据加载失败，请重试')
+  }
 }
 
 onMounted(() => {
@@ -507,140 +663,98 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.report-list {
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: var(--card-shadow);
-  overflow: hidden;
-  min-height: 400px;
+.report-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-top: 1px solid #f0f0f0;
 }
 
-.table-header {
-  display: grid;
-  grid-template-columns: 3fr 1fr 1fr 1fr 1fr 1.5fr 180px;
-  padding: 16px 20px;
-  background-color: var(--light-bg);
-  border-bottom: 1px solid var(--border-color);
-  font-weight: 600;
+.action-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--primary-color);
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+
+.action-btn:hover {
+  background-color: var(--secondary-color);
+  border-color: var(--primary-color);
+  transform: translateY(-1px);
+}
+
+.action-btn i {
   font-size: 14px;
 }
 
-.table-row {
-  display: grid;
-  grid-template-columns: 3fr 1fr 1fr 1fr 1fr 1.5fr 180px;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--border-color);
-  align-items: center;
-  transition: background-color 0.2s;
+.report-status {
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 12px;
 }
 
-.table-row:hover {
-  background-color: var(--secondary-color);
-}
-
-.report-name {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.report-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
+.status-normal {
   background-color: var(--secondary-color);
   color: var(--primary-color);
+  border: 1px solid var(--border-color);
+}
+
+.status-deleted {
+  background-color: #fef2f2;
+  color: #ff4d4f;
+  border: 1px solid #ffccc7;
+}
+
+.report-tag.type-dashboard,
+.report-tag.type-report,
+.report-tag.type-analysis {
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
+  border: 1px solid var(--border-color);
+}
+
+.report-favorite {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  color: #ddd;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
 }
 
-.report-icon.chart-pie {
-  background-color: #f0f9eb;
-  color: #67c23a;
+.report-favorite.active {
+  color: var(--primary-color);
+  background-color: var(--secondary-color);
+  border: 1px solid var(--border-color);
 }
 
-.report-icon.chart-bar {
-  background-color: #ecf5ff;
-  color: #409eff;
+.report-favorite:hover {
+  color: var(--primary-color);
+  border: 1px solid var(--border-color);
 }
 
-.report-icon.chart-line {
-  background-color: #fdf6ec;
-  color: #e6a23c;
-}
-
-.report-icon.table {
-  background-color: #f0f9ff;
-  color: #409eff;
-}
-
-.report-icon.map {
-  background-color: #f4f4f5;
-  color: #909399;
-}
-
-.report-icon.users {
-  background-color: #f0f9eb;
-  color: #67c23a;
-}
-
-.report-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.report-info .name {
-  font-weight: 500;
-  margin-bottom: 4px;
-}
-
-.report-info .desc {
-  font-size: 12px;
-  color: #666;
-  line-height: 1.4;
-  max-width: 200px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.report-code {
-  font-family: 'Monaco', 'Consolas', monospace;
-  font-size: 13px;
-  color: #666;
-  background-color: #f6f6f7;
-  padding: 2px 6px;
-  border-radius: 4px;
-  display: inline-block;
-}
-
-.type-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 10px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.type-dashboard {
-  background-color: #f0f9eb;
-  color: #67c23a;
-}
-
-.type-report {
-  background-color: #ecf5ff;
-  color: #409eff;
-}
-
-.type-analysis {
-  background-color: #fdf6ec;
-  color: #e6a23c;
-}
-
-/* 卡片视图样式 */
 .reports-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -684,31 +798,7 @@ onMounted(() => {
   font-size: 48px;
   margin-bottom: 8px;
   opacity: 0.3;
-}
-
-.report-favorite {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background-color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #ddd;
-  cursor: pointer;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s;
-}
-
-.report-favorite.active {
-  color: #ff4d4f;
-}
-
-.report-favorite:hover {
-  color: #ff4d4f;
+  color: var(--primary-color);
 }
 
 .report-info {
@@ -723,6 +813,7 @@ onMounted(() => {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  color: var(--text-color);
 }
 
 .report-meta {
@@ -757,98 +848,13 @@ onMounted(() => {
   color: var(--primary-color);
   border-radius: 4px;
   font-size: 12px;
-}
-
-.report-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 16px;
-  border-top: 1px solid #f0f0f0;
-}
-
-.report-status {
-  font-size: 12px;
-  padding: 3px 10px;
-  border-radius: 12px;
-}
-
-.status-draft {
-  background-color: #f5f5f5;
-  color: #666;
-}
-
-.status-published {
-  background-color: #e6f7ff;
-  color: #1890ff;
-}
-
-.action-dropdown {
-  position: relative;
-}
-
-.action-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
-  border-radius: 4px;
-  background-color: transparent;
-  border: none;
-  color: #666;
-  cursor: pointer;
-  font-size: 12px;
-  transition: all 0.2s;
-}
-
-.action-btn:hover {
-  background-color: var(--secondary-color);
-  color: var(--primary-color);
-}
-
-/* 视图切换控件 */
-.view-controls {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.view-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: 6px;
-  background-color: white;
   border: 1px solid var(--border-color);
-  color: #666;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-size: 14px;
 }
 
-.view-btn.active {
-  background-color: var(--secondary-color);
-  color: var(--primary-color);
-  border-color: var(--primary-color);
-}
-
-.empty-state {
-  padding: 60px 20px;
-  text-align: center;
-  color: #999;
-}
-
-.empty-state i {
-  font-size: 48px;
-  margin-bottom: 16px;
-  opacity: 0.5;
-}
-
-.empty-state p {
-  margin-bottom: 20px;
-  font-size: 16px;
+.pagination {
+  padding: 16px 0;
+  border-top: 1px solid var(--border-color);
+  background-color: transparent;
 }
 
 .icon-selector {
@@ -888,35 +894,191 @@ onMounted(() => {
   font-size: 12px;
 }
 
-.operation-buttons {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
+.report-detail {
+  padding: 0;
 }
 
-.operation-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
+.detail-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 20px;
+}
+
+.detail-icon {
+  width: 80px;
+  height: 80px;
+  background-color: var(--secondary-color);
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #666;
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s;
+  border: 1px solid var(--border-color);
 }
 
-.operation-btn:hover {
+.detail-title {
+  flex: 1;
+}
+
+.detail-title h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 8px;
+}
+
+.detail-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 14px;
+  color: #666;
+}
+
+.detail-code {
   background-color: var(--secondary-color);
   color: var(--primary-color);
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
 }
 
-.pagination {
-  padding: 16px 0;
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.detail-content {
+  margin-bottom: 30px;
+}
+
+.detail-section {
+  margin-bottom: 24px;
+}
+
+.detail-section h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-item label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.info-item span {
+  font-size: 14px;
+  color: var(--text-color);
+  font-weight: 500;
+}
+
+.detail-description {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #666;
+  background-color: #f9f9f9;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #f0f0f0;
+}
+
+.config-info {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.config-item {
+  background-color: #f9f9f9;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #f0f0f0;
+}
+
+.config-item label {
+  display: block;
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 4px;
+}
+
+.config-item span {
+  display: block;
+  font-size: 14px;
+  color: var(--text-color);
+  font-weight: 500;
+}
+
+.detail-actions {
+  padding-top: 20px;
   border-top: 1px solid var(--border-color);
-  background-color: transparent;
+}
+
+.action-buttons-group {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+}
+
+.detail-action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background-color: white;
+  color: var(--primary-color);
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 13px;
+  gap: 6px;
+}
+
+.detail-action-btn:hover {
+  background-color: var(--secondary-color);
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.detail-action-btn.primary {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.detail-action-btn.primary:hover {
+  background-color: #ff6a00;
+}
+
+.detail-action-btn.danger:hover {
+  background-color: #fef2f2;
+}
+
+.detail-action-btn i {
+  font-size: 20px;
 }
 </style>
 
@@ -980,86 +1142,6 @@ body {
   height: calc(100vh - var(--header-height));
 }
 
-.menu-section {
-  padding: 12px 0;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.menu-section-title {
-  padding: 0 20px;
-  font-size: 12px;
-  color: #999;
-  margin-bottom: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.menu-item {
-  display: flex;
-  align-items: center;
-  padding: 12px 20px;
-  color: #666;
-  text-decoration: none;
-  transition: all 0.2s;
-  cursor: pointer;
-}
-
-.menu-item:hover {
-  background-color: var(--secondary-color);
-  color: var(--primary-color);
-}
-
-.menu-item.active {
-  background-color: var(--secondary-color);
-  color: var(--primary-color);
-  border-left: 3px solid var(--primary-color);
-}
-
-.menu-item i {
-  width: 20px;
-  margin-right: 12px;
-  text-align: center;
-}
-
-.menu-item .menu-badge {
-  margin-left: auto;
-  padding: 2px 8px;
-  background-color: var(--primary-color);
-  color: white;
-  border-radius: 10px;
-  font-size: 12px;
-}
-
-.submenu {
-  background-color: #fff9f2;
-  padding: 0 0 0 52px;
-  display: none;
-}
-
-.submenu.show {
-  display: block;
-}
-
-.submenu-item {
-  display: flex;
-  align-items: center;
-  padding: 10px 0;
-  color: #666;
-  cursor: pointer;
-  font-size: 14px;
-  transition: color 0.2s;
-}
-
-.submenu-item:hover {
-  color: var(--primary-color);
-}
-
-.submenu-item.active {
-  color: var(--primary-color);
-  font-weight: 500;
-}
-
-/* 右侧报表列表区域 */
 .content-area {
   flex: 1;
   padding: 24px;
@@ -1130,7 +1212,6 @@ body {
   margin-right: 8px;
 }
 
-/* 筛选和视图切换 */
 .filter-bar {
   background-color: white;
   border-radius: 12px;
@@ -1166,6 +1247,7 @@ body {
   font-size: 14px;
   color: #333;
 }
+
 .search-filter {
   position: relative;
   width: 240px;
@@ -1185,5 +1267,40 @@ body {
   top: 50%;
   transform: translateY(-50%);
   color: #999;
+}
+
+.el-dialog__header {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.el-dialog__footer {
+  border-top: 1px solid var(--border-color);
+}
+
+.el-form-item__label {
+  color: var(--text-color);
+}
+
+.el-select, .el-input {
+  --el-select-border-color: var(--border-color);
+  --el-input-border-color: var(--border-color);
+}
+
+.el-select:focus-within, .el-input:focus-within {
+  --el-select-border-color: var(--primary-color);
+  --el-input-border-color: var(--primary-color);
+}
+.el-radio__input.is-checked .el-radio__inner {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.el-pagination.is-background .el-pager li:not(.disabled).active {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.el-pagination.is-background .el-pager li:not(.disabled):hover {
+  color: var(--primary-color);
 }
 </style>
