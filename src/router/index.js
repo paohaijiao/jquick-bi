@@ -104,7 +104,7 @@ const routes = [
     component: () => import('../views/PipLine.vue')
   },
   {
-    path: '/report',
+    path: '/report/:id',
     name: 'reportPage',
     component: () => import('../views/Report.vue')
   }

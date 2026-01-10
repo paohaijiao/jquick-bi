@@ -316,6 +316,7 @@ import Header from '@/components/Header.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import SidebarMenu from '@/components/SidebarMenu.vue';
 import request from '../api/request';
+import router from '@/router';
 const reports = ref([])
 
 const filter = reactive({
@@ -445,7 +446,10 @@ const viewReport = (report) => {
 }
 
 const viewReportContent = (report) => {
-  ElMessage.info(`正在打开报表：${report.name}`)
+ router.push({
+    name: 'reportPage',
+    params: { id: report.id }
+  })
 }
 
 const copyReport = async (report) => {

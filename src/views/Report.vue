@@ -183,14 +183,12 @@
         <div class="canvas-container" id="canvas" @dragover.prevent="handleDragOver" @drop="handleDrop" @dragleave="handleDragLeave">
           <div :class="{ 'grid-layout': useGridLayout,  'dragover': isDraggingOver,   'show-grid': showGridLines }"
                class="canvas-drag-area">
-            <!-- 单一网格容器 -->
             <div v-if="gridContainer" class="container-content">
               <div :class="{ 'selected': selectedComponentId === gridContainer.id }"
                    :style="getGridContainerStyle(gridContainer)"
                    class="layout-container grid-container"
                    @click="selectComponent(gridContainer.id)">
                 <div :style="getGridTemplateStyle(gridContainer)" class="grid-cells">
-                  <!-- 修改：简化合并单元格的显示 -->
                   <div v-for="cell in gridContainer.config.cells"
                        :key="cell.id"
                        :class="{
@@ -210,13 +208,11 @@
                        @dblclick.stop="handleGridCellDoubleClick(gridContainer.id, cell)">
                     
                     <div class="cell-content">
-                      <!-- 合并单元格：只显示主单元格内容，子单元格为空 -->
                       <div v-if="cell.merged && isMainMergedCell(cell)" 
                            class="merged-cell-content"
                            @dragleave="handleGridCellDragLeave($event, cell.id)"
                            @drop="handleGridCellDrop($event, cell.id)"
                            @dragover.prevent="handleGridCellDragOver($event, cell.id)">
-                        <!-- 合并单元格中的组件 -->
                         <div v-for="component in getComponentsInGridCell(cell.id)"
                              :key="component.id"
                              :class="{
@@ -229,7 +225,6 @@
                           <div class="component-content" v-html="renderComponentContent(component)"></div>
                         </div>
                         
-                        <!-- 合并单元格的拖放提示（当没有组件时显示） -->
                         <div v-if="getComponentsInGridCell(cell.id).length === 0"
                              class="empty-cell-hint"
                              @dragleave="handleGridCellDragLeave($event, cell.id)"
@@ -240,7 +235,6 @@
                         </div>
                       </div>
                       
-                      <!-- 非合并单元格的内容 -->
                       <div v-if="!cell.merged">
                         <div v-for="component in getComponentsInGridCell(cell.id)"
                              :key="component.id"
@@ -264,9 +258,7 @@
                         </div>
                       </div>
                       
-                      <!-- 合并单元格的子单元格：完全隐藏内容 -->
                       <div v-if="cell.merged && !isMainMergedCell(cell)" class="sub-merged-cell-content">
-                        <!-- 子单元格完全隐藏，不显示任何内容 -->
                       </div>
                     </div>
                   </div>
@@ -274,7 +266,6 @@
               </div>
             </div>
 
-            <!-- 不在网格中的组件 -->
             <div v-for="component in components.filter(c => !c.gridCellId)"
                  :key="component.id"
                  :class="{
@@ -414,7 +405,6 @@
             </div>
           </div>
 
-          <!-- 网格单元格属性 -->
           <div v-else-if="selectedComponent.type === 'grid-cell'" class="setting-panel">
             <div class="setting-group">
               <h3 class="setting-title">单元格信息</h3>
@@ -522,7 +512,6 @@
             </div>
           </div>
 
-          <!-- 普通组件属性 -->
           <div v-else class="setting-panel">
             <div class="setting-group">
               <h3 class="setting-title text-align-left">基本信息</h3>
@@ -614,11 +603,14 @@
 <script>
 import request from '../api/request';
 import { ElMessage } from "element-plus";
+import { useRoute } from 'vue-router'
+const route = useRoute();
 
 export default {
   name: 'Builder',
   data() {
     return {
+      reportId:null,
       sidebarActive: false,
       propertiesPanelActive: true,
       activeTab: 'layout',
@@ -649,16 +641,12 @@ export default {
   },
   computed: {
     selectedComponent() {
-      // 查找选中的网格容器
       if (this.gridContainer && this.selectedComponentId === this.gridContainer.id) {
         return this.gridContainer;
       }
-      
-      // 查找选中的网格单元格
       if (this.gridContainer && this.gridContainer.config.cells) {
         const cell = this.gridContainer.config.cells.find(c => c.id === this.selectedComponentId);
         if (cell) {
-          // 如果是合并单元格的子单元格，返回主单元格
           if (cell.merged && !this.isMainMergedCell(cell)) {
             const mainCell = this.findMainMergedCell(cell);
             if (mainCell) {
@@ -683,8 +671,6 @@ export default {
           };
         }
       }
-      
-      // 查找选中的普通组件
       return this.components.find(c => c.id === this.selectedComponentId) || null;
     },
     showCellOperations() {
@@ -731,11 +717,8 @@ export default {
       this.activeTab=activeTab;
       debugger;
     },
-    // 检查是否为合并单元格的主单元格
     isMainMergedCell(cell) {
       if (!cell.merged) return false;
-      
-      // 查找跨行跨列范围的主单元格（左上角单元格）
       if (this.gridContainer) {
         const cells = this.gridContainer.config.cells;
         for (let row = cell.row; row >= 1; row--) {
@@ -756,17 +739,12 @@ export default {
           }
         }
       }
-      
-      // 默认：如果找不到其他主单元格，这个就是主单元格
       return true;
     },
     
-    // 查找合并单元格的主单元格
     findMainMergedCell(cell) {
       if (!cell.merged || !this.gridContainer) return cell;
-      
       const cells = this.gridContainer.config.cells;
-      // 查找跨行跨列范围的主单元格（左上角单元格）
       for (let row = cell.row; row >= 1; row--) {
         for (let col = cell.col; col >= 1; col--) {
           const mainCell = cells.find(c => 
@@ -785,8 +763,6 @@ export default {
       
       return cell;
     },
-    
-    // 创建网格容器
     createGridContainer() {
       const gridId = `grid_${Date.now()}`;
       this.gridContainer = {
@@ -815,8 +791,6 @@ export default {
       this.initializeGridCells();
       this.selectedComponentId = gridId;
     },
-    
-    // 应用网格配置
     applyGridConfig() {
       if (this.gridContainer) {
         this.gridContainer.config.rows = this.gridConfig.rows;
@@ -828,26 +802,19 @@ export default {
         this.createGridContainer();
       }
     },
-    
-    // 初始化网格单元格
     initializeGridCells() {
       if (!this.gridContainer) return;
-      
       const container = this.gridContainer;
       const rows = container.config.rows || 3;
       const columns = container.config.columns || 3;
-      
       const cells = [];
       for (let row = 1; row <= rows; row++) {
         for (let col = 1; col <= columns; col++) {
           const cellId = `cell_${row}_${col}`;
-          
-          // 查找是否已存在该位置的单元格
           let existingCell = null;
           if (container.config.cells && container.config.cells.length > 0) {
             existingCell = container.config.cells.find(c => c.row === row && c.col === col);
           }
-          
           cells.push({
             id: cellId,
             row,
@@ -864,27 +831,19 @@ export default {
       
       container.config.cells = cells;
     },
-    
-    // 更新网格单元格（当行数列数改变时）
     updateGridCells() {
       if (!this.selectedComponent || this.selectedComponent.type !== 'grid') return;
-      
       const container = this.selectedComponent;
       const rows = container.config.rows;
       const columns = container.config.columns;
-      
-      // 创建新的单元格数组
       const newCells = [];
       for (let row = 1; row <= rows; row++) {
         for (let col = 1; col <= columns; col++) {
           const cellId = `cell_${row}_${col}`;
-          
-          // 查找是否已存在该位置的单元格
           let existingCell = null;
           if (container.config.cells && container.config.cells.length > 0) {
             existingCell = container.config.cells.find(c => c.row === row && c.col === col);
           }
-          
           newCells.push({
             id: cellId,
             row,
@@ -898,77 +857,50 @@ export default {
           });
         }
       }
-      
       container.config.cells = newCells;
-      
-      // 更新全局网格容器
       if (this.gridContainer && this.gridContainer.id === container.id) {
         this.gridContainer.config.cells = newCells;
       }
     },
-    
-    // 更新网格样式
     updateGridStyle() {
-      // 样式更新会自动通过响应式更新视图
       ElMessage.success('网格样式已更新');
     },
-    
-    // 更新单元格样式
     updateCellStyle() {
       if (!this.selectedComponent || this.selectedComponent.type !== 'grid-cell') return;
-      
       const cell = this.gridContainer.config.cells.find(c => c.id === this.selectedComponentId);
       if (cell) {
-        // 更新单元格样式属性
         cell.backgroundColor = this.selectedComponent.backgroundColor || '#ffffff';
-        cell.borderWidth = this.selectedComponent.borderWidth || 1;
-        
+        cell.borderWidth = this.selectedComponent.borderWidth || 1;   
         ElMessage.success('单元格样式已更新');
       }
     },
-    
-    // 更新单元格跨度
     updateCellSpan() {
       if (!this.selectedComponent || this.selectedComponent.type !== 'grid-cell') return;
-      
       const rowSpan = this.selectedComponent.rowSpan || 1;
       const colSpan = this.selectedComponent.colSpan || 1;
-      
-      // 更新网格容器中的对应单元格
       if (this.gridContainer && this.gridContainer.config.cells) {
         const cell = this.gridContainer.config.cells.find(c => c.id === this.selectedComponentId);
         if (cell) {
           cell.rowSpan = rowSpan;
           cell.colSpan = colSpan;
-          
-          // 如果跨度过大，自动标记为合并
           if (rowSpan > 1 || colSpan > 1) {
             cell.merged = true;
-            
-            // 标记其他单元格为合并的子单元格
             this.markSubMergedCells(cell);
           }
-          
           ElMessage.success('单元格跨度已更新');
         }
       }
     },
-    
-    // 标记合并单元格的子单元格
     markSubMergedCells(mainCell) {
       if (!mainCell.merged || !this.gridContainer) return;
-      
       const rowSpan = mainCell.rowSpan || 1;
       const colSpan = mainCell.colSpan || 1;
-      
       for (let row = mainCell.row; row < mainCell.row + rowSpan; row++) {
         for (let col = mainCell.col; col < mainCell.col + colSpan; col++) {
           if (row === mainCell.row && col === mainCell.col) continue;
-          
           const targetCell = this.gridContainer.config.cells.find(c => 
             c.row === row && c.col === col
           );
-          
           if (targetCell) {
             targetCell.merged = true;
             targetCell.rowSpan = 1;
@@ -978,33 +910,23 @@ export default {
         }
       }
     },
-    
-    // 获取单元格地址（A1, B2等）
     getCellAddress(cellId) {
       if (!this.gridContainer) return '';
-      
       const cell = this.gridContainer.config.cells.find(c => c.id === cellId);
       if (!cell) return '';
-      
       const colLetter = String.fromCharCode(64 + cell.col);
       return `${colLetter}${cell.row}`;
     },
-    
-    // 检查单元格是否能形成矩形
     checkCellsCanFormRectangle(cells) {
       if (cells.length === 0) return false;
-      
       const rows = new Set(cells.map(cell => cell.row));
       const cols = new Set(cells.map(cell => cell.col));
-      
       const minRow = Math.min(...rows);
       const maxRow = Math.max(...rows);
       const minCol = Math.min(...cols);
       const maxCol = Math.max(...cols);
-      
       const expectedCellCount = (maxRow - minRow + 1) * (maxCol - minCol + 1);
       if (expectedCellCount !== cells.length) return false;
-      
       const cellSet = new Set(cells.map(cell => `${cell.row}-${cell.col}`));
       for (let row = minRow; row <= maxRow; row++) {
         for (let col = minCol; col <= maxCol; col++) {
@@ -1016,11 +938,8 @@ export default {
       
       return true;
     },
-    
-    // 处理单元格点击
     handleCellClick(containerId, cell, event) {
       if (event.ctrlKey || event.metaKey) {
-        // Ctrl/Cmd 点击：切换选中状态
         const index = this.selectedCells.indexOf(cell.id);
         if (index > -1) {
           this.selectedCells.splice(index, 1);
@@ -1028,15 +947,11 @@ export default {
           this.selectedCells.push(cell.id);
         }
       } else if (event.shiftKey && this.selectedCells.length > 0) {
-        // Shift 点击：选择区域
         const lastSelected = this.selectedCells[this.selectedCells.length - 1];
         this.selectCellRange(lastSelected, cell.id);
       } else {
-        // 普通点击：单选
         this.selectedCells = [cell.id];
       }
-      
-      // 如果点击的是合并单元格的子单元格，选择主单元格
       if (cell.merged && !this.isMainMergedCell(cell)) {
         const mainCell = this.findMainMergedCell(cell);
         if (mainCell) {
@@ -1047,32 +962,24 @@ export default {
       
       this.selectComponent(cell.id);
     },
-    
-    // 选择单元格范围
     selectCellRange(startCellId, endCellId) {
       if (!this.gridContainer) return;
-      
       const startCell = this.gridContainer.config.cells.find(c => c.id === startCellId);
       const endCell = this.gridContainer.config.cells.find(c => c.id === endCellId);
       if (!startCell || !endCell) return;
-      
       const minRow = Math.min(startCell.row, endCell.row);
       const maxRow = Math.max(startCell.row, endCell.row);
       const minCol = Math.min(startCell.col, endCell.col);
       const maxCol = Math.max(startCell.col, endCell.col);
-      
       const cellsInRange = this.gridContainer.config.cells.filter(cell => 
         cell.row >= minRow && cell.row <= maxRow &&
         cell.col >= minCol && cell.col <= maxCol
       );
-      
       this.selectedCells = cellsInRange.map(cell => cell.id);
     },
-    
-    // 合并单元格
     mergeCells() {
       if (!this.canMerge || !this.gridContainer) return;
-      
+
       const cellsToMerge = this.gridContainer.config.cells.filter(cell => 
         this.selectedCells.includes(cell.id)
       );
@@ -1085,33 +992,24 @@ export default {
       const maxRow = Math.max(...rows);
       const minCol = Math.min(...cols);
       const maxCol = Math.max(...cols);
-      
       const rowSpan = maxRow - minRow + 1;
       const colSpan = maxCol - minCol + 1;
-      
       const mainCell = this.gridContainer.config.cells.find(cell => 
         cell.row === minRow && cell.col === minCol
       );
       
       if (!mainCell) return;
-      
-      // 标记主单元格为合并状态
       mainCell.merged = true;
       mainCell.rowSpan = rowSpan;
       mainCell.colSpan = colSpan;
-      
-      // 收集所有需要合并的单元格中的组件
       const allComponentsInMergedCells = [];
       cellsToMerge.forEach(cell => {
         if (cell.components && cell.components.length > 0) {
           allComponentsInMergedCells.push(...cell.components);
         }
       });
-      
-      // 将组件转移到主单元格
       if (allComponentsInMergedCells.length > 0) {
         mainCell.components = allComponentsInMergedCells;
-        
         allComponentsInMergedCells.forEach(componentId => {
           const component = this.components.find(c => c.id === componentId);
           if (component) {
@@ -1119,8 +1017,6 @@ export default {
           }
         });
       }
-      
-      // 标记其他单元格为合并的子单元格
       cellsToMerge.forEach(cell => {
         if (cell.id !== mainCell.id) {
           cell.merged = true;
@@ -1129,13 +1025,11 @@ export default {
           cell.components = [];
         }
       });
-      
       ElMessage.success(`成功合并 ${cellsToMerge.length} 个单元格`);
       this.selectedCells = [mainCell.id];
       this.selectComponent(mainCell.id);
     },
-    
-    // 拆分单元格
+
     splitCell() {
       if (!this.canSplit || !this.gridContainer) return;
       
@@ -1147,19 +1041,14 @@ export default {
       
       const rowSpan = cell.rowSpan || 1;
       const colSpan = cell.colSpan || 1;
-      
-      // 重置主单元格
       cell.merged = false;
       cell.rowSpan = 1;
       cell.colSpan = 1;
-      
-      // 重置其他单元格
       for (let row = cell.row; row < cell.row + rowSpan; row++) {
         for (let col = cell.col; col < cell.col + colSpan; col++) {
           const targetCell = this.gridContainer.config.cells.find(c => 
             c.row === row && c.col === col
           );
-          
           if (targetCell && targetCell.id !== cell.id) {
             targetCell.merged = false;
             targetCell.rowSpan = 1;
@@ -1171,24 +1060,17 @@ export default {
       ElMessage.success('单元格已拆分');
       this.selectedCells = [cell.id];
     },
-    
-    // 清除合并
     clearMerge() {
       if (!this.canClearMerge || !this.gridContainer) return;
-      
       const cell = this.gridContainer.config.cells.find(c => 
         c.id === this.selectedCells[0]
       );
-      
       if (!cell || !cell.merged) return;
-      
       const rowSpan = cell.rowSpan || 1;
       const colSpan = cell.colSpan || 1;
-      
       cell.merged = false;
       cell.rowSpan = 1;
       cell.colSpan = 1;
-      
       for (let row = cell.row; row < cell.row + rowSpan; row++) {
         for (let col = cell.col; col < cell.col + colSpan; col++) {
           const targetCell = this.gridContainer.config.cells.find(c => 
@@ -1206,13 +1088,10 @@ export default {
       ElMessage.success('已清除合并');
       this.selectedCells = [cell.id];
     },
-    
-    // 更新组件属性
     updateComponent() {
       if (!this.selectedComponent) return;
       
       if (this.selectedComponent.type !== 'grid-cell') {
-        // 更新普通组件
         const componentIndex = this.components.findIndex(c => c.id === this.selectedComponentId);
         if (componentIndex !== -1) {
           this.components[componentIndex] = { ...this.selectedComponent };
@@ -1220,24 +1099,17 @@ export default {
         }
       }
     },
-    
-    // 画布点击事件
     handleCanvasClick(event) {
       if (!event.target.closest('.grid-cell') && !event.target.closest('.layout-container')) {
         this.selectedCells = [];
       }
     },
-    
-    // 获取网格单元格中的组件
     getComponentsInGridCell(cellId) {
       return this.components.filter(component => component.gridCellId === cellId);
     },
-    
-    // 获取网格容器样式
     getGridContainerStyle(container) {
       if (!container || !container.config) return {};
       const config = container.config;
-      
       return {
         width: (config.width?.value || 100) + (config.width?.unit || '%'),
         height: (config.height?.value || 600) + (config.height?.unit || 'px'),
@@ -1248,12 +1120,10 @@ export default {
         'box-sizing': 'border-box'
       };
     },
-    
-    // 获取网格模板样式
+  
     getGridTemplateStyle(container) {
       if (!container || !container.config) return {};
       const config = container.config;
-      
       return {
         display: 'grid',
         'grid-template-rows': `repeat(${config.rows || 3}, minmax(80px, 1fr))`,
@@ -1266,11 +1136,8 @@ export default {
         'box-sizing': 'border-box'
       };
     },
-    
-    // 获取网格单元格样式
     getGridCellStyle(cell) {
       if (!cell) return {};
-      
       const style = {
         'grid-row': `${cell.row || 1} / span ${cell.rowSpan || 1}`,
         'grid-column': `${cell.col || 1} / span ${cell.colSpan || 1}`,
@@ -1281,31 +1148,25 @@ export default {
       };
 
       if (cell.merged) {
-        // 主合并单元格显示边框
         if (this.isMainMergedCell(cell)) {
           style.border = `${cell.borderWidth || 1}px solid var(--border-color)`;
           style.backgroundColor = cell.backgroundColor || 'white';
         } else {
-          // 子合并单元格隐藏边框和背景
           style.border = 'none';
           style.backgroundColor = 'transparent';
           style.minHeight = '0';
           style.minWidth = '0';
         }
       } else {
-        // 非合并单元格
         style.border = `${cell.borderWidth || 1}px solid var(--border-color)`;
         style.backgroundColor = cell.backgroundColor || 'white';
       }
 
       return style;
     },
-    
-    // 获取组件样式
     getComponentStyle(component) {
       if (!component || !component.config) return {};
       const config = component.config;
-      
       return {
         width: (config.width?.value || 100) + (config.width?.unit === 'auto' ? '' : config.width?.unit || '%'),
         height: (config.height?.value || 'auto') + (config.height?.unit === 'auto' ? '' : config.height?.unit || 'px'),
@@ -1331,16 +1192,11 @@ export default {
         'border-radius': (config.borderRadius || '0') + 'px'
       };
     },
-    
-    // 渲染组件内容
     renderComponentContent(component) {
       if (!component) return '';
-      
       if (component.content) {
         return component.content;
       }
-      
-      // 默认内容
       const defaults = {
         'div': '<div style="padding: 8px; background: #f0f0f0; border-radius: 4px;">容器</div>',
         'span': '<span style="padding: 4px 8px; background: #e6f7ff; border-radius: 4px;">文本内容</span>',
@@ -1354,8 +1210,6 @@ export default {
       
       return defaults[component.type] || `<div style="color: #666; padding: 8px;">${component.name || '组件'}</div>`;
     },
-    
-    // 拖拽相关方法
     handleDomTypeDragStart(event, domType) {
       this.draggingElementType = domType;
       event.dataTransfer.setData('text/plain', domType);
@@ -1369,10 +1223,8 @@ export default {
       e.preventDefault();
       e.stopPropagation();
       e.dataTransfer.dropEffect = 'copy';
-      
       const cellElement = e.target.closest('.grid-cell');
       if (cellElement) {
-        // 获取单元格对象
         const cell = this.gridContainer?.config.cells.find(c => c.id === cellId);
         if (cell) {
           // 如果是合并单元格的子单元格，找到主单元格
@@ -1395,7 +1247,6 @@ export default {
     handleGridCellDragLeave(e, cellId) {
       e.preventDefault();
       e.stopPropagation();
-      
       const cellElement = e.target.closest('.grid-cell');
       if (cellElement) {
         const cell = this.gridContainer?.config.cells.find(c => c.id === cellId);
@@ -1415,8 +1266,6 @@ export default {
         }
       }
     },
-    
-    // 修改：允许向合并单元格拖放组件
     handleGridCellDrop(e, cellId) {
       e.preventDefault();
       e.stopPropagation();
@@ -1437,14 +1286,13 @@ export default {
         return;
       }
       
-      // 检查单元格是否存在
       if (this.gridContainer) {
         const cell = this.gridContainer.config.cells.find(c => c.id === cellId);
         if (!cell) {
           ElMessage.warning('目标单元格不存在');
           return;
         }
-        
+     
         // 如果是合并单元格的子单元格，找到主单元格
         const targetCell = cell.merged && !this.isMainMergedCell(cell) ? 
           this.findMainMergedCell(cell) : cell;
@@ -1907,17 +1755,15 @@ export default {
     }
   },
   mounted() {
-    this.initializeDomElements();
-    
-    // 添加点击事件监听器
-    document.addEventListener('click', this.handleCanvasClick.bind(this));
-    
-    // 测试：默认创建网格容器
-    setTimeout(() => {
-      if (!this.gridContainer) {
-        this.createGridContainer();
-      }
-    }, 100);
+      this.reportId = this.$route.params.id
+      console.log("当前的报表id是"+ this.$route.params.id);
+      this.initializeDomElements();
+      document.addEventListener('click', this.handleCanvasClick.bind(this));
+      setTimeout(() => {
+        if (!this.gridContainer) {
+          this.createGridContainer();
+        }
+      }, 100);
   },
   beforeDestroy() {
     document.removeEventListener('click', this.handleCanvasClick);
