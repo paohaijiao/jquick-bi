@@ -1,4 +1,4 @@
-# jquick-b
+# jquick-bi
 
 ## Project setup
 ```
